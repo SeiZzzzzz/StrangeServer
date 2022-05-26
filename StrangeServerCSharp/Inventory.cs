@@ -73,14 +73,15 @@
             }
             if (sel == 3)
             {
-                uint xp = (uint)(x + (player.dir == 3 ? 3 : player.dir == 1 ? -3 : 0));
-                uint yp = (uint)(y + (player.dir == 0 ? 3 : player.dir == 2 ? -3 : 0));
+                uint xp = (uint)(x + (player.dir == 3 ? 2 : player.dir == 1 ? -2 : 0));
+                uint yp = (uint)(y + (player.dir == 0 ? 2 : player.dir == 2 ? -2 : 0));
                 var m = Market.Build(xp, yp, this.player);
                 if (m != null)
                 {
-                    World.packmap[x + y * World.width] = m;
+                    World.packmap[xp + yp * World.width] = m;
                 }
             }
+            this.player.GimmePacks();
             if (!World.THIS.GetCellConst(x, y).is_empty)
             {
                 return;

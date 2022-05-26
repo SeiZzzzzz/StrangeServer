@@ -9,6 +9,7 @@ namespace StrangeServerCSharp
             this.rhorb = default(HORB);
             cryslines = new List<string>();
             buttons = new List<string>();
+            tabs = new List<string>();
         }
         public void AddTitle(string title)
         {
@@ -62,7 +63,7 @@ namespace StrangeServerCSharp
         {
             tabs.Add(text);
             tabs.Add(command);
-            rhorb.buttons = tabs.ToArray();
+            rhorb.tabs = tabs.ToArray();
         }
         public void Admin()
         {
@@ -217,6 +218,10 @@ namespace StrangeServerCSharp
                 {
                     Console((string)button, p);
                 }
+                else if (p.win == "market")
+                {
+                    Market((string)button, p);
+                }
 
                 if (button != null && (string)button == "exit")
                 {
@@ -230,6 +235,7 @@ namespace StrangeServerCSharp
             {
                 p.connection.Send("Gu", "");
                 p.win = "";
+                p.cpack = null;
             }
         }
         public static void Console(string text, Player p)
@@ -255,6 +261,53 @@ namespace StrangeServerCSharp
                 }
             }
             p.ShowConsole();
+        }
+        private static void Market(string text, Player p)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+            if (text.StartsWith("sell"))
+            {
+                if (text.StartsWith("sellall"))
+                {
+                    if (p.cpack == null)
+                    {
+
+                        Exit("exit", p);
+                    }
+                    for (int i = 0; i < 6; i++)
+                    {
+                        long remcry = p.crys.cry[i];
+                        if (p.crys.RemoveCrys(i, remcry))
+                        {
+                            p.money += (remcry * World.costs[i]);
+                        }
+                    }
+                    p.SendMoney();
+                    p.cpack.Open(p, p.win);
+                    Exit("exit", p);
+                    return;
+
+                }
+                if (p.cpack == null)
+                {
+                    Exit("exit", p);
+                }
+                string[] cry = text.Split(":");
+                for (int i = 0; i < 6; i++)
+                {
+                    long remcry = long.Parse(cry[i + 1]);
+                    if (p.crys.RemoveCrys(i, remcry))
+                    {
+                        p.money += (remcry * World.costs[i]);
+                    }
+                }
+                p.SendMoney();
+                p.cpack.Open(p, p.win);
+
+            }
         }
         private static void box(string text, Player p)
         {

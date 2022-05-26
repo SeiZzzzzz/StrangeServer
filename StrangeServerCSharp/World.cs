@@ -33,6 +33,20 @@ namespace StrangeServerCSharp
             74,
             75
         };
+        public List<int> road = new List<int>()
+        {
+            32,
+            35,
+            37,
+            36,
+            39
+        };
+        public List<int> pack = new List<int>()
+        {
+            38,
+            37,
+            106,
+        };
         public static void InitCell(string name)
         {
             if (cellspool[name] == null)
@@ -221,7 +235,7 @@ namespace StrangeServerCSharp
             cellspool = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText("MapBlocks.json"));
             for (int i = 0; i < 255; i++)
             {
-                InitCell(i.ToString()); //
+                InitCell(i.ToString());
             }
             World.map = map;
             World.roadmap = roadmap;
@@ -333,6 +347,14 @@ namespace StrangeServerCSharp
             System.Numerics.Vector2 chp = GetChunkPosByCoords(x, y);
             Chunk.chunks[(int)chp.X, (int)chp.Y].Update();
         }
+        public bool isRoad(byte cell)
+        {
+            return road.Contains(cell);
+        }
+        public bool isPack(byte cell)
+        {
+            return pack.Contains(cell);
+        }
         public void SetCell(uint x, uint y, byte cell, int hp = -1)
         {
             if (cell == 0)
@@ -344,6 +366,15 @@ namespace StrangeServerCSharp
                 return;
             }
             var c = cellps[(int)cell].CloneCell();
+            if (isRoad(cell))
+            {
+                cells[x + y * height] = c;
+                roadmap[x + y * height] = cell;
+                World.map[x + y * height] = cell;
+                System.Numerics.Vector2 v = GetChunkPosByCoords(x, y);
+                Chunk.chunks[(int)v.X, (int)v.Y].Update();
+                return;
+            }
             if (cells[x + y * height].is_empty)
             {
                 roadmap[x + y * height] = World.map[x + y * height];
@@ -387,6 +418,7 @@ namespace StrangeServerCSharp
             }
             return null;
         }
+        public static long[] costs = new long[] { 10, 25, 20, 25, 21, 50 };
         public void CreateChunks()
         {
             for (uint chx = 0; chx < XServer.THIS.chunkscx; chx++)
@@ -401,12 +433,6 @@ namespace StrangeServerCSharp
                             if (Chunk.chunks[chx, chy] != null)
                             {
                                 byte cell = GetCell(((chx * 32) + x), (((chy * 32) + y)));
-
-                                if (cell == 90)
-                                {
-                                    World.map[(((chx * 32) + x) + (((chy * 32) + y))) * width] = 32;
-                                    cell = 32;
-                                }
                                 Chunk.chunks[chx, chy].cells[x + y * 32] = cell;
                                 cells[((chx * 32) + x) + ((chy * 32) + y) * height] = cellps[(int)cell].CloneCell();
                             }

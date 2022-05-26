@@ -44,6 +44,38 @@
                 return null;
             }
             World.THIS.SetCell(x, y, 37);
+            World.THIS.SetCell(x + 1, y, 37);
+            World.THIS.SetCell(x + 2, y, 37);
+            World.THIS.SetCell(x - 2, y, 37);
+            World.THIS.SetCell(x - 1, y, 37);
+            World.THIS.SetCell(x, y + 1, 37);
+            World.THIS.SetCell(x, y + 2, 37);
+            World.THIS.SetCell(x, y - 2, 37);
+            World.THIS.SetCell(x, y - 1, 37);
+            //
+            World.THIS.SetCell(x - 1, y - 1, 106);
+            World.THIS.SetCell(x + 1, y - 1, 106);
+            World.THIS.SetCell(x - 1, y + 1, 106);
+            World.THIS.SetCell(x + 1, y + 1, 106);
+            //
+            World.THIS.SetCell(x - 1, y - 2, 106);
+            World.THIS.SetCell(x - 2, y - 1, 106);
+            World.THIS.SetCell(x - 2, y - 2, 38);
+            //
+            World.THIS.SetCell(x - 1, y + 2, 106);
+            World.THIS.SetCell(x - 2, y + 1, 106);
+            World.THIS.SetCell(x - 2, y + 2, 38);
+            //
+            World.THIS.SetCell(x + 1, y - 2, 106);
+            World.THIS.SetCell(x + 2, y - 1, 106);
+            World.THIS.SetCell(x + 2, y - 2, 38);
+            //
+            World.THIS.SetCell(x + 1, y + 2, 106);
+            World.THIS.SetCell(x + 2, y + 1, 106);
+            World.THIS.SetCell(x + 2, y + 2, 38);
+
+            var v = World.THIS.GetChunkPosByCoords(x, y);
+            Chunk.chunks[(uint)v.X,(uint)v.Y].AddPack(x, y);
             return new Market(owner, x, y, 'M');
         }
         public static async void AsyncAction(int msdelay, Action act)
@@ -57,19 +89,24 @@
         public static bool checkcan(uint px, uint py, Player p)
         {
             int valid = 0;
-            for(int x = -2; x <= 2;x++)
+            for(int x = -3; x <= 3;x++)
             {
-                for (int y = -2; y <= 2; y++)
+                for (int y = -3; y <= 3; y++)
                 {
                     if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
                     {
                         valid++;
                     }
-                    var c = World.THIS.GetCellConst((uint)(px + x), (uint)(py + y));
-                    if (!(c.is_empty && c.can_build_over))
+                    else
                     {
-                        p.connection.AddFX(0, (uint)(px + x), (uint)(py + y));
-                        valid++;
+
+
+                        var c = World.THIS.GetCellConst((uint)(px + x), (uint)(py + y));
+                        if (!(c.is_empty && c.can_build_over))
+                        {
+                            p.connection.AddFX(0, (uint)(px + x), (uint)(py + y));
+                            valid++;
+                        }
                     }
                 }
             }
@@ -82,6 +119,10 @@
         public override void Open(Player p, string tab)
         {
             var c = new HorbConst();
+            if (p.win == "")
+            {
+                return;
+            }
             if (tab == this.winid)
             {
                 c.AddTab("ПРОДАТЬ КРИ", "");
@@ -95,12 +136,10 @@
                 c.AddCrysRight("будет продано");
                 c.AddCrysLeft("  останется");
                 var cry = p.crys.cry;
-                c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[0], value = 0, descText = "x $10" });
-                c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[1], value = 0, descText = "x $25" });
-                c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[2], value = 0, descText = "x $20" });
-                c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[3], value = 0, descText = "x $25" });
-                c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[4], value = 0, descText = "x $21" });
-                c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[5], value = 0, descText = "x $50" });
+                for (int i = 0; i < 6; i++)
+                {
+                    c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = cry[i], value = 0, descText = "x " + World.costs[i] });
+                }
                 c.AddButton("ПРОДАТЬ", "@sell:%M%");
                 c.AddButton("ПРОДАТЬ ВСЕ", "@sellall");
                 c.AddButton("ВЫЙТИ", "exit");

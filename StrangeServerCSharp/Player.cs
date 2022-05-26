@@ -9,8 +9,8 @@ namespace StrangeServerCSharp
         public string name;
         public int bid = 0;
         public int level;
-        public int creds;
-        public int money;
+        public long creds;
+        public long money;
         public Vector2 pos;
         public int cid;
         public int dir;
@@ -38,6 +38,7 @@ namespace StrangeServerCSharp
         public Vector2 resppos;
         public Stack<byte> geo = new Stack<byte>();
         Queue<Line> console = new Queue<Line>();
+        public Building cpack = null;
         public Player(Session conn, int id, uint x, uint y)
         {
             resppos = new Vector2(x, y);
@@ -50,8 +51,8 @@ namespace StrangeServerCSharp
             this.chunkx = (int)Math.Floor(this.pos.X / 32);
             this.chunky = (int)Math.Floor(this.pos.Y / 32);
             level = 0;
-            creds = 1000;
-            money = 1000;
+            creds = 0;
+            money = 0;
             cid = 0;
             dir = 0;
             skin = 0;
@@ -85,6 +86,19 @@ namespace StrangeServerCSharp
             while (Chunk.chunks[this.chunkx, this.chunky].bots.Keys.Contains(this.id))
             {
                 Chunk.chunks[this.chunkx, this.chunky].bots.Remove(this.id);
+            }
+        }
+        public void SendMoney()
+        {
+            this.connection.Send("P$", new V { money = this.money, creds = this.creds }.ToString());
+        }
+        public struct V
+        {
+            public long money;
+            public long creds;
+            public override string ToString()
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(this);
             }
         }
         public void ShowConsole()
@@ -162,7 +176,7 @@ namespace StrangeServerCSharp
         }
         public void Death()
         {
-
+            this.win = "";
             var rx = resppos.X + 2;
             var ry = resppos.Y;
             uint dx = (uint)this.pos.X;
@@ -260,6 +274,31 @@ namespace StrangeServerCSharp
 
                             this.connection.SendBot(player.id, (uint)player.pos.X, (uint)player.pos.Y, player.dir, player.cid, player.skin, player.tail);
                             this.connection.SendNick(id.Key, player.name);
+
+                        }
+                    }
+                }
+            }
+        }
+        public void GimmePacks()
+        {
+            for (var xxx = -2; xxx <= 2; xxx++)
+            {
+                for (var yyy = -2; yyy <= 2; yyy++)
+                {
+                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                    {
+                        var x = (this.chunkx + xxx);
+                        var y = (this.chunky + yyy);
+                        var ch = Chunk.chunks[x, y];
+
+                        foreach (var v in ch.packs)
+                        {
+                            var pack = World.packmap[(uint)v.Key.X + (uint)v.Key.Y * World.height];
+                            if (pack != null)
+                            {
+                                this.connection.AddPack(pack.GetShpack);
+                            }
 
                         }
                     }
@@ -496,6 +535,7 @@ namespace StrangeServerCSharp
             }
             if (needupd)
             {
+                GimmePacks();
                 for (var xxx = -2; xxx <= 2; xxx++)
                 {
                     for (var yyy = -2; yyy <= 2; yyy++)
@@ -568,6 +608,7 @@ namespace StrangeServerCSharp
                 if (pack != null)
                 {
                     win = pack.winid;
+                    cpack = pack;
                 }
                 if (win != "" && (World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null))
                 {

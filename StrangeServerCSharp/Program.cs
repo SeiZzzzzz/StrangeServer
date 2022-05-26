@@ -6,7 +6,6 @@ namespace StrangeServerCSharp
 {
     public class Program
     {
-        public static bool dontdsave = false;
         static void Main(string[] a)
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
@@ -22,10 +21,6 @@ namespace StrangeServerCSharp
                     server = new XServer(IPAddress.Any, port);
                     server.Start();
                 }
-                if (line.StartsWith("dontsave"))
-                {
-                    dontdsave = true;
-                }
                 else if (string.IsNullOrEmpty(line))
                     break;
             }
@@ -33,10 +28,7 @@ namespace StrangeServerCSharp
         }
         private static void OnExit(object s, EventArgs arg)
         {
-            if (!dontdsave)
-            {
                 XServer.THIS.SaveMap();
-            }
         }
 
     }
@@ -75,6 +67,21 @@ namespace StrangeServerCSharp
         }
         public void SaveMap()
         {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (World.map[x + y * height] == 90)
+                    {
+                        World.map[x + y * height] = 32;
+                    }
+                    else if (World.THIS.isPack(World.map[x + y * height]) || World.THIS.isPack(World.roadmap[x + y * height]))
+                    {
+                        World.map[x + y * height] = 32;
+                        World.roadmap[x + y * height] = 32;
+                    }
+                }
+            }
             File.WriteAllBytes("cum.map", World.map);
             File.WriteAllBytes("cumroad.map", World.roadmap);
         }
@@ -100,6 +107,7 @@ namespace StrangeServerCSharp
         public Player player;
         public int lst = 0;
         public int prp = 0;
+        public static long online = 0;
         public Session(TcpServer server) : base(server) { }
         protected override void OnConnected()
         {
@@ -110,6 +118,11 @@ namespace StrangeServerCSharp
             Session.id++;
             Console.WriteLine(this.Id.ToString());
             Send("AU", Server.ConnectedSessions.ToString());
+            online++;
+            foreach (var player in XServer.players)
+            {
+                player.Value.connection.SendOnline();
+            }
         }
 
         protected override void OnDisconnected()
@@ -121,6 +134,11 @@ namespace StrangeServerCSharp
             }
             this.player.Death();
             this.player.ForceRemove();
+            online--;
+        }
+        public void SendOnline()
+        {
+            this.Send("ON", online +":0");
         }
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
@@ -134,17 +152,18 @@ namespace StrangeServerCSharp
                 Send("BA", "0");
                 Send("BD", "0");
                 Send("GE", " ");
-                Send("ON", "228:0");
                 Send("@T", $"{this.player.pos.X}:{this.player.pos.Y}");
                 Send("BI", "{\"x\":" + this.player.pos.X + ",\"y\":" + this.player.pos.Y + ",\"id\":" + player.id + ",\"name\":\"" + player.name + "\"}");
-                Send("sp", "20:20:100000");
+                Send("sp", "25:20:100000");
                 Send("IN", "show:2:-1:5#1#6#1");
                 Send("#S", "#cc#10#snd#0#mus#0#isca#0#tsca#0#mous#1#pot#0#frc#0#ctrl#0#mof#0");
                 Send("@B", this.player.crys.GetCry);
+                this.player.SendMoney();
                 this.player.SendHp();
                 this.player.SendLvl();
                 this.player.TryToGetChunks();
-                
+                SendOnline();
+
             }
             else if (p.eventType == "PO")
             {
