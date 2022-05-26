@@ -221,7 +221,7 @@ namespace StrangeServerCSharp
             cellspool = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText("MapBlocks.json"));
             for (int i = 0; i < 255; i++)
             {
-                InitCell(i.ToString()); /
+                InitCell(i.ToString()); //
             }
             World.map = map;
             World.roadmap = roadmap;
