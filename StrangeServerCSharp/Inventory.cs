@@ -60,7 +60,7 @@
             {
                 this.player.connection.Send("IN", Item.usetextprot);
             }
-        }/
+        }
         public void Use(uint x, uint y)
         {
             if (items[sel].count <= 0 || !World.THIS.ValidCoord(x, y) || sel < 0)
