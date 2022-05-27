@@ -26,7 +26,7 @@ namespace StrangeServerCSharp
                 return players.First(p => p.id == id);
             }
             catch(Exception) {
-                var playerr = new Player { pos = new System.Numerics.Vector2(340, 15) };
+                var playerr = new Player { pos = new System.Numerics.Vector2(340, 15), resppos = new System.Numerics.Vector2(340, 15) };
                 THIS.players.Add(playerr);
                 playerr.name = playerr.id.ToString();
                 THIS.SaveChanges();
@@ -35,7 +35,7 @@ namespace StrangeServerCSharp
                 return playerr;
             }
             needr = true;
-            var player = new Player { pos = new System.Numerics.Vector2(340, 15) };
+            var player = new Player { pos = new System.Numerics.Vector2(340, 15), resppos = new System.Numerics.Vector2(340, 15) };
             THIS.players.Add(player);
             THIS.SaveChanges();
             var n = players.First(p => p.name == p.name);

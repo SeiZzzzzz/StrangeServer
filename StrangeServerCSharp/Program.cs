@@ -121,6 +121,10 @@ namespace StrangeServerCSharp
         }
         protected override void OnDisconnected()
         {
+            if (player == null)
+            {
+                return;
+            }
             Console.WriteLine("Disconnected " + player.id);
             if (player.timer != null)
             {

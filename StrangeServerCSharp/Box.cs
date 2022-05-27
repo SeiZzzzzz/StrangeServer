@@ -26,9 +26,10 @@
             p.crys.Boxcrys(b.bxcry);
             p.crys.UpdateBasket();
             World.THIS.DestroyCell(x, y);
+            World.boxmap[x + y * World.height] = null;
 
         }
-        public long[] bxcry = new long[5];
+        public long[] bxcry = new long[6];
         public long ze { get { return bxcry[0]; } set { bxcry[0] = value; } }
         public long cr { get { return bxcry[1]; } set { bxcry[1] = value; } }
         public long si { get { return bxcry[2]; } set { bxcry[2] = value; } }

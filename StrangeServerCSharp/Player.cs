@@ -16,6 +16,8 @@ namespace StrangeServerCSharp
         public Vector2 pos = new Vector2(0,0);
         public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
+        public uint respx { get { return (uint)resppos.X; } set { resppos.X = value; } }
+        public uint respy { get { return (uint)resppos.Y; } set { resppos.Y = value; } }
         public int cid { get; set; }
         public int dir;
         public int skin;
@@ -173,9 +175,12 @@ namespace StrangeServerCSharp
                 SendDFToBots(6, 0, 0, 0, 0);
             }
             var cell = World.cellps[World.THIS.GetCell((uint)this.pos.X, (uint)this.pos.Y)];
+
             if (!cell.is_destructible)
             {
+                /*
                 this.Move((uint)this.pos.X, (uint)this.pos.Y, this.dir);
+                */
                 return;
             }
             World.THIS.DestroyCell((uint)this.pos.X, (uint)this.pos.Y);
@@ -190,29 +195,24 @@ namespace StrangeServerCSharp
             var resped = false;
             while (!resped)
             {
-                var x = 0;
-                var y = -1;
-                for (; y < 4; y++)
+                var x = World.Random.Next(0,5);
+                var y = World.Random.Next(-1, 4); ;
+               
+                var tx = (uint)(rx + x);
+                var ty = (uint)(ry + y);
+                if (World.THIS.ValidCoord(tx, ty) && (World.Random.Next(0, 100) < 5))
                 {
-                    for (; x < 4; x++)
+                    SendFXoBots(2, dx, dy);
+                    this.pos = new Vector2(tx, ty);
+                    this.connection.Send("@T", $"{pos.X}:{pos.Y}");
+                    if (this.crys.AllCry > 0)
                     {
-                        var tx = (uint)(rx + x);
-                        var ty = (uint)(ry + y);
-                        if (World.THIS.ValidCoord(tx, ty) && (World.Random.Next(0, 100) < 5))
-                        {
-                            SendFXoBots(2, dx, dy);
-                            this.pos = new Vector2(tx, ty);
-                            this.connection.Send("@T", $"{pos.X}:{pos.Y}");
-                            if (this.crys.AllCry > 0)
-                            {
-                                Box.BuildBox(dx, dy, this.crys.cry);
-                                this.crys.ClearCrys();
-                            }
-                            hp = maxhp;
-                            SendHp();
-                            resped = true;
-                        }
+                        Box.BuildBox(dx, dy, this.crys.cry);
+                        this.crys.ClearCrys();
                     }
+                    hp = maxhp;
+                    SendHp();
+                    resped = true;
                 }
             }
         }
@@ -438,10 +438,9 @@ namespace StrangeServerCSharp
         }
         public void CBox(uint x, uint y)
         {
-            Box b = World.boxmap[x + y * World.height];
+            var b = World.boxmap[x + y * World.height].AllCrys;
             Box.CollectBox(x, y, this);
-            byte[] dat = Encoding.UTF8.GetBytes("+" + b.AllCrys);
-            World.boxmap[x + y * World.height] = null;
+            byte[] dat = Encoding.UTF8.GetBytes("+" + b);
             this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
         }
         public void Bz(uint x, uint y)
@@ -603,11 +602,13 @@ namespace StrangeServerCSharp
                 return;
             }
             var c = World.cellps[World.THIS.GetCell(x, y)];
+            /*
             if (World.THIS.GetCellConst(x, y) == null || !World.THIS.GetCellConst(x, y).is_empty)
             {
                 this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                 return;
             }
+            */
             var newpos = new Vector2(x, y);
             if (Vector2.Distance(pos, newpos) < 2)
             {

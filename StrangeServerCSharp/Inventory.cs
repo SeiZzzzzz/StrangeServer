@@ -12,6 +12,7 @@
             items[3].count++;
             items[5].count++;
             items[6].count++;
+            items[7].count++;
 
         }
         public Player player;
@@ -93,6 +94,10 @@
             else if (this.sel == 6)
             {
                 World.THIS.Prot(x, y);
+            }
+            else if (this.sel == 7)
+            {
+                World.THIS.Raz(x, y);
             }
             if (items[sel].count > 0)
             {

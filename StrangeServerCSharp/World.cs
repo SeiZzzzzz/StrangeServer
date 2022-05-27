@@ -195,6 +195,30 @@ namespace StrangeServerCSharp
                  canboom[x + y * height] = false;
              });
         }
+        public void Raz(uint x, uint y)
+        {
+            SendPack('B', x, y, 0, 3);
+            canboom[x + y * height] = true;
+            AsyncAction(100, () =>
+            {
+                for (int _x = -4; _x < 4; _x++)
+                {
+                    for (int _y = -4; _y < 4; _y++)
+                    {
+                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 3.5f)
+                        {
+                            foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
+                            {
+                                XServer.players[id].Hurt(500);
+                            }
+                        }
+                    }
+                }
+                SendDFToBotsGlobal(1, x, y, 10, 0, 2);
+                ClearPack(x, y);
+                canboom[x + y * height] = false;
+            });
+        }
         public void Prot(uint x, uint y)
         {
             SendPack('B', x, y, 0, 1);
