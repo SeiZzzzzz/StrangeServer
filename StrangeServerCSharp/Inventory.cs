@@ -63,11 +63,7 @@
         }
         public void Use(uint x, uint y)
         {
-            if (items[sel].count <= 0)
-            {
-                return;
-            }
-            if (!World.THIS.ValidCoord(x, y))
+            if (items[sel].count <= 0 || !World.THIS.ValidCoord(x, y) || sel < 0)
             {
                 return;
             }

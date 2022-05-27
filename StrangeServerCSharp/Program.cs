@@ -155,7 +155,6 @@ namespace StrangeServerCSharp
                 Send("@T", $"{this.player.pos.X}:{this.player.pos.Y}");
                 Send("BI", "{\"x\":" + this.player.pos.X + ",\"y\":" + this.player.pos.Y + ",\"id\":" + player.id + ",\"name\":\"" + player.name + "\"}");
                 Send("sp", "25:20:100000");
-                Send("IN", "show:2:-1:5#1#6#1");
                 Send("#S", "#cc#10#snd#0#mus#0#isca#0#tsca#0#mous#1#pot#0#frc#0#ctrl#0#mof#0");
                 Send("@B", this.player.crys.GetCry);
                 this.player.SendMoney();
@@ -163,6 +162,7 @@ namespace StrangeServerCSharp
                 this.player.SendLvl();
                 this.player.TryToGetChunks();
                 SendOnline();
+                this.player.inventory.Choose(-1);
 
             }
             else if (p.eventType == "PO")

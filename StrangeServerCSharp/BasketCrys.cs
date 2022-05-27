@@ -48,6 +48,23 @@
             return false;
 
         }
+        public bool BuyCrys(int index, long val)
+        {
+            if ((val < 0) || (player.money <= 0))
+            {
+                return false;
+            }
+            if (player.money - (val * World.costsbuy[index]) >= 0)
+            {
+                player.money -= (val * World.costsbuy[index]);
+                this.cry[index] += val;
+                player.connection.Send("@B", GetCry);
+                return true;
+            }
+            player.connection.Send("@B", GetCry);
+            return false;
+
+        }
         public void BuildBox(HorbConst c)
         {
             c.AddTitle("Создание бокса");

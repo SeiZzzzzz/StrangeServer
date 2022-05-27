@@ -23,6 +23,10 @@ namespace StrangeServerCSharp
         {
             rhorb.text += text + "\n";
         }
+        public void SetText(string text)
+        {
+            rhorb.text = text;
+        }
         public void AddIConsole()
         {
             rhorb.input_console = true;
@@ -218,7 +222,7 @@ namespace StrangeServerCSharp
                 {
                     Console((string)button, p);
                 }
-                else if (p.win == "market")
+                else if (p.win.StartsWith("market"))
                 {
                     Market((string)button, p);
                 }
@@ -268,8 +272,18 @@ namespace StrangeServerCSharp
             {
                 return;
             }
-            if (text.StartsWith("sell"))
+            if (text.StartsWith("tab"))
             {
+                p.win = "market." + text;
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            if (p.win == "market.tab_sell")
+            {
+                if (!text.StartsWith("sell"))
+                {
+                    return;
+                }
                 if (text.StartsWith("sellall"))
                 {
                     if (p.cpack == null)
@@ -307,6 +321,30 @@ namespace StrangeServerCSharp
                 p.SendMoney();
                 p.cpack.Open(p, p.win);
 
+            }
+            else if (p.win == "market.tab_buy")
+            {
+                if (!text.StartsWith("buy"))
+                {
+                    return;
+                }
+                if (p.cpack == null)
+                {
+                    Exit("exit", p);
+                }
+                string[] cry = text.Split(":");
+                for (int i = 0; i < 6; i++)
+                {
+                    long buycry = long.Parse(cry[i + 1]);
+                    if (!p.crys.BuyCrys(i,buycry))
+                    {
+                        p.SendMoney();
+                        p.cpack.Open(p, p.win);
+                        return;
+                    }
+                }
+                p.SendMoney();
+                p.cpack.Open(p, p.win);
             }
         }
         private static void box(string text, Player p)

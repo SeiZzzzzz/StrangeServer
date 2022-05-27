@@ -419,6 +419,7 @@ namespace StrangeServerCSharp
             return null;
         }
         public static long[] costs = new long[] { 10, 25, 20, 25, 21, 50 };
+        public static long[] costsbuy = new long[] { 10, 25, 20, 25, 21, 50 };
         public void CreateChunks()
         {
             for (uint chx = 0; chx < XServer.THIS.chunkscx; chx++)

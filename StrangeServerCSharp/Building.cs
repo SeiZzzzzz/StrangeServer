@@ -35,7 +35,7 @@
     }
     public class Market : Building
     {
-        public Market(Player p,uint x, uint y, char type) : base(p,x, y, type) { winid = "market"; }
+        public Market(Player p,uint x, uint y, char type) : base(p,x, y, type) { winid = "market.tab_sell"; }
         public override string winid { get; set; }
         public static Market Build(uint x, uint y, Player owner)
         {
@@ -150,7 +150,26 @@
             }
             else if (tab == "market.tab_buy")
             {
-
+                c.AddTab("ПРОДАТЬ КРИ", "tab_sell");
+                c.AddTab("КУПИТЬ КРИ", "");
+                c.AddTab("КРЕДИТЫ И ПРОЧЕЕ", "tab_misc");
+                c.AddTab("ОРДЕРЫ", "tab_mkt");
+                c.AddTab("АУКЦИОН", "tab_auc");
+                c.AddTitle("МАРКЕТ");
+                c.SetText("<color=#f88></color>");
+                c.AddCrysRight("сколько покупаем");
+                c.AddCrysLeft("станет в грузе");
+                c.AddCrysBuy();
+                for (int i = 0; i < 6; i++)
+                {
+                    c.AddCrysLine(new CrysLine { leftMin = 0, rightMin = 0, d = (p.money / World.costsbuy[i]), value = 0, descText = "x " + World.costsbuy[i] });
+                }
+                c.AddButton("КУПИТЬ", "buy:%M%");
+                c.AddButton("ВЫЙТИ", "exit");
+                if (p == owner)
+                {
+                    c.Admin();
+                }
             }
             else if (tab == "market.tab_misc")
             {

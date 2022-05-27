@@ -166,7 +166,6 @@ namespace StrangeServerCSharp
                 SendDFToBots(6, 0, 0, 0, 0);
             }
             var cell = World.cellps[World.THIS.GetCell((uint)this.pos.X, (uint)this.pos.Y)];
-
             if (!cell.is_destructible)
             {
                 this.Move((uint)this.pos.X, (uint)this.pos.Y, this.dir);
@@ -605,7 +604,7 @@ namespace StrangeServerCSharp
             if (Vector2.Distance(pos, newpos) < 2)
             {
                 var pack = World.packmap[(uint)newpos.X + (uint)newpos.Y * World.width];
-                if (pack != null)
+                if (pack != null && win == "")
                 {
                     win = pack.winid;
                     cpack = pack;
