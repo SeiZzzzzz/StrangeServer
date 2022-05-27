@@ -1,29 +1,24 @@
-﻿namespace StrangeServerCSharp
+﻿using System.ComponentModel.DataAnnotations.Schema;
+namespace StrangeServerCSharp
 {
     public abstract class Building
     {
-        public Building(Player p,uint x, uint y, char type, int cid = 0, int off = 0)
-        {
-            owner = p;
-            this.x = x;
-            this.y = y;
-            this.type = type;
-            this.cid = cid;
-            this.off = off;
-            winid = "";
-        }
+
+        public int Id { get; set; }
+        public Building() { }
+        [NotMapped]
         public abstract string winid { get; set; }
         public abstract void Open(Player p, string tab);
         public Pack GetShpack
         {
             get { return new Pack { cid = this.cid, off = this.off, type = this.type, x = this.x, y = this.y }; }
         }
-        public int cid;
-        public int off;
-        public char type;
-        public uint x;
-        public uint y;
-        public Player owner;
+        public int cid { get; set; }
+        public int off { get; set; }
+        public char type { get; set; }
+        public uint x { get; set; }
+        public uint y  { get; set; }
+        public Player owner { get; set; }
     }
     public struct Pack
     {
@@ -35,7 +30,7 @@
     }
     public class Market : Building
     {
-        public Market(Player p,uint x, uint y, char type) : base(p,x, y, type) { winid = "market.tab_sell"; }
+        public Market() { winid = "market.tab_sell"; }
         public override string winid { get; set; }
         public static Market Build(uint x, uint y, Player owner)
         {
@@ -76,7 +71,7 @@
 
             var v = World.THIS.GetChunkPosByCoords(x, y);
             Chunk.chunks[(uint)v.X,(uint)v.Y].AddPack(x, y);
-            return new Market(owner, x, y, 'M');
+            return new Market() { owner = owner, x = x, y = y, type = 'M' };
         }
         public static async void AsyncAction(int msdelay, Action act)
         {
@@ -182,7 +177,7 @@
     public class Resp : Building
     {
         public override string winid { get; set; }
-        public Resp(Player p,uint x, uint y, char type, int off = 0) : base(p,x, y, type, off) { winid = "resp"; }
+        public Resp() { winid = "resp"; }
         public override void Open(Player p, string tab)
         {
             return;

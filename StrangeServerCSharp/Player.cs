@@ -1,18 +1,22 @@
 ﻿using System.Numerics;
 using System.Text;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StrangeServerCSharp
 {
     public class Player
     {
-        public int id;
-        public string name;
+        public int id { get; set; }
+        public string name { get; set; }
         public int bid = 0;
         public int level;
-        public long creds;
-        public long money;
-        public Vector2 pos;
-        public int cid;
+        public long creds { get; set; }
+        public long money { get; set; }
+        public string hash { get; set; }
+        public Vector2 pos = new Vector2(0,0);
+        public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
+        public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
+        public int cid { get; set; }
         public int dir;
         public int skin;
         public int tail;
@@ -39,15 +43,12 @@ namespace StrangeServerCSharp
         public Stack<byte> geo = new Stack<byte>();
         Queue<Line> console = new Queue<Line>();
         public Building cpack = null;
-        public Player(Session conn, int id, uint x, uint y)
+        public Player()
         {
-            resppos = new Vector2(x, y);
+            resppos = pos;
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;
-            this.connection = conn;
-            this.id = id;
-            pos = new Vector2(x, y);
             this.chunkx = (int)Math.Floor(this.pos.X / 32);
             this.chunky = (int)Math.Floor(this.pos.Y / 32);
             level = 0;
@@ -57,12 +58,10 @@ namespace StrangeServerCSharp
             dir = 0;
             skin = 0;
             tail = 0;
-            name = this.id.ToString();
             chunkx = 0;
             chunky = 0;
             lastupdchchunkx = 0;
             lastupdchchunky = 0;
-            GimmeBotsUPD();
             console.Enqueue(new Line { text = "@@> Добро пожаловать в консоль!" });
             for (int i = 0; i < 4; i++)
             {
@@ -75,7 +74,15 @@ namespace StrangeServerCSharp
             {
                 AddConsoleLine();
             }
+            hash = GenerateHash();
 
+        }
+        public string GenerateHash()
+        {
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, 12)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
         public class Line
         {
@@ -83,7 +90,7 @@ namespace StrangeServerCSharp
         }
         public void ForceRemove()
         {
-            while (Chunk.chunks[this.chunkx, this.chunky].bots.Keys.Contains(this.id))
+            while (Chunk.chunks[this.chunkx, this.chunky].bots.ContainsKey(this.id))
             {
                 Chunk.chunks[this.chunkx, this.chunky].bots.Remove(this.id);
             }
@@ -191,7 +198,7 @@ namespace StrangeServerCSharp
                     {
                         var tx = (uint)(rx + x);
                         var ty = (uint)(ry + y);
-                        if (World.THIS.ValidCoord(tx, ty) && (World.Random.Next(0, 100) < 2))
+                        if (World.THIS.ValidCoord(tx, ty) && (World.Random.Next(0, 100) < 5))
                         {
                             SendFXoBots(2, dx, dy);
                             this.pos = new Vector2(tx, ty);
@@ -434,6 +441,7 @@ namespace StrangeServerCSharp
             Box b = World.boxmap[x + y * World.height];
             Box.CollectBox(x, y, this);
             byte[] dat = Encoding.UTF8.GetBytes("+" + b.AllCrys);
+            World.boxmap[x + y * World.height] = null;
             this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
         }
         public void Bz(uint x, uint y)

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Security.Cryptography;
 namespace StrangeServerCSharp
 {
     public class Program
@@ -41,7 +42,7 @@ namespace StrangeServerCSharp
         public static World world = null;
         public static XServer THIS;
         public static Dictionary<int, Player> players = new Dictionary<int, Player>();
-        public static Dictionary<Guid, Player> playersconn = new Dictionary<Guid, Player>();
+        public BDClass db = new BDClass();
         public XServer(IPAddress address, int port) : base(address, port)
         {
             Console.WriteLine("Started");
@@ -67,23 +68,9 @@ namespace StrangeServerCSharp
         }
         public void SaveMap()
         {
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (World.map[x + y * height] == 90)
-                    {
-                        World.map[x + y * height] = 32;
-                    }
-                    else if (World.THIS.isPack(World.map[x + y * height]) || World.THIS.isPack(World.roadmap[x + y * height]))
-                    {
-                        World.map[x + y * height] = 32;
-                        World.roadmap[x + y * height] = 32;
-                    }
-                }
-            }
             File.WriteAllBytes("cum.map", World.map);
             File.WriteAllBytes("cumroad.map", World.roadmap);
+            BDClass.Save();
         }
         protected override TcpSession CreateSession() { return new Session(this); }
 
@@ -102,29 +89,36 @@ namespace StrangeServerCSharp
                 act();
             });
         }
-        public static int id = 1;
         public int bid;
         public Player player;
         public int lst = 0;
         public int prp = 0;
         public static long online = 0;
+        public string sid = "";
         public Session(TcpServer server) : base(server) { }
         protected override void OnConnected()
         {
-            this.player = new Player(this, id, 340, 15);
-            Console.WriteLine("connected " + player.id);
-            XServer.players.Add(id, player);
-            XServer.playersconn.Add(this.Id, player);
-            Session.id++;
             Console.WriteLine(this.Id.ToString());
-            Send("AU", Server.ConnectedSessions.ToString());
+            sid = Server.ConnectedSessions.ToString();
+            Send("AU", sid);
             online++;
             foreach (var player in XServer.players)
             {
                 player.Value.connection.SendOnline();
             }
         }
-
+        public static string CalculateMD5Hash(string input)
+        {
+            HashAlgorithm hashAlgorithm = MD5.Create();
+            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            byte[] array = hashAlgorithm.ComputeHash(bytes);
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < array.Length; i++)
+            {
+                stringBuilder.Append(array[i].ToString("x2"));
+            }
+            return stringBuilder.ToString();
+        }
         protected override void OnDisconnected()
         {
             Console.WriteLine("Disconnected " + player.id);
@@ -132,8 +126,12 @@ namespace StrangeServerCSharp
             {
                 this.player.timer.Dispose();
             }
-            this.player.Death();
-            this.player.ForceRemove();
+            Task.Run(() =>
+            {
+                this.player.ForceRemove();
+                this.player.Death();
+            });
+            XServer.players.Remove(this.player.id);
             online--;
         }
         public void SendOnline()
@@ -145,6 +143,26 @@ namespace StrangeServerCSharp
             Packet p = new Packet(buffer);
             if (p.eventType == "AU")
             {
+                string[] data = Encoding.UTF8.GetString(p.data).Split('_');
+                Console.WriteLine(Encoding.UTF8.GetString(p.data));
+                if (!int.TryParse(data[1], out var id))
+                {
+                    return;
+                }
+                
+                this.player = XServer.THIS.db.GetPlayer(id, this, out var needr);
+                if (CalculateMD5Hash(this.player.hash + sid) != data[2])
+                {
+                    return;
+                }
+                if (needr)
+                {
+                    return;
+                }
+                this.player.connection = this;
+                this.player.GimmeBotsUPD();
+                Console.WriteLine("connected " + player.id);
+                XServer.players.Add(player.id, player);
                 Send("PI", "0:0:0");
                 Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
                 Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");

@@ -251,6 +251,7 @@ namespace StrangeServerCSharp
             boxmap = new Box[width * height];
             canboom = new bool[width * height];
             c117UPD();
+            BDClass.Load();
         }
         public static bool[] canboom;
         public static async void WorldUPD()
@@ -315,11 +316,14 @@ namespace StrangeServerCSharp
 
                         foreach (var id in ch.bots)
                         {
-                            var player = XServer.players[id.Key];
-
-                            if (player.pos.X == bx && player.pos.Y == by)
+                            if (XServer.players.ContainsKey(id.Key))
                             {
-                                st.Push(id.Key);
+                                var player = XServer.players[id.Key];
+
+                                if (player.pos.X == bx && player.pos.Y == by)
+                                {
+                                    st.Push(id.Key);
+                                }
                             }
 
                         }
