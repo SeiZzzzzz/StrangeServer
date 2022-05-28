@@ -250,14 +250,18 @@ namespace StrangeServerCSharp
                 if (text.StartsWith("newnick"))
                 {
                     string[] t = text.Split(" ");
-                    if (BDClass.NickAvl(t[1]))
+                    if (!string.IsNullOrWhiteSpace(t[1]))
                     {
-                        p.AddConsoleLine("недоступен");
-                    }
-                    else if (!string.IsNullOrWhiteSpace(t[1]))
-                    {
-                        p.SetNick(text.Split(" ")[1]);
-                        p.AddConsoleLine("новый ник:" + p.name);
+                        if (BDClass.NickAvl(t[1]))
+                        {
+                            p.AddConsoleLine("недоступен");
+                        }
+                        else
+                        {
+                            p.SetNick(text.Split(" ")[1]);
+                            p.AddConsoleLine("новый ник:" + p.name);
+                            BDClass.THIS.SaveChanges();
+                        }
                     }
                 }
                 if (text.StartsWith("setcell"))

@@ -145,9 +145,10 @@ namespace StrangeServerCSharp
         }
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
+            
             Packet p = new Packet(buffer);
-            if (p.eventType == "AU")
-            {
+                if (p.eventType == "AU")
+                {
                 try
                 {
                     var x = Encoding.UTF8.GetString(p.data);
@@ -171,6 +172,7 @@ namespace StrangeServerCSharp
                     }
                     else
                     {
+                        data = x.Split('_');
                         Console.WriteLine(x);
                         if (!int.TryParse(data[1], out var id))
                         {
@@ -188,7 +190,7 @@ namespace StrangeServerCSharp
                         }
                     }
                 }
-                catch (Exception ex) { return;this.Disconnect(); }
+                catch (Exception ex) { }
                 this.player.connection = this;
                 this.player.GimmeBotsUPD();
                 Console.WriteLine("connected " + player.id);

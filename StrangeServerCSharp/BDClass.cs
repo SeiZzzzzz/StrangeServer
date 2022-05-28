@@ -20,7 +20,8 @@ namespace StrangeServerCSharp
         }
         public static bool NickAvl(string nick)
         {
-            return !(THIS.players.Where(p => p.name == nick).Count() > 0);
+            Console.WriteLine(THIS.players.Where(p => p.name == nick).Count());
+            return THIS.players.Where(p => p.name == nick).Count() > 0;
         }
         public Player GetPlayer(int id,Session s, out bool needr)
         {
@@ -63,7 +64,11 @@ namespace StrangeServerCSharp
                     THIS.boxes.Add(box);
                 }
             }
-            THIS.SaveChanges();
+            try
+            {
+                THIS.SaveChanges();
+            }
+            catch (Exception ex) { }
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
