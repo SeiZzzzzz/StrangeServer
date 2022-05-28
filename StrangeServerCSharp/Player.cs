@@ -13,6 +13,7 @@ namespace StrangeServerCSharp
         public long creds { get; set; }
         public long money { get; set; }
         public string hash { get; set; }
+        public string passwd { get; set; }
         public Vector2 pos = new Vector2(0,0);
         public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }

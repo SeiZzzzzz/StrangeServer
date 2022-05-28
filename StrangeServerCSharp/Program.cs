@@ -99,7 +99,7 @@ namespace StrangeServerCSharp
         protected override void OnConnected()
         {
             Console.WriteLine(this.Id.ToString());
-            sid = Server.ConnectedSessions.ToString();
+            sid = this.Id.ToString();
             Send("AU", sid);
             online++;
             foreach (var player in XServer.players)
@@ -135,6 +135,7 @@ namespace StrangeServerCSharp
                 this.player.ForceRemove();
                 this.player.Death();
             });
+            XServer.THIS.db.SaveChanges();
             XServer.players.Remove(this.player.id);
             online--;
         }
@@ -147,22 +148,47 @@ namespace StrangeServerCSharp
             Packet p = new Packet(buffer);
             if (p.eventType == "AU")
             {
-                string[] data = Encoding.UTF8.GetString(p.data).Split('_');
-                Console.WriteLine(Encoding.UTF8.GetString(p.data));
-                if (!int.TryParse(data[1], out var id))
+                try
                 {
-                    return;
+                    var x = Encoding.UTF8.GetString(p.data);
+                    string[] data = x.Split('|');
+                    if (x.Contains("DEBUG"))
+                    {
+                        foreach (var j in XServer.THIS.db.players.Where(p => p.name == data[1]).ToList())
+                        {
+                            if (string.IsNullOrWhiteSpace(j.passwd))
+                            {
+                                Send("AH", j.id + "_" + j.hash);
+                                this.player = j;
+                            }
+                            if (j.passwd == data[2])
+                            {
+                                Send("AH", j.id + "_" + j.hash);
+                                this.player = j;
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine(x);
+                        if (!int.TryParse(data[1], out var id))
+                        {
+                            return;
+                        }
+
+                        this.player = XServer.THIS.db.GetPlayer(id, this, out var needr);
+                        if (CalculateMD5Hash(this.player.hash + sid) != data[2])
+                        {
+                            return;
+                        }
+                        if (needr)
+                        {
+                            return;
+                        }
+                    }
                 }
-                
-                this.player = XServer.THIS.db.GetPlayer(id, this, out var needr);
-                if (CalculateMD5Hash(this.player.hash + sid) != data[2])
-                {
-                    return;
-                }
-                if (needr)
-                {
-                    return;
-                }
+                catch (Exception ex) { return;this.Disconnect(); }
                 this.player.connection = this;
                 this.player.GimmeBotsUPD();
                 Console.WriteLine("connected " + player.id);

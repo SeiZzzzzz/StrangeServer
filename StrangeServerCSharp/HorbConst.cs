@@ -249,7 +249,12 @@ namespace StrangeServerCSharp
                 p.AddConsoleLine(text);
                 if (text.StartsWith("newnick"))
                 {
-                    if (!string.IsNullOrWhiteSpace(text.Split(" ")[1]))
+                    string[] t = text.Split(" ");
+                    if (BDClass.NickAvl(t[1]))
+                    {
+                        p.AddConsoleLine("недоступен");
+                    }
+                    else if (!string.IsNullOrWhiteSpace(t[1]))
                     {
                         p.SetNick(text.Split(" ")[1]);
                         p.AddConsoleLine("новый ник:" + p.name);

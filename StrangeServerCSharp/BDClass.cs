@@ -18,6 +18,10 @@ namespace StrangeServerCSharp
             Console.WriteLine(Database.EnsureCreated());
             THIS = this;
         }
+        public static bool NickAvl(string nick)
+        {
+            return !(THIS.players.Where(p => p.name == nick).Count() > 0);
+        }
         public Player GetPlayer(int id,Session s, out bool needr)
         {
             try

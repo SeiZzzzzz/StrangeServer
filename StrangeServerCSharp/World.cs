@@ -197,15 +197,15 @@ namespace StrangeServerCSharp
         }
         public void Raz(uint x, uint y)
         {
-            SendPack('B', x, y, 0, 3);
+            SendPack('B', x, y, 0, 2);
             canboom[x + y * height] = true;
-            AsyncAction(100, () =>
+            AsyncAction(75, () =>
             {
-                for (int _x = -4; _x < 4; _x++)
+                for (int _x = -14; _x < 14; _x++)
                 {
-                    for (int _y = -4; _y < 4; _y++)
+                    for (int _y = -14; _y < 14; _y++)
                     {
-                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 3.5f)
+                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 15.5f)
                         {
                             foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
                             {
