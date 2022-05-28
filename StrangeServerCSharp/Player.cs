@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Text;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StrangeServerCSharp
 {
@@ -14,7 +13,7 @@ namespace StrangeServerCSharp
         public long money { get; set; }
         public string hash { get; set; }
         public string passwd { get; set; }
-        public Vector2 pos = new Vector2(0,0);
+        public Vector2 pos = new Vector2(0, 0);
         public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
         public uint respx { get { return (uint)resppos.X; } set { resppos.X = value; } }
@@ -196,9 +195,9 @@ namespace StrangeServerCSharp
             var resped = false;
             while (!resped)
             {
-                var x = World.Random.Next(0,5);
+                var x = World.Random.Next(0, 5);
                 var y = World.Random.Next(-1, 4); ;
-               
+
                 var tx = (uint)(rx + x);
                 var ty = (uint)(ry + y);
                 if (World.THIS.ValidCoord(tx, ty) && (World.Random.Next(0, 100) < 5))

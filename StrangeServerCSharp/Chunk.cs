@@ -39,7 +39,7 @@
             {
                 var v = new System.Numerics.Vector2(x, y);
                 if (!packs.ContainsKey(v))
-                    {
+                {
                     packs.Add(v, "");
                 }
             }

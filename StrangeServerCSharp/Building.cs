@@ -17,7 +17,7 @@ namespace StrangeServerCSharp
         public int off { get; set; }
         public char type { get; set; }
         public uint x { get; set; }
-        public uint y  { get; set; }
+        public uint y { get; set; }
         public Player owner { get; set; }
     }
     public struct Pack
@@ -70,7 +70,7 @@ namespace StrangeServerCSharp
             World.THIS.SetCell(x + 2, y + 2, 38);
 
             var v = World.THIS.GetChunkPosByCoords(x, y);
-            Chunk.chunks[(uint)v.X,(uint)v.Y].AddPack(x, y);
+            Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
             return new Market() { owner = owner, x = x, y = y, type = 'M' };
         }
         public static async void AsyncAction(int msdelay, Action act)
@@ -84,7 +84,7 @@ namespace StrangeServerCSharp
         public static bool checkcan(uint px, uint py, Player p)
         {
             int valid = 0;
-            for(int x = -3; x <= 3;x++)
+            for (int x = -3; x <= 3; x++)
             {
                 for (int y = -3; y <= 3; y++)
                 {
@@ -170,7 +170,7 @@ namespace StrangeServerCSharp
             {
 
             }
-            c.Send(p.win,p);
+            c.Send(p.win, p);
         }
         public static string mtext = "choose:\n[ENTER] = установить рынок\n[ESC] = отмена:3:4:4:9:9:000000000000000000001101100001101100000000000001101100001101100000000000000000000 ";
     }

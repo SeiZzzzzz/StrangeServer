@@ -52,6 +52,10 @@ namespace StrangeServerCSharp
             to.connection.Send("GU", this.Result);
             to.win = type;
         }
+        public void SendToSess(Session to)
+        {
+            to.Send("GU", this.Result);
+        }
         public void AddCrysLine(CrysLine line)
         {
             cryslines.Add(line.ToString());
@@ -345,7 +349,7 @@ namespace StrangeServerCSharp
                 for (int i = 0; i < 6; i++)
                 {
                     long buycry = long.Parse(cry[i + 1]);
-                    if (!p.crys.BuyCrys(i,buycry))
+                    if (!p.crys.BuyCrys(i, buycry))
                     {
                         p.SendMoney();
                         p.cpack.Open(p, p.win);

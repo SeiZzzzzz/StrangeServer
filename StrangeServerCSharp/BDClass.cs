@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace StrangeServerCSharp
 {
@@ -23,28 +18,11 @@ namespace StrangeServerCSharp
             Console.WriteLine(THIS.players.Where(p => p.name == nick).Count());
             return THIS.players.Where(p => p.name == nick).Count() > 0;
         }
-        public Player GetPlayer(int id,Session s, out bool needr)
+        public Player CreatePlayer()
         {
-            try
-            {
-                needr = false;
-                return players.First(p => p.id == id);
-            }
-            catch(Exception) {
-                var playerr = new Player { pos = new System.Numerics.Vector2(340, 15), resppos = new System.Numerics.Vector2(340, 15) };
-                THIS.players.Add(playerr);
-                playerr.name = playerr.id.ToString();
-                THIS.SaveChanges();
-                s.Send("AH", playerr.id + "_" + playerr.hash);
-                needr = true;
-                return playerr;
-            }
-            needr = true;
             var player = new Player { pos = new System.Numerics.Vector2(340, 15), resppos = new System.Numerics.Vector2(340, 15) };
             THIS.players.Add(player);
             THIS.SaveChanges();
-            var n = players.First(p => p.name == p.name);
-            s.Send("AH", n.id + "_" + n.hash);
             return player;
         }
         public static BDClass THIS;

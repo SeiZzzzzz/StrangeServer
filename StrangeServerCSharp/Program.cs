@@ -1,8 +1,8 @@
 ﻿using NetCoreServer;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Security.Cryptography;
+using System.Text;
 namespace StrangeServerCSharp
 {
     public class Program
@@ -29,7 +29,7 @@ namespace StrangeServerCSharp
         }
         private static void OnExit(object s, EventArgs arg)
         {
-                XServer.THIS.SaveMap();
+            XServer.THIS.SaveMap();
         }
 
     }
@@ -141,79 +141,182 @@ namespace StrangeServerCSharp
         }
         public void SendOnline()
         {
-            this.Send("ON", online +":0");
+            this.Send("ON", online + ":0");
         }
-        protected override void OnReceived(byte[] buffer, long offset, long size)
+        public int winauthtype = 0;
+        public bool autosed = false;
+        public string auname = "";
+        public string aupasswd = "";
+        public void Auth(byte[] data, out bool ret)
         {
-            
-            Packet p = new Packet(buffer);
-                if (p.eventType == "AU")
+            ret = true;
+            string x = null;
+            string[] datax = null;
+            if (data != null)
+            {
+
+                x = Encoding.UTF8.GetString(data);
+                datax = x.Split('_');
+                if (datax[1] == "0")
                 {
-                try
+                    Send("AH", "BAD");
+                    data = null;
+                }
+                else
                 {
-                    var x = Encoding.UTF8.GetString(p.data);
-                    string[] data = x.Split('|');
-                    if (x.Contains("DEBUG"))
+                    try
                     {
-                        foreach (var j in XServer.THIS.db.players.Where(p => p.name == data[1]).ToList())
+                        if (!int.TryParse(datax[1], out int id))
                         {
-                            if (string.IsNullOrWhiteSpace(j.passwd))
-                            {
-                                Send("AH", j.id + "_" + j.hash);
-                                this.player = j;
-                            }
-                            if (j.passwd == data[2])
-                            {
-                                Send("AH", j.id + "_" + j.hash);
-                                this.player = j;
-                                return;
-                            }
+                            Send("AH", "BAD");
                         }
+                        var p = XServer.THIS.db.players.First(p => p.id == id);
+                        if (CalculateMD5Hash(p.hash + this.sid) == datax[2])
+                        {
+                            this.player = p;
+                            ret = false;
+                            return;
+                        }
+                    }catch (Exception ex) { Send("AH", "BAD"); }
+                }
+                Console.WriteLine(x);
+            }
+            if (data == null || x.Contains("NO_AUTH"))
+            {
+            f1:
+                autosed = true;
+                if (winauthtype == -1)
+                {
+                    var c = new HorbConst();
+                    c.AddTitle("НОВЫЙ ИГРОК");
+                    c.AddTextLine("Ник.");
+                    c.AddIConsole();
+                    c.AddIConsolePlace("");
+                    c.AddButton("ВЫПОЛНИТЬ", "%I%");
+                    Send("PI", "0:0:0");
+                    Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    c.SendToSess(this);
+                }
+                else if (winauthtype == -2)
+                {
+                    var c = new HorbConst();
+                    c.AddTitle("НОВЫЙ ИГРОК");
+                    c.AddTextLine("пароль");
+                    c.AddIConsole();
+                    c.AddIConsolePlace("я хуй");
+                    c.AddButton("ВЫПОЛНИТЬ", "%I%");
+
+                    Send("PI", "0:0:0");
+                    Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    c.SendToSess(this);
+                }
+                else if (winauthtype == 0)
+                {
+                    var c = new HorbConst();
+                    c.AddTitle("АВТОРИЗАЦИЯ");
+                    c.AddTextLine("ник нужен ебать");
+                    c.AddIConsole();
+                    c.AddIConsolePlace("");
+                    c.AddButton("ВЫПОЛНИТЬ", "%I%");
+                    c.AddButton("НОВЫЙ АКК", "newakk");
+                    Send("PI", "0:0:0");
+                    Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    c.SendToSess(this);
+                }
+                else if (winauthtype == 1)
+                {
+                    var c = new HorbConst();
+                    c.AddTitle("АВТОРИЗАЦИЯ");
+                    c.AddTextLine("пароль нужен ебать");
+                    c.AddIConsole();
+                    c.AddIConsolePlace("пароль блядота");
+                    c.AddButton("ВЫПОЛНИТЬ", "%I%");
+                    Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+                    c.SendToSess(this);
+                }
+                else if (winauthtype > 1)
+                {
+                    try
+                    {
+                        var p = XServer.THIS.db.players.First(p => p.name == auname);
+                        if (p.passwd == aupasswd)
+                        {
+                            autosed = false;
+                            Send("AH", p.id + "_" + p.hash);
+                            this.player = p;
+                            ret = false;
+
+                        }
+                    }
+                    catch (Exception ex) { winauthtype = 0; goto f1; }
+
+                }
+                else if (winauthtype < -2)
+                {
+                    if (!string.IsNullOrWhiteSpace(auname) && !string.IsNullOrWhiteSpace(aupasswd) && !BDClass.NickAvl(auname))
+                    {
+                        this.player = BDClass.THIS.CreatePlayer();
+                        Send("AH", this.player.id + "_" + this.player.hash);
+                        ret = false;
                     }
                     else
                     {
-                        data = x.Split('_');
-                        Console.WriteLine(x);
-                        if (!int.TryParse(data[1], out var id))
-                        {
-                            return;
-                        }
-
-                        this.player = XServer.THIS.db.GetPlayer(id, this, out var needr);
-                        if (CalculateMD5Hash(this.player.hash + sid) != data[2])
-                        {
-                            return;
-                        }
-                        if (needr)
-                        {
-                            return;
-                        }
+                        winauthtype = 0;
+                        goto f1;
                     }
                 }
-                catch (Exception ex) { }
-                this.player.connection = this;
-                this.player.GimmeBotsUPD();
-                Console.WriteLine("connected " + player.id);
+            }
+        }
+        public void InitPlayer()
+        {
+            this.player.connection = this;
+            Console.WriteLine("connected " + player.id);
+            if (!XServer.players.ContainsKey(this.player.id))
+            {
                 XServer.players.Add(player.id, player);
-                Send("PI", "0:0:0");
-                Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
-                Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
-                Send("sp", "125:57:200");
-                Send("BA", "0");
-                Send("BD", "0");
-                Send("GE", " ");
-                Send("@T", $"{this.player.pos.X}:{this.player.pos.Y}");
-                Send("BI", "{\"x\":" + this.player.pos.X + ",\"y\":" + this.player.pos.Y + ",\"id\":" + player.id + ",\"name\":\"" + player.name + "\"}");
-                Send("sp", "25:20:100000");
-                Send("#S", "#cc#10#snd#0#mus#0#isca#0#tsca#0#mous#1#pot#0#frc#0#ctrl#0#mof#0");
-                Send("@B", this.player.crys.GetCry);
-                this.player.SendMoney();
-                this.player.SendHp();
-                this.player.SendLvl();
-                this.player.TryToGetChunks();
-                SendOnline();
-                this.player.inventory.Choose(-1);
+            }
+            
+            Send("PI", "0:0:0");
+            Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+            Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
+            Send("sp", "125:57:200");
+            Send("BA", "0");
+            Send("BD", "0");
+            Send("GE", " ");
+            Send("@T", $"{this.player.pos.X}:{this.player.pos.Y}");
+            Send("BI", "{\"x\":" + this.player.pos.X + ",\"y\":" + this.player.pos.Y + ",\"id\":" + player.id + ",\"name\":\"" + player.name + "\"}");
+            Send("sp", "25:20:100000");
+            Send("#S", "#cc#10#snd#0#mus#0#isca#0#tsca#0#mous#1#pot#0#frc#0#ctrl#0#mof#0");
+            Send("@B", this.player.crys.GetCry);
+            this.player.SendMoney();
+            this.player.SendHp();
+            this.player.SendLvl();
+            this.player.TryToGetChunks();
+            this.player.GimmeBotsUPD();
+            SendOnline();
+            this.player.inventory.Choose(-1);
+        }
+        protected override void OnReceived(byte[] buffer, long offset, long size)
+        {
 
+            Packet p = new Packet(buffer);
+            if (p.eventType == "AU")
+            {
+                var ret = true;
+                try
+                {
+                    Auth(p.data, out ret);
+                }
+                catch (Exception) { this.Disconnect(); ret = true; }
+                if (ret)
+                {
+                    return;
+                }
+                InitPlayer();
             }
             else if (p.eventType == "PO")
             {
@@ -228,12 +331,67 @@ namespace StrangeServerCSharp
             else if (p.eventType == "TY")
             {
                 TYPacket ty = new TYPacket(p.data);
+                if (autosed)
+                {
+                    Newtonsoft.Json.Linq.JObject jo = null;
+                    try
+                    {
+                        jo = Newtonsoft.Json.Linq.JObject.Parse(Encoding.UTF8.GetString(ty.data));
+                    }
+                    catch (Newtonsoft.Json.JsonReaderException)
+                    {
+                        return;
+                    }
+                    var button = jo["b"];
+                    if (button != null)
+                    {
+                        if (button.ToString() == "newakk")
+                        {
+                            winauthtype--;
+                        }
+                        else if (winauthtype == -1)
+                        {
+                            if (!string.IsNullOrWhiteSpace(button.ToString()))
+                            {
+                                auname = button.ToString();
+                                winauthtype--;
+                            }
+                        }
+                        else if (winauthtype == -2)
+                        {
+                            if (!string.IsNullOrWhiteSpace(button.ToString()))
+                            {
+                                aupasswd = button.ToString();
+                                winauthtype--;
+                            }
+                        }
+                        else if (winauthtype == 0)
+                        {
+                                winauthtype++;
+                                auname = button.ToString();
+                        }
+                        else if (winauthtype == 1)
+                        {
+                                winauthtype++;
+                                aupasswd = button.ToString();
+                        }
+                        else
+                        {
+                            winauthtype--;
+                        }
+                        Console.WriteLine(button);
+                        
+                        Auth(null,out var ret);
+                        return;
+                    }
+                    return;
+                }
                 if (ty.eventType == "Xmov")
                 {
                     int.TryParse(Encoding.UTF8.GetString(ty.data).Trim(), out int dir);
                     this.player.Move(ty.x, ty.y, dir > 9 ? dir - 10 : dir);
                 }
-                if (ty.eventType == "GUI_" && player.win != "")
+                else if (ty.eventType == "GUI_" && player.win != "")
                 {
                     try
                     {
