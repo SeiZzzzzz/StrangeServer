@@ -21,11 +21,12 @@ namespace StrangeServerCSharp
                 Console.WriteLine(THIS.players.Where(p => p.name == nick).Count());
 
                 return THIS.players.Where(p => p.name == nick).Count() > 0;
-            }catch(Exception) { return false; }
+            }
+            catch (Exception) { return false; }
         }
         public Player CreatePlayer(string name, string passwd)
         {
-            var player = new Player { pos = new System.Numerics.Vector2(340, 15) };
+            var player = new Player { pos = new System.Numerics.Vector2(351, 22) };
             try
             {
                 player.resp = BDClass.THIS.resps.First();
@@ -34,19 +35,16 @@ namespace StrangeServerCSharp
             player.name = name;
             player.passwd = passwd;
             THIS.players.Add(player);
-            THIS.SaveChanges();
+            try
+            {
+                THIS.SaveChanges();
+            }
+            catch (Exception) { return player; }
             return player;
         }
         public static BDClass THIS;
         public static void Save()
         {
-            foreach (var pack in World.packmap)
-            {
-                if (pack != null)
-                {
-                    THIS.Set<Building>().Add(pack);
-                }
-            }
             foreach (var box in World.boxmap)
             {
                 if (box != null)

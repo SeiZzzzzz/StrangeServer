@@ -190,8 +190,8 @@ namespace StrangeServerCSharp
             var resped = false;
             while (!resped)
             {
-                var x = World.Random.Next(0, 5);
-                var y = World.Random.Next(-1, 4); ;
+                var x = World.Random.Next(0, 4);
+                var y = World.Random.Next(-1, 3); ;
 
                 var tx = (uint)(rx + x);
                 var ty = (uint)(ry + y);

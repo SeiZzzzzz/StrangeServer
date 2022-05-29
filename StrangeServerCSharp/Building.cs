@@ -17,7 +17,10 @@ namespace StrangeServerCSharp
         public int cid { get; set; }
         public int off { get; set; }
         public char type { get; set; }
+        public int respcost { get; set; }
+        public long cryinside { get; set; }
         public uint x { get; set; }
+
         public uint y { get; set; }
         public int ownerid { get; set; }
     }
@@ -222,9 +225,9 @@ namespace StrangeServerCSharp
         public static bool checkcan(uint px, uint py, Player p)
         {
             int valid = 0;
-            for (int x = -3; x <= 3; x++)
+            for (int x = -4; x <= 4; x++)
             {
-                for (int y = -3; y <= 3; y++)
+                for (int y = -4; y <= 4; y++)
                 {
                     if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
                     {
@@ -316,12 +319,10 @@ namespace StrangeServerCSharp
     {
         public override void Rebild()
         {
-            World.THIS.SetCell(x, y, 37);
+            rb(this.x, this.y);
         }
         public override string winid { get; set; }
         public Resp() { winid = "resp"; }
-        public int respcost{ get; set; }
-        public long cryinside { get; set; }
         public static string rtext = "choose:\n[ENTER] = установить респаун\n[ESC] = отмена:3:2:2:9:7:000000000011100000010000000011100000010100000000000000000000000 ";
         public string resped(Player p)
         {
@@ -336,26 +337,54 @@ namespace StrangeServerCSharp
         }
         public static Resp Build(uint x, uint y, Player owner)
         {
-                if (owner.connection == null)
-                {
-                    World.THIS.SetCell(x, y, 37);
-                    var v1 = World.THIS.GetChunkPosByCoords(x, y);
-                    Chunk.chunks[(uint)v1.X, (uint)v1.Y].AddPack(x, y);
-                    return new Resp() { ownerid = 0, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
-                }
-                if (!checkcan(x, y, owner))
-                {
-                    return null;
-                }
-            World.THIS.SetCell(x, y, 37);
+            if (owner.connection == null)
+            {
+                World.THIS.SetCell(x, y, 37);
+                var v1 = World.THIS.GetChunkPosByCoords(x, y);
+                Chunk.chunks[(uint)v1.X, (uint)v1.Y].AddPack(x, y);
+                return new Resp() { ownerid = 0, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
+            }
+            if (!checkcan(x, y, owner))
+            {
+                return null;
+            }
+            rb(x, y);
             var v = World.THIS.GetChunkPosByCoords(x, y);
             Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
-            return new Resp() { ownerid = owner.id, x = x, y = y, type = 'R' ,respcost = 20, cryinside = 100, off = 1 };
+            return new Resp() { ownerid = owner.id, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
+        }
+        public static void rb(uint x, uint y)
+        {
+            World.THIS.SetCell(x, y, 37);
+            World.THIS.SetCell(x, y + 2, 37);
+            World.THIS.SetCell(x + 1, y, 37);
+            for (int px = 2; px < 7; px++)
+            {
+                for (int py = -1; py < 3; py++)
+                {
+                    if (World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)) != null)
+                    {
+                        World.THIS.SetCell((uint)(x + px), (uint)(y + py), 35);
+                        World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).is_destructible = false;
+                        World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).can_build_over = false;
+                    }
+                }
+            }
+            //walls
+            World.THIS.SetCell(x - 1, y, 106);
+            World.THIS.SetCell(x - 1, y + 1, 106);
+            World.THIS.SetCell(x - 1, y - 1, 106);
+            World.THIS.SetCell(x, y - 1, 106);
+            World.THIS.SetCell(x, y + 1, 106);
+            World.THIS.SetCell(x + 1, y + 1, 106);
+            World.THIS.SetCell(x + 1, y - 1, 106);
+            World.THIS.SetCell(x + 1, y + 2, 106);
+            World.THIS.SetCell(x - 1, y + 2, 106);
         }
         public static bool checkcan(uint px, uint py, Player p)
         {
             int valid = 0;
-            for (int x = -3; x <= 3; x++)
+            for (int x = -3; x <= 7; x++)
             {
                 for (int y = -3; y <= 3; y++)
                 {

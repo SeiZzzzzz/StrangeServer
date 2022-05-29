@@ -9,7 +9,7 @@
             {
                 items.Add(i, new Item(i, 0));
             }
-            items[2].count++;
+            items[1].count++;
             items[3].count++;
             items[5].count++;
             items[6].count++;
@@ -50,7 +50,7 @@
         {
             sel = id;
             this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
-            if (sel == 2)
+            if (sel == 1)
             {
                 this.player.connection.Send("IN", Resp.rtext);
             }
@@ -77,7 +77,7 @@
             {
                 return;
             }
-            if (sel == 2)
+            if (sel == 1)
             {
                 uint xp = (uint)(x + (player.dir == 3 ? 2 : player.dir == 1 ? -2 : 0));
                 uint yp = (uint)(y + (player.dir == 0 ? 2 : player.dir == 2 ? -2 : 0));
@@ -85,6 +85,7 @@
                 if (m != null)
                 {
                     World.packmap[xp + yp * World.width] = m;
+                    BDClass.THIS.resps.Add(m);
                 }
             }
             if (sel == 3)
@@ -95,6 +96,7 @@
                 if (m != null)
                 {
                     World.packmap[xp + yp * World.width] = m;
+                    BDClass.THIS.markets.Add(m);
                 }
             }
             this.player.GimmePacks();

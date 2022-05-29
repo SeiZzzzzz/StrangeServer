@@ -368,6 +368,10 @@ namespace StrangeServerCSharp
             byte r = roadmap[x + y * height];
             if (r == 35)
             {
+                if (!GetCellConst(x, y).can_build_over)
+                {
+                    return;
+                }
                 roadmap[x + y * height] = 32;
             }
             cells[x + y * height] = cellps[roadmap[x + y * height]].CloneCell();

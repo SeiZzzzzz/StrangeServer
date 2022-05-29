@@ -177,7 +177,8 @@ namespace StrangeServerCSharp
                             ret = false;
                             return;
                         }
-                    }catch (Exception ex) { Send("AH", "BAD"); }
+                    }
+                    catch (Exception ex) { Send("AH", "BAD"); }
                 }
                 Console.WriteLine(x);
             }
@@ -259,7 +260,7 @@ namespace StrangeServerCSharp
                 {
                     if (!string.IsNullOrWhiteSpace(auname) && !string.IsNullOrWhiteSpace(aupasswd) && !BDClass.NickAvl(auname))
                     {
-                        this.player = BDClass.THIS.CreatePlayer(auname,aupasswd);
+                        this.player = BDClass.THIS.CreatePlayer(auname, aupasswd);
                         autosed = false;
                         Send("AH", this.player.id + "_" + this.player.hash);
                         ret = false;
@@ -280,7 +281,7 @@ namespace StrangeServerCSharp
             {
                 XServer.players.Add(player.id, player);
             }
-            
+
             Send("PI", "0:0:0");
             Send("cf", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
             Send("CF", "{\"width\":" + XServer.width + ",\"height\":" + XServer.height + ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
@@ -368,21 +369,21 @@ namespace StrangeServerCSharp
                         }
                         else if (winauthtype == 0)
                         {
-                                winauthtype++;
-                                auname = button.ToString();
+                            winauthtype++;
+                            auname = button.ToString();
                         }
                         else if (winauthtype == 1)
                         {
-                                winauthtype++;
-                                aupasswd = button.ToString();
+                            winauthtype++;
+                            aupasswd = button.ToString();
                         }
                         else
                         {
                             winauthtype--;
                         }
                         Console.WriteLine(button);
-                        
-                        Auth(null,out var ret);
+
+                        Auth(null, out var ret);
                         return;
                     }
                     return;

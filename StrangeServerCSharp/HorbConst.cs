@@ -148,6 +148,339 @@ namespace StrangeServerCSharp
         public long value;
         public string descText;
     }
+    public struct RichListEntry
+    {
+        public string[] ToList()
+        {
+            return new string[]
+            {
+                this.Text,
+                this.Type,
+                this.Values,
+                this.Action,
+                this.InitialValue
+            };
+        }
+        public new string ToString()
+        {
+            return "\"" + string.Join("\",\"", this.ToList()) + "\"";
+        }
+
+        public string Text;
+
+        public string Type;
+
+        public string Values;
+
+        public string InitialValue;
+
+        public string Action;
+    }
+    //Darkar25 richlistgen
+    public static class RichListGenerator
+    {
+
+        public static RichListEntry Text(string text)
+        {
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "text",
+                Values = "",
+                Action = "",
+                InitialValue = ""
+            };
+        }
+
+
+        public static RichListEntry Bool(string text, string id, bool value)
+        {
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "bool",
+                Values = "0",
+                Action = id,
+                InitialValue = (value ? "1" : "0")
+            };
+        }
+
+
+        public static RichListEntry UInt(string text, string id, uint value)
+        {
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "uint",
+                Values = "0",
+                Action = id,
+                InitialValue = value.ToString()
+            };
+        }
+
+
+        public static RichListEntry Drop(string text, string id, string[] values, int index)
+        {
+            string text2 = "";
+            for (int i = 0; i < values.Length; i++)
+            {
+                text2 = string.Concat(new object[]
+                {
+                    text2,
+                    i,
+                    ":",
+                    values[i].ToString(),
+                    "#"
+                });
+            }
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "drop",
+                Values = text2,
+                Action = id,
+                InitialValue = index.ToString()
+            };
+        }
+
+
+        public static RichListEntry Fill(string text, string barText, int percent, int crystalType, string action100, string action1000, string actionMax)
+        {
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "fill",
+                Values = string.Concat(new object[]
+                {
+                    (percent < 0) ? 0 : ((percent > 100) ? 100 : percent),
+                    "#",
+                    barText,
+                    "#",
+                    (crystalType < 0) ? 0 : ((crystalType > 5) ? 5 : crystalType),
+                    "#",
+                    action100,
+                    "#",
+                    action1000,
+                    "#",
+                    actionMax
+                }),
+                Action = "",
+                InitialValue = ""
+            };
+        }
+
+
+        public static RichListEntry Fill(string text, int current, int max, int crystalType, string action100, string action1000, string actionMax)
+        {
+            int num = (current < 0) ? 0 : ((current > max) ? max : current);
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "fill",
+                Values = string.Concat(new object[]
+                {
+                    Math.Round((double)((float)max / 100f * (float)num)),
+                    "#",
+                    num,
+                    "/",
+                    max,
+                    "#",
+                    (crystalType < 0) ? 0 : ((crystalType > 5) ? 5 : crystalType),
+                    "#",
+                    action100,
+                    "#",
+                    action1000,
+                    "#",
+                    actionMax
+                }),
+                Action = "",
+                InitialValue = ""
+            };
+        }
+
+        public static RichListEntry Button(string text, string action, string buttonText)
+        {
+            return new RichListEntry
+            {
+                Text = text,
+                Type = "button",
+                Values = buttonText,
+                Action = action,
+                InitialValue = ""
+            };
+        }
+
+        public class CardBuilder
+        {
+
+            public CardBuilder()
+            {
+                this.Reset();
+            }
+
+
+            public void SetTitle(string title)
+            {
+                this.Title = title;
+            }
+
+
+            public void SetUnknown(string unk)
+            {
+                this.IDK = unk;
+            }
+
+
+            public void SetAction(string act)
+            {
+                this.Action = act;
+            }
+
+            public void SetURI(string uri)
+            {
+                this.URI = uri;
+            }
+
+
+            public void FlushLine()
+            {
+                string t = this.Title.Contains("&") ? this.Title.Substring(0, this.Title.IndexOf('&')) : this.Title;
+                string unk = this.IDK.Contains("&") ? this.IDK.Substring(0, this.IDK.IndexOf('&')) : this.IDK;
+                string act = this.Action.Contains("&") ? this.Action.Substring(0, this.Action.IndexOf('&')) : this.Action;
+                string uri = this.URI.Contains("&") ? this.URI.Substring(0, this.URI.IndexOf('&')) : this.URI;
+                this.UnsafeFlushLine(t, unk, act, uri, this.Width, this.Height);
+            }
+
+            public void Reset()
+            {
+                this.Title = "";
+                this.IDK = "";
+                this.Action = "";
+                this.URI = "";
+                this.Width = 8U;
+                this.Height = 8U;
+            }
+
+
+            public RichListEntry Result
+            {
+                get
+                {
+                    string text = "";
+                    for (int i = 0; i < this.image.Count; i++)
+                    {
+                        if (text != "")
+                        {
+                            text += "&";
+                        }
+                        text = string.Concat(new object[]
+                        {
+                            text,
+                            this.image[i],
+                            "%",
+                            this.width[i],
+                            "%",
+                            this.height[i]
+                        });
+                    }
+                    return new RichListEntry
+                    {
+                        Text = string.Join("&", this.title),
+                        Type = "3card",
+                        Values = string.Join("&", this.somethin),
+                        Action = string.Join("&", this.action),
+                        InitialValue = text
+                    };
+                }
+            }
+
+
+            public new string ToString()
+            {
+                return this.Result.ToString();
+            }
+
+
+            public string Title { get; set; }
+
+
+            public string IDK { get; set; }
+
+
+            public string Action { get; set; }
+
+
+            public string URI { get; set; }
+
+            public void SetWidth(uint width)
+            {
+                this.Width = width;
+            }
+
+
+            public void SetHeight(uint height)
+            {
+                this.Height = height;
+            }
+
+
+            public void SetImageURL(string url, uint width, uint height)
+            {
+                this.SetURI(url);
+                this.SetWidth(width);
+                this.SetHeight(height);
+            }
+
+
+            public void UnsafeFlushLine(string t, string unk, string act, string uri, uint w, uint h)
+            {
+                this.title.Add(t);
+                this.somethin.Add(unk);
+                this.action.Add(act);
+                this.image.Add(uri);
+                this.width.Add(w);
+                this.height.Add(h);
+                this.Reset();
+            }
+
+
+            public uint Width { get; set; }
+
+
+            public uint Height { get; set; }
+
+
+            public void SetIngameImage(string spriteGroup, uint index, uint scale)
+            {
+
+
+                this.SetURI(string.Concat(new object[]
+                {
+                    "inner:",
+                    spriteGroup.ToUpper(),
+                    ":",
+                    index
+                }));
+                this.SetWidth(scale);
+                this.SetHeight(0U);
+            }
+
+            private List<string> title = new List<string>();
+            private List<string> somethin = new List<string>();
+
+
+            private List<string> action = new List<string>();
+
+
+            private List<string> image = new List<string>();
+
+
+            private List<uint> width = new List<uint>();
+
+
+            private List<uint> height = new List<uint>();
+        }
+    }
     public struct HORB
     {
         public override string ToString()
@@ -198,220 +531,5 @@ namespace StrangeServerCSharp
 
         public bool input_console { get; set; }
     }
-    public static class HorbDecoder
-    {
-        public static void Decode(string c, Player p)
-        {
-            JObject jo = null;
-            try
-            {
-                jo = JObject.Parse(c);
-            }
-            catch (Newtonsoft.Json.JsonReaderException)
-            {
-                return;
-            }
-            var button = jo["b"];
-            if (button != null)
-            {
-                if (p.win == "")
-                {
-                    return;
-                }
-                if (p.win == "box")
-                {
-                    box((string)button, p);
-                }
-                else if (p.win == "console")
-                {
-                    Console((string)button, p);
-                }
-                else if (p.win.StartsWith("market"))
-                {
-                    Market((string)button, p);
-                }
-                else if (p.win.StartsWith("resp"))
-                {
-                    Resp((string)button, p);
-                }
-
-                if (button != null && (string)button == "exit")
-                {
-                    Exit((string)button, p);
-                }
-            }
-        }
-        private static void Exit(string text, Player p)
-        {
-            if (text == "exit")
-            {
-                p.connection.Send("Gu", "");
-                p.win = "";
-                p.cpack = null;
-            }
-        }
-
-        private static void Resp(string text, Player p)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return;
-            }
-            if (text.StartsWith("tab"))
-            {
-                p.win = "resp." + text;
-                p.cpack.Open(p, p.win);
-                return;
-            }
-            if (text.StartsWith("bind"))
-            {
-                p.resp = (Resp)p.cpack;
-                p.cpack.Open(p, p.win);
-                return;
-            }
-        }
-        public static void Console(string text, Player p)
-        {
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                p.AddConsoleLine(text);
-                if (text.StartsWith("newnick"))
-                {
-                    string[] t = text.Split(" ");
-                    if (!string.IsNullOrWhiteSpace(t[1]))
-                    {
-                        if (BDClass.NickAvl(t[1]))
-                        {
-                            p.AddConsoleLine("недоступен");
-                        }
-                        else
-                        {
-                            p.SetNick(text.Split(" ")[1]);
-                            p.AddConsoleLine("новый ник:" + p.name);
-                            BDClass.THIS.SaveChanges();
-                        }
-                    }
-                }
-                if (text.StartsWith("setcell"))
-                {
-                    if (!string.IsNullOrWhiteSpace(text.Split(" ")[1]))
-                    {
-                        p.cellg = byte.Parse(text.Split(" ")[1]);
-                        p.AddConsoleLine("cell:" + p.cellg);
-                    }
-                }
-            }
-            p.ShowConsole();
-        }
-        private static void Market(string text, Player p)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return;
-            }
-            if (text.StartsWith("tab"))
-            {
-                p.win = "market." + text;
-                p.cpack.Open(p, p.win);
-                return;
-            }
-            if (p.win == "market.tab_sell")
-            {
-                if (!text.StartsWith("sell"))
-                {
-                    return;
-                }
-                if (text.StartsWith("sellall"))
-                {
-                    if (p.cpack == null)
-                    {
-
-                        Exit("exit", p);
-                    }
-                    for (int i = 0; i < 6; i++)
-                    {
-                        long remcry = p.crys.cry[i];
-                        if (p.crys.RemoveCrys(i, remcry))
-                        {
-                            p.money += (remcry * World.costs[i]);
-                        }
-                    }
-                    p.SendMoney();
-                    p.cpack.Open(p, p.win);
-                    Exit("exit", p);
-                    return;
-
-                }
-                if (p.cpack == null)
-                {
-                    Exit("exit", p);
-                }
-                string[] cry = text.Split(":");
-                for (int i = 0; i < 6; i++)
-                {
-                    long remcry = long.Parse(cry[i + 1]);
-                    if (p.crys.RemoveCrys(i, remcry))
-                    {
-                        p.money += (remcry * World.costs[i]);
-                    }
-                }
-                p.SendMoney();
-                p.cpack.Open(p, p.win);
-
-            }
-            else if (p.win == "market.tab_buy")
-            {
-                if (!text.StartsWith("buy"))
-                {
-                    return;
-                }
-                if (p.cpack == null)
-                {
-                    Exit("exit", p);
-                }
-                string[] cry = text.Split(":");
-                for (int i = 0; i < 6; i++)
-                {
-                    long buycry = long.Parse(cry[i + 1]);
-                    if (!p.crys.BuyCrys(i, buycry))
-                    {
-                        p.SendMoney();
-                        p.cpack.Open(p, p.win);
-                        return;
-                    }
-                }
-                p.SendMoney();
-                p.cpack.Open(p, p.win);
-            }
-        }
-        private static void box(string text, Player p)
-        {
-            if (text.StartsWith("dropbox"))
-            {
-                string[] cry = text.Split(":");
-                long[] box = new long[6];
-                uint x = (uint)p.GetDirCord().X;
-                uint y = (uint)p.GetDirCord().Y;
-                if (!World.THIS.ValidCoord(x, y) || !(World.THIS.GetCellConst(x, y).is_empty && World.THIS.GetCellConst(x, y).can_build_over))
-                {
-                    return;
-                }
-                for (int i = 0; i < 6; i++)
-                {
-                    long remcry = long.Parse(cry[i + 1]);
-                    if (p.crys.RemoveCrys(i, remcry))
-                    {
-                        box[i] = remcry;
-                    }
-                }
-                if (box.Sum() <= 0)
-                {
-                    return;
-                }
-                Box.BuildBox(x, y, box);
-                p.connection.Send("Gu", "");
-                p.win = "";
-            }
-        }
-    }
+    
 }
