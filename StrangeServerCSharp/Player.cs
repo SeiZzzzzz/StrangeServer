@@ -16,8 +16,7 @@ namespace StrangeServerCSharp
         public Vector2 pos = new Vector2(0, 0);
         public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
-        public uint respx { get { return (uint)resppos.X; } set { resppos.X = value; } }
-        public uint respy { get { return (uint)resppos.Y; } set { resppos.Y = value; } }
+        public Resp resp { get; set; }
         public int cid { get; set; }
         public int dir;
         public int skin;
@@ -41,13 +40,12 @@ namespace StrangeServerCSharp
         public int[] counter = { 0, 0, 0 };
         public int[] nextlvl = { 20, 200, 200 };
         public int[] lvl = { 1, 3, 200 };
-        public Vector2 resppos;
         public Stack<byte> geo = new Stack<byte>();
         Queue<Line> console = new Queue<Line>();
         public Building cpack = null;
         public Player()
         {
-            resppos = pos;
+            resp = BDClass.THIS.resps.First();
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;
@@ -178,9 +176,7 @@ namespace StrangeServerCSharp
 
             if (!cell.is_destructible)
             {
-                /*
                 this.Move((uint)this.pos.X, (uint)this.pos.Y, this.dir);
-                */
                 return;
             }
             World.THIS.DestroyCell((uint)this.pos.X, (uint)this.pos.Y);
@@ -188,8 +184,8 @@ namespace StrangeServerCSharp
         public void Death()
         {
             this.win = "";
-            var rx = resppos.X + 2;
-            var ry = resppos.Y;
+            var rx = resp.x + 2;
+            var ry = resp.y;
             uint dx = (uint)this.pos.X;
             uint dy = (uint)this.pos.Y;
             var resped = false;
@@ -602,15 +598,13 @@ namespace StrangeServerCSharp
                 return;
             }
             var c = World.cellps[World.THIS.GetCell(x, y)];
-            /*
             if (World.THIS.GetCellConst(x, y) == null || !World.THIS.GetCellConst(x, y).is_empty)
             {
                 this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                 return;
             }
-            */
             var newpos = new Vector2(x, y);
-            if (Vector2.Distance(pos, newpos) < 2)
+            if (Vector2.Distance(pos, newpos) < 1.2f)
             {
                 var pack = World.packmap[(uint)newpos.X + (uint)newpos.Y * World.width];
                 if (pack != null && win == "")

@@ -259,7 +259,8 @@ namespace StrangeServerCSharp
                 {
                     if (!string.IsNullOrWhiteSpace(auname) && !string.IsNullOrWhiteSpace(aupasswd) && !BDClass.NickAvl(auname))
                     {
-                        this.player = BDClass.THIS.CreatePlayer();
+                        this.player = BDClass.THIS.CreatePlayer(auname,aupasswd);
+                        autosed = false;
                         Send("AH", this.player.id + "_" + this.player.hash);
                         ret = false;
                     }

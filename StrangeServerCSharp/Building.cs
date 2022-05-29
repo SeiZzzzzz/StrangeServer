@@ -18,7 +18,7 @@ namespace StrangeServerCSharp
         public char type { get; set; }
         public uint x { get; set; }
         public uint y { get; set; }
-        public Player owner { get; set; }
+        public int ownerid { get; set; }
     }
     public struct Pack
     {
@@ -71,7 +71,7 @@ namespace StrangeServerCSharp
 
             var v = World.THIS.GetChunkPosByCoords(x, y);
             Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
-            return new Market() { owner = owner, x = x, y = y, type = 'M' };
+            return new Market() { ownerid = owner.id, x = x, y = y, type = 'M' };
         }
         public static async void AsyncAction(int msdelay, Action act)
         {
@@ -138,7 +138,7 @@ namespace StrangeServerCSharp
                 c.AddButton("ПРОДАТЬ", "@sell:%M%");
                 c.AddButton("ПРОДАТЬ ВСЕ", "@sellall");
                 c.AddButton("ВЫЙТИ", "exit");
-                if (p == owner)
+                if (p == BDClass.THIS.players.First(p => p.id == ownerid))
                 {
                     c.Admin();
                 }
@@ -161,7 +161,7 @@ namespace StrangeServerCSharp
                 }
                 c.AddButton("КУПИТЬ", "buy:%M%");
                 c.AddButton("ВЫЙТИ", "exit");
-                if (p == owner)
+                if (p == BDClass.THIS.players.First(p => p.id == ownerid))
                 {
                     c.Admin();
                 }
@@ -178,9 +178,34 @@ namespace StrangeServerCSharp
     {
         public override string winid { get; set; }
         public Resp() { winid = "resp"; }
+        public int respcost{ get; set; }
+        public string resped(Player p)
+        {
+            if (p.resp == this)
+            {
+                return $"Цена восстановления: <color=green>${respcost}</color>\n\n<color=#8f8>Вы привязаны к этому респу.</color>";
+            }
+            else
+            {
+                return $"Цена восстановления: <color=green>${respcost}</color>\n\n<color=#f88>Привязать робота к респу?</color>";
+            }
+        }
         public override void Open(Player p, string tab)
         {
-            return;
+            var c = new HorbConst();
+            if (tab == this.winid)
+            {
+                c.AddTitle("РЕСП");
+                c.SetText($"@@Респ - это место, где будет появляться ваш робот\nпосле уничтожения (HP = 0)\n\n{resped(p)}");
+                if (p.resp != this)
+                {
+                    c.AddButton("ПРИВЯЗАТЬ", "bind");
+                }
+                if (p == BDClass.THIS.players.First(p => p.id == ownerid))
+                {
+                    c.Admin();
+                }
+            }
         }
     }
 }

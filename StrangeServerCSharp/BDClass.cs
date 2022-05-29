@@ -7,6 +7,7 @@ namespace StrangeServerCSharp
         public DbSet<Player> players { get; set; }
         public DbSet<Building> packs { get; set; }
         public DbSet<Market> markets { get; set; }
+        public DbSet<Resp> resps { get; set; }
         public DbSet<Box> boxes { get; set; }
         public BDClass()
         {
@@ -15,12 +16,18 @@ namespace StrangeServerCSharp
         }
         public static bool NickAvl(string nick)
         {
-            Console.WriteLine(THIS.players.Where(p => p.name == nick).Count());
-            return THIS.players.Where(p => p.name == nick).Count() > 0;
+            try
+            {
+                Console.WriteLine(THIS.players.Where(p => p.name == nick).Count());
+
+                return THIS.players.Where(p => p.name == nick).Count() > 0;
+            }catch(Exception) { return false; }
         }
-        public Player CreatePlayer()
+        public Player CreatePlayer(string name, string passwd)
         {
-            var player = new Player { pos = new System.Numerics.Vector2(340, 15), resppos = new System.Numerics.Vector2(340, 15) };
+            var player = new Player { pos = new System.Numerics.Vector2(340, 15), resp = BDClass.THIS.resps.First() };
+            player.name = name;
+            player.passwd = passwd;
             THIS.players.Add(player);
             THIS.SaveChanges();
             return player;

@@ -416,7 +416,7 @@ namespace StrangeServerCSharp
             var h = ContPlayers(x, y);
             foreach (var id in h)
             {
-                XServer.players[id].Hurt(c.damage);
+                XServer.players[id].Hurt(c.fall_damage);
             }
             if (cell == 90)
             {
