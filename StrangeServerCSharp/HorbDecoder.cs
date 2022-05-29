@@ -78,6 +78,10 @@ namespace StrangeServerCSharp
                 p.cpack.Open(p, p.win);
                 return;
             }
+            if (p.id != p.cpack.ownerid)
+            {
+                return;
+            }
         }
         public static void Console(string text, Player p)
         {

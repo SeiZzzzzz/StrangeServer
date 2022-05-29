@@ -353,6 +353,29 @@ namespace StrangeServerCSharp
             Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
             return new Resp() { ownerid = owner.id, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
         }
+        public void OnDeath(Player p)
+        {
+            if (ownerid > 0 && cryinside > 0)
+            {
+                cryinside--;
+                if (p.money >= respcost)
+                {
+                    p.money -= respcost;
+                }
+                else
+                {
+                    p.hp = 100;
+                }
+            }
+            else if (cryinside == 1)
+            {
+                off = 0;
+            }
+        }
+        public void AddCry(long col)
+        {
+
+        }
         public static void rb(uint x, uint y)
         {
             World.THIS.SetCell(x, y, 37);

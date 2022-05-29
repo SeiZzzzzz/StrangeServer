@@ -393,6 +393,13 @@ namespace StrangeServerCSharp
                     int.TryParse(Encoding.UTF8.GetString(ty.data).Trim(), out int dir);
                     this.player.Move(ty.x, ty.y, dir > 9 ? dir - 10 : dir);
                 }
+                if (ty.eventType == "ADMN")
+                {
+                    if (this.player.cpack != null && (this.player.id == this.player.cpack.ownerid))
+                    {
+                        this.player.cpack.Open(this.player, "ADMN");
+                    }
+                }
                 else if (ty.eventType == "GUI_" && player.win != "")
                 {
                     try
