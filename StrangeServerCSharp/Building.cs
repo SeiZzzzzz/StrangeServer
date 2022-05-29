@@ -9,6 +9,7 @@ namespace StrangeServerCSharp
         [NotMapped]
         public abstract string winid { get; set; }
         public abstract void Open(Player p, string tab);
+        public abstract void Rebild();
         public Pack GetShpack
         {
             get { return new Pack { cid = this.cid, off = this.off, type = this.type, x = this.x, y = this.y }; }
@@ -32,12 +33,149 @@ namespace StrangeServerCSharp
     {
         public Market() { winid = "market.tab_sell"; }
         public override string winid { get; set; }
+        public override void Rebild()
+        {
+            if (World.THIS.GetCellConst(x + 3, y) != null)
+            {
+                World.THIS.SetCell(x + 3, y, 35);
+                World.THIS.GetCellConst(x + 3, y).is_destructible = false;
+                World.THIS.GetCellConst(x + 3, y).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x + 4, y) != null)
+            {
+                World.THIS.SetCell(x + 4, y, 35);
+                World.THIS.GetCellConst(x + 4, y).is_destructible = false;
+                World.THIS.GetCellConst(x + 4, y).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x - 3, y) != null)
+            {
+                World.THIS.SetCell(x - 3, y, 35);
+                World.THIS.GetCellConst(x - 3, y).is_destructible = false;
+                World.THIS.GetCellConst(x - 3, y).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x - 4, y) != null)
+            {
+                World.THIS.SetCell(x - 4, y, 35);
+                World.THIS.GetCellConst(x - 4, y).is_destructible = false;
+                World.THIS.GetCellConst(x - 4, y).can_build_over = false;
+            }
+
+            //y
+            if (World.THIS.GetCellConst(x, y + 3) != null)
+            {
+                World.THIS.SetCell(x, y + 3, 35);
+                World.THIS.GetCellConst(x, y + 3).is_destructible = false;
+                World.THIS.GetCellConst(x, y + 3).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x, y + 4) != null)
+            {
+                World.THIS.SetCell(x, y + 4, 35);
+                World.THIS.GetCellConst(x, y + 4).is_destructible = false;
+                World.THIS.GetCellConst(x, y + 4).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x, y - 3) != null)
+            {
+                World.THIS.SetCell(x, y - 3, 35);
+                World.THIS.GetCellConst(x, y - 3).is_destructible = false;
+                World.THIS.GetCellConst(x, y - 3).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x, y - 4) != null)
+            {
+                World.THIS.SetCell(x, y - 4, 35);
+                World.THIS.GetCellConst(x, y - 4).is_destructible = false;
+                World.THIS.GetCellConst(x, y - 4).can_build_over = false;
+            }
+            //osn
+            World.THIS.SetCell(x, y, 37);
+            World.THIS.SetCell(x + 1, y, 37);
+            World.THIS.SetCell(x + 2, y, 37);
+            World.THIS.SetCell(x - 2, y, 37);
+            World.THIS.SetCell(x - 1, y, 37);
+            World.THIS.SetCell(x, y + 1, 37);
+            World.THIS.SetCell(x, y + 2, 37);
+            World.THIS.SetCell(x, y - 2, 37);
+            World.THIS.SetCell(x, y - 1, 37);
+            //
+            World.THIS.SetCell(x - 1, y - 1, 106);
+            World.THIS.SetCell(x + 1, y - 1, 106);
+            World.THIS.SetCell(x - 1, y + 1, 106);
+            World.THIS.SetCell(x + 1, y + 1, 106);
+            //
+            World.THIS.SetCell(x - 1, y - 2, 106);
+            World.THIS.SetCell(x - 2, y - 1, 106);
+            World.THIS.SetCell(x - 2, y - 2, 38);
+            //
+            World.THIS.SetCell(x - 1, y + 2, 106);
+            World.THIS.SetCell(x - 2, y + 1, 106);
+            World.THIS.SetCell(x - 2, y + 2, 38);
+            //
+            World.THIS.SetCell(x + 1, y - 2, 106);
+            World.THIS.SetCell(x + 2, y - 1, 106);
+            World.THIS.SetCell(x + 2, y - 2, 38);
+            //
+            World.THIS.SetCell(x + 1, y + 2, 106);
+            World.THIS.SetCell(x + 2, y + 1, 106);
+            World.THIS.SetCell(x + 2, y + 2, 38);
+
+        }
         public static Market Build(uint x, uint y, Player owner)
         {
             if (!checkcan(x, y, owner))
             {
                 return null;
             }
+            //x
+            if (World.THIS.GetCellConst(x + 3, y) != null)
+            {
+                World.THIS.SetCell(x + 3, y, 35);
+                World.THIS.GetCellConst(x + 3, y).is_destructible = false;
+                World.THIS.GetCellConst(x + 3, y).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x + 4, y) != null)
+            {
+                World.THIS.SetCell(x + 4, y, 35);
+                World.THIS.GetCellConst(x + 4, y).is_destructible = false;
+                World.THIS.GetCellConst(x + 4, y).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x - 3, y) != null)
+            {
+                World.THIS.SetCell(x - 3, y, 35);
+                World.THIS.GetCellConst(x - 3, y).is_destructible = false;
+                World.THIS.GetCellConst(x - 3, y).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x - 4, y) != null)
+            {
+                World.THIS.SetCell(x - 4, y, 35);
+                World.THIS.GetCellConst(x - 4, y).is_destructible = false;
+                World.THIS.GetCellConst(x - 4, y).can_build_over = false;
+            }
+
+            //y
+            if (World.THIS.GetCellConst(x, y + 3) != null)
+            {
+                World.THIS.SetCell(x, y + 3, 35);
+                World.THIS.GetCellConst(x, y + 3).is_destructible = false;
+                World.THIS.GetCellConst(x, y + 3).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x, y + 4) != null)
+            {
+                World.THIS.SetCell(x, y + 4, 35);
+                World.THIS.GetCellConst(x, y + 4).is_destructible = false;
+                World.THIS.GetCellConst(x, y + 4).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x, y - 3) != null)
+            {
+                World.THIS.SetCell(x, y - 3, 35);
+                World.THIS.GetCellConst(x, y - 3).is_destructible = false;
+                World.THIS.GetCellConst(x, y - 3).can_build_over = false;
+            }
+            if (World.THIS.GetCellConst(x, y - 4) != null)
+            {
+                World.THIS.SetCell(x, y - 4, 35);
+                World.THIS.GetCellConst(x, y - 4).is_destructible = false;
+                World.THIS.GetCellConst(x, y - 4).can_build_over = false;
+            }
+            //osn
             World.THIS.SetCell(x, y, 37);
             World.THIS.SetCell(x + 1, y, 37);
             World.THIS.SetCell(x + 2, y, 37);
@@ -176,9 +314,15 @@ namespace StrangeServerCSharp
     }
     public class Resp : Building
     {
+        public override void Rebild()
+        {
+            World.THIS.SetCell(x, y, 37);
+        }
         public override string winid { get; set; }
         public Resp() { winid = "resp"; }
         public int respcost{ get; set; }
+        public long cryinside { get; set; }
+        public static string rtext = "choose:\n[ENTER] = установить респаун\n[ESC] = отмена:3:2:2:9:7:000000000011100000010000000011100000010100000000000000000000000 ";
         public string resped(Player p)
         {
             if (p.resp == this)
@@ -189,6 +333,54 @@ namespace StrangeServerCSharp
             {
                 return $"Цена восстановления: <color=green>${respcost}</color>\n\n<color=#f88>Привязать робота к респу?</color>";
             }
+        }
+        public static Resp Build(uint x, uint y, Player owner)
+        {
+                if (owner.connection == null)
+                {
+                    World.THIS.SetCell(x, y, 37);
+                    var v1 = World.THIS.GetChunkPosByCoords(x, y);
+                    Chunk.chunks[(uint)v1.X, (uint)v1.Y].AddPack(x, y);
+                    return new Resp() { ownerid = 0, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
+                }
+                if (!checkcan(x, y, owner))
+                {
+                    return null;
+                }
+            World.THIS.SetCell(x, y, 37);
+            var v = World.THIS.GetChunkPosByCoords(x, y);
+            Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
+            return new Resp() { ownerid = owner.id, x = x, y = y, type = 'R' ,respcost = 20, cryinside = 100, off = 1 };
+        }
+        public static bool checkcan(uint px, uint py, Player p)
+        {
+            int valid = 0;
+            for (int x = -3; x <= 3; x++)
+            {
+                for (int y = -3; y <= 3; y++)
+                {
+                    if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
+                    {
+                        valid++;
+                    }
+                    else
+                    {
+
+
+                        var c = World.THIS.GetCellConst((uint)(px + x), (uint)(py + y));
+                        if (!(c.is_empty && c.can_build_over))
+                        {
+                            p.connection.AddFX(0, (uint)(px + x), (uint)(py + y));
+                            valid++;
+                        }
+                    }
+                }
+            }
+            if (valid > 0)
+            {
+                return false;
+            }
+            return true;
         }
         public override void Open(Player p, string tab)
         {
@@ -201,11 +393,15 @@ namespace StrangeServerCSharp
                 {
                     c.AddButton("ПРИВЯЗАТЬ", "bind");
                 }
-                if (p == BDClass.THIS.players.First(p => p.id == ownerid))
+                if (ownerid > 0)
                 {
-                    c.Admin();
+                    if (p == BDClass.THIS.players.First(p => p.id == ownerid))
+                    {
+                        c.Admin();
+                    }
                 }
             }
+            c.Send(p.win, p);
         }
     }
 }

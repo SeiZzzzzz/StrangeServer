@@ -45,7 +45,6 @@ namespace StrangeServerCSharp
         public Building cpack = null;
         public Player()
         {
-            resp = BDClass.THIS.resps.First();
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;

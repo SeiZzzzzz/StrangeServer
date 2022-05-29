@@ -25,7 +25,12 @@ namespace StrangeServerCSharp
         }
         public Player CreatePlayer(string name, string passwd)
         {
-            var player = new Player { pos = new System.Numerics.Vector2(340, 15), resp = BDClass.THIS.resps.First() };
+            var player = new Player { pos = new System.Numerics.Vector2(340, 15) };
+            try
+            {
+                player.resp = BDClass.THIS.resps.First();
+            }
+            catch (Exception) { player.resp = Resp.Build(player.x, player.y, player); player.resp.ownerid = 0; }
             player.name = name;
             player.passwd = passwd;
             THIS.players.Add(player);
@@ -69,6 +74,14 @@ namespace StrangeServerCSharp
             {
                 foreach (var i in THIS.markets.ToList())
                 {
+                    i.Rebild();
+                    World.packmap[i.x + i.y * World.height] = i;
+                    var v = World.THIS.GetChunkPosByCoords(i.x, i.y);
+                    Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
+                }
+                foreach (var i in THIS.resps.ToList())
+                {
+                    i.Rebild();
                     World.packmap[i.x + i.y * World.height] = i;
                     var v = World.THIS.GetChunkPosByCoords(i.x, i.y);
                     Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);

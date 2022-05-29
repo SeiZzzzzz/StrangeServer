@@ -230,6 +230,10 @@ namespace StrangeServerCSharp
                 {
                     Market((string)button, p);
                 }
+                else if (p.win.StartsWith("resp"))
+                {
+                    Resp((string)button, p);
+                }
 
                 if (button != null && (string)button == "exit")
                 {
@@ -244,6 +248,26 @@ namespace StrangeServerCSharp
                 p.connection.Send("Gu", "");
                 p.win = "";
                 p.cpack = null;
+            }
+        }
+
+        private static void Resp(string text, Player p)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+            if (text.StartsWith("tab"))
+            {
+                p.win = "resp." + text;
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            if (text.StartsWith("bind"))
+            {
+                p.resp = (Resp)p.cpack;
+                p.cpack.Open(p, p.win);
+                return;
             }
         }
         public static void Console(string text, Player p)

@@ -9,6 +9,7 @@
             {
                 items.Add(i, new Item(i, 0));
             }
+            items[2].count++;
             items[3].count++;
             items[5].count++;
             items[6].count++;
@@ -49,6 +50,10 @@
         {
             sel = id;
             this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
+            if (sel == 2)
+            {
+                this.player.connection.Send("IN", Resp.rtext);
+            }
             if (sel == 3)
             {
                 this.player.connection.Send("IN", Market.mtext);
@@ -71,6 +76,16 @@
             if (items[sel].count <= 0 || !World.THIS.ValidCoord(x, y) || sel < 0)
             {
                 return;
+            }
+            if (sel == 2)
+            {
+                uint xp = (uint)(x + (player.dir == 3 ? 2 : player.dir == 1 ? -2 : 0));
+                uint yp = (uint)(y + (player.dir == 0 ? 2 : player.dir == 2 ? -2 : 0));
+                var m = Resp.Build(xp, yp, this.player);
+                if (m != null)
+                {
+                    World.packmap[xp + yp * World.width] = m;
+                }
             }
             if (sel == 3)
             {
