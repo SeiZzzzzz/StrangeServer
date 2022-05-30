@@ -82,6 +82,16 @@ namespace StrangeServerCSharp
             {
                 return;
             }
+            if (text.StartsWith("fill"))
+            {
+                var resp = p.cpack as Resp;
+                if (text.StartsWith("fill:b_max"))
+                    {
+                    resp.cryinside = resp.crymax;
+                    resp.off = 1;
+                    resp.UpdatePackVis();
+                }
+            }
         }
         public static void Console(string text, Player p)
         {

@@ -68,6 +68,16 @@ namespace StrangeServerCSharp
         }
         public void SaveMap()
         {
+            for (uint y = 0; y < height; y++)
+            {
+                for (uint x = 0; x <width; x++)
+                {
+                    if (World.THIS.isPack(World.THIS.GetCell(x,y)))
+                    {
+                        World.THIS.SetCell(x, y, 32);
+                    }
+                }
+            }
             File.WriteAllBytes("cum.map", World.map);
             File.WriteAllBytes("cumroad.map", World.roadmap);
             BDClass.Save();
@@ -397,7 +407,8 @@ namespace StrangeServerCSharp
                 {
                     if (this.player.cpack != null && (this.player.id == this.player.cpack.ownerid))
                     {
-                        this.player.cpack.Open(this.player, "ADMN");
+                        this.player.win = this.player.cpack.winid.Split('.')[0] + ".ADMN";
+                        this.player.cpack.Open(this.player, this.player.win);
                     }
                 }
                 else if (ty.eventType == "GUI_" && player.win != "")

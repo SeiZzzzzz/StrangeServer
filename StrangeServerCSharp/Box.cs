@@ -9,7 +9,9 @@
             {
                 return;
             }
-            World.boxmap[x + y * World.height] = new Box() { bxcry = cry.Clone() as long[], x = x, y = y };
+            var box = new Box() { bxcry = cry.Clone() as long[], x = x, y = y };
+            BDClass.THIS.boxes.Add(box);
+            World.boxmap[x + y * World.height] = box;
             World.THIS.SetCell(x, y, 90);
         }
         public Box() { }

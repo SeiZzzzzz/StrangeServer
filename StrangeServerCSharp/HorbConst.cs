@@ -161,7 +161,7 @@ namespace StrangeServerCSharp
                 this.InitialValue
             };
         }
-        public new string ToString()
+        public override string ToString()
         {
             return "\"" + string.Join("\",\"", this.ToList()) + "\"";
         }
@@ -273,13 +273,14 @@ namespace StrangeServerCSharp
         public static RichListEntry Fill(string text, int current, int max, int crystalType, string action100, string action1000, string actionMax)
         {
             int num = (current < 0) ? 0 : ((current > max) ? max : current);
+            var per = num > 0 ? Math.Round((decimal)num / (max / 100)) : 0;
             return new RichListEntry
             {
                 Text = text,
                 Type = "fill",
                 Values = string.Concat(new object[]
                 {
-                    Math.Round((double)((float)max / 100f * (float)num)),
+                    per.ToString(),
                     "#",
                     num,
                     "/",
