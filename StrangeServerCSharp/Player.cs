@@ -496,6 +496,7 @@ namespace StrangeServerCSharp
         {
             this.name = text;
             this.connection.SendNick(id, name);
+            BDClass.THIS.SaveChanges();
         }
         public void SendLocalMsg(byte[] msg)
         {

@@ -257,9 +257,10 @@ namespace StrangeServerCSharp
     }
     public class Resp : Building
     {
-        public int respcost { get; set; }
+        public uint respcost { get; set; }
         public int cryinside { get; set; }
         public int crymax { get; set; }
+        public int moneyinside{ get; set; }
         public override void Rebild()
         {
             rb(this.x, this.y);
@@ -415,7 +416,7 @@ namespace StrangeServerCSharp
                 c.AddButton("ВЫЙТИ", "exit");
                 string[] l = new string[0];
                 l = l.Concat(RichListGenerator.Fill("Заряд",cryinside, crymax, 1, "fill:b_100", "fill:b_1000", "fill:b_max").ToList()).ToArray();
-
+                l = l.Concat(RichListGenerator.UInt("Стоимость", "cost", respcost).ToList()).ToArray();
                 c.rhorb.richList = l;
             }
             c.Send(p.win, p);

@@ -90,6 +90,8 @@ namespace StrangeServerCSharp
                     resp.cryinside = resp.crymax;
                     resp.off = 1;
                     resp.UpdatePackVis();
+                    p.cpack.Open(p, p.win);
+                    return;
                 }
             }
         }
@@ -111,7 +113,6 @@ namespace StrangeServerCSharp
                         {
                             p.SetNick(text.Split(" ")[1]);
                             p.AddConsoleLine("новый ник:" + p.name);
-                            BDClass.THIS.SaveChanges();
                         }
                     }
                 }

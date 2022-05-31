@@ -185,7 +185,19 @@ namespace StrangeServerCSharp
                              }
                              if (ValidCoord((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_percent))
                              {
-                                 DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
+                                 if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
+                                 {
+                                        SetCell((uint)(x + _x), (uint)(y + _y),118);
+                                 }
+                                 else if (GetCell((uint)(x + _x), (uint)(y + _y)) == 118)
+                                 {
+                                     SetCell((uint)(x + _x), (uint)(y + _y), 103);
+                                 }
+                                 else
+                                 {
+                                     DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
+                                 }
+                                 
                              }
                          }
                      }
@@ -205,7 +217,7 @@ namespace StrangeServerCSharp
                 {
                     for (int _y = -14; _y < 14; _y++)
                     {
-                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 15.5f)
+                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 9.5f)
                         {
                             foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
                             {
