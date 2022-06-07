@@ -15,10 +15,6 @@ namespace StrangeServerCSharp
         {
             rhorb.title = title;
         }
-        public void AddCss(string css)
-        {
-            rhorb.css = css;
-        }
         public void AddTextLine(string text)
         {
             rhorb.text += text + "\n";
@@ -60,6 +56,15 @@ namespace StrangeServerCSharp
         {
             cryslines.Add(line.ToString());
             rhorb.crys_lines = cryslines.ToArray();
+        }
+        public void AddCss(float ch = 0, float w = 0, float h = 0, string invb = "misc")
+        {
+            var c = new css();
+            c.ch = ch;
+            c.w = w;
+            c.h = h;
+            c.InvButton = invb;
+            rhorb.css = c.ToString();
         }
         public void AddButton(string text, string command)
         {
@@ -176,6 +181,18 @@ namespace StrangeServerCSharp
 
         public string Action;
     }
+    public class InvGen
+        {
+        public static string getmarket(string[] mp)
+        {
+            string s = "";
+            foreach (var i in mp)
+            {
+                s += i;
+            }
+            return s;
+        }
+        }
     //Darkar25 richlistgen
     public static class RichListGenerator
     {
@@ -532,5 +549,22 @@ namespace StrangeServerCSharp
 
         public bool input_console { get; set; }
     }
-    
+    public struct css
+    {
+        public override string ToString()
+        {
+            return "invButton=" + InvButton + ";inv-w=" + w.ToString() + ";inv-ch=" + ch.ToString();
+            
+        }
+        public string InvButton { get; set; }
+        public float ch { get; set; }
+        public float w { get; set; }
+        public float h { get; set; }
+        public bool fixScroll { get; set; }
+        public string fixTextScroll { get; set; }
+        public bool biginput { get; set; }
+        public bool disableKeyboard { get; set; }
+        public float space { get; set; }
+        public float scrollH { get; set; }
+    }
 }

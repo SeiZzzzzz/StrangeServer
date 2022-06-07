@@ -18,6 +18,7 @@ namespace StrangeServerCSharp
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
         public Resp resp { get; set; }
         public int cid { get; set; }
+        public Settings s { get; set; }
         public int dir;
         public int skin;
         public int tail;
@@ -251,12 +252,15 @@ namespace StrangeServerCSharp
         }
         public async void GimmeBotsUPD()
         {
-            timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
-
-            while (await timer.WaitForNextTickAsync())
+            try
             {
-                GimmeBots();
-            }
+                timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
+
+                while (await timer.WaitForNextTickAsync())
+                {
+                    GimmeBots();
+                }
+            }catch (Exception ex) { }
         }
         public void GimmeBots()
         {

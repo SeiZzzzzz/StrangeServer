@@ -55,6 +55,45 @@ namespace StrangeServerCSharp
     }
     public class Market : Building
     {
+        public static string[] mpcosts = new string[]
+        {
+           "8:^$0;!$0:",
+           "1:^$1.1B;!$778M:",
+           "2:^$1.1B;!$778M:",
+           "3:^$1.1B;!$778M:",
+           "4:^$1.1B;!$778M:",
+           "5:^$1.1B;!$778M:",
+           "6:^$1.1B;!$778M:",
+           "7:^$1.1B;!$778M:",
+           "9:^$1.1B;!$778M:",
+           "10:^$1.1B;!$778M:",
+           "11:^$1.1B;!$778M:",
+           "12:^$1.1B;!$778M:",
+           "13:^$1.1B;!$778M:",
+           "14:^$1.1B;!$778M:",
+           "15:^$1.1B;!$778M:",
+           "16:^$1.1B;!$778M:",
+           "17:^$1.1B;!$778M:",
+           "18:^$1.1B;!$778M:",
+           "19:^$1.1B;!$778M:",
+           "20:^$1.1B;!$778M:",
+           "21:^$1.1B;!$778M:",
+           "22:^$1.1B;!$778M:",
+           "23:^$1.1B;!$778M:",
+           "24:^$1.1B;!$778M:",
+           "25:^$1.1B;!$778M:",
+           "26:^$1.1B;!$778M:",
+           "27:^$1.1B;!$778M:",
+           "28:^$1.1B;!$778M:",
+           "29:^$1.1B;!$778M:",
+           "29:^$1.1B;!$778M:",
+           "30:^$1.1B;!$778M:",
+           "31:^$1.1B;!$778M:",
+           "32:^$1.1B;!$778M:",
+           "33:^$1.1B;!$778M:",
+           "34:^$1.1B;!$778M:",
+
+        };
         public Market() { winid = "market.tab_sell"; }
         public override string winid { get; set; }
         public override void Rebild()
@@ -249,6 +288,18 @@ namespace StrangeServerCSharp
             }
             else if (tab == "market.tab_misc")
             {
+                c.AddTab("ПРОДАТЬ КРИ", "tab_sell");
+                c.AddTab("КУПИТЬ КРИ", "tab_buy");
+                c.AddTab("КРЕДИТЫ И ПРОЧЕЕ", "");
+                c.AddTab("ОРДЕРЫ", "tab_mkt");
+                c.AddTab("АУКЦИОН", "tab_auc");
+                c.AddTitle("МАРКЕТ");
+                c.SetText("##");
+                c.AddButton("ПРОДЛИТЬ ЛИЦЕНЗИЮ", "maker");
+                c.AddButton("ВЫЙТИ", "exit");
+                c.AddCss(68, 596, 0, "misc");
+                c.rhorb.inv = InvGen.getmarket(mpcosts);
+
 
             }
             c.Send(p.win, p);
