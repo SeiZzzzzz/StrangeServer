@@ -18,7 +18,7 @@ namespace StrangeServerCSharp
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
         public Resp resp { get; set; }
         public int cid { get; set; }
-        public Settings s { get; set; }
+        //public Settings s { get; set; }
         public int dir;
         public int skin;
         public int tail;

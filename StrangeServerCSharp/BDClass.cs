@@ -9,7 +9,7 @@ namespace StrangeServerCSharp
         public DbSet<Market> markets { get; set; }
         public DbSet<Resp> resps { get; set; }
         public DbSet<Box> boxes { get; set; }
-        public DbSet<Clan> clans { get; set; }
+        //public DbSet<Clan> clans { get; set; }
         public BDClass()
         {
             Console.WriteLine(Database.EnsureCreated());

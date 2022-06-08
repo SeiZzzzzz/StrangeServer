@@ -190,7 +190,6 @@ namespace StrangeServerCSharp
                     }
                     catch (Exception ex) { Send("AH", "BAD"); }
                 }
-                Console.WriteLine(x);
             }
             if (data == null || x.Contains("NO_AUTH"))
             {
@@ -391,7 +390,6 @@ namespace StrangeServerCSharp
                         {
                             winauthtype--;
                         }
-                        Console.WriteLine(button);
 
                         Auth(null, out var ret);
                         return;
@@ -405,7 +403,7 @@ namespace StrangeServerCSharp
                 }
                 if (ty.eventType == "Sett")
                 {
-                    this.player.s.Open();
+                    //this.player.s.Open();
                 }
                 if (ty.eventType == "ADMN")
                 {
