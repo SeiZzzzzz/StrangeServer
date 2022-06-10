@@ -73,7 +73,7 @@
         }
         public void Use(uint x, uint y)
         {
-            if (items[sel].count <= 0 || !World.THIS.ValidCoord(x, y) || sel < 0)
+            if (items[sel].count <= 0 || !World.THIS.ValidCoord(x, y) || sel < 0 || World.THIS.GetCell(x,y) == 37)
             {
                 return;
             }

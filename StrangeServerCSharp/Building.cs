@@ -382,7 +382,7 @@ namespace StrangeServerCSharp
             World.THIS.SetCell(x, y, 37);
             World.THIS.SetCell(x, y + 2, 37);
             World.THIS.SetCell(x + 1, y, 37);
-            for (int px = 2; px < 7; px++)
+            for (int px = 2; px < 6; px++)
             {
                 for (int py = -1; py < 3; py++)
                 {

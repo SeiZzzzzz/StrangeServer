@@ -17,8 +17,8 @@ namespace StrangeServerCSharp
         public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
         public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
         public Resp resp { get; set; }
-        public int cid { get; set; }
-        //public Settings s { get; set; }
+        public int clanid { get; set; }
+        public Settings settings { get; set; }
         public int dir;
         public int skin;
         public int tail;
@@ -46,6 +46,7 @@ namespace StrangeServerCSharp
         public Building cpack = null;
         public Player()
         {
+            settings = new Settings();
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;
@@ -54,7 +55,7 @@ namespace StrangeServerCSharp
             level = 0;
             creds = 0;
             money = 0;
-            cid = 0;
+            clanid = 0;
             dir = 0;
             skin = 0;
             tail = 0;
@@ -166,7 +167,7 @@ namespace StrangeServerCSharp
             {
                 this.Death();
             }
-            if (hp - damage > 0)
+            else if (hp - damage > 0)
             {
                 hp -= damage;
                 SendHp();
@@ -183,7 +184,7 @@ namespace StrangeServerCSharp
         }
         public void Death()
         {
-            this.win = "";
+            HorbDecoder.Exit("exit", this);
             this.resp.OnDeath(this);
             var rx = resp.x + 2;
             var ry = resp.y;
@@ -278,7 +279,7 @@ namespace StrangeServerCSharp
                         {
                             var player = XServer.players[id.Key];
 
-                            this.connection.SendBot(player.id, (uint)player.pos.X, (uint)player.pos.Y, player.dir, player.cid, player.skin, player.tail);
+                            this.connection.SendBot(player.id, (uint)player.pos.X, (uint)player.pos.Y, player.dir, player.clanid, player.skin, player.tail);
                             this.connection.SendNick(id.Key, player.name);
 
                         }
@@ -618,6 +619,15 @@ namespace StrangeServerCSharp
                 {
                     win = pack.winid;
                     cpack = pack;
+                }
+                if (win.StartsWith("!!"))
+                    {
+                    if (win.StartsWith("!!settings"))
+                    {
+                        settings.Open(this);
+                    }
+                    this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
+                    return;
                 }
                 if (win != "" && (World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null))
                 {

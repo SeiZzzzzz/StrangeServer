@@ -27,7 +27,14 @@ namespace StrangeServerCSharp
                 {
                     return;
                 }
-                if (p.win == "box")
+                if (p.win.StartsWith("!!"))
+                {
+                    if (p.win.StartsWith("!!settings"))
+                    {
+                        Sett((string)button, p);
+                    }
+                }
+                else if (p.win == "box")
                 {
                     box((string)button, p);
                 }
@@ -50,7 +57,7 @@ namespace StrangeServerCSharp
                 }
             }
         }
-        private static void Exit(string text, Player p)
+        public static void Exit(string text, Player p)
         {
             if (text == "exit")
             {
@@ -92,6 +99,24 @@ namespace StrangeServerCSharp
                     resp.UpdatePackVis();
                     p.cpack.Open(p, p.win);
                     return;
+                }
+            }
+        }
+        public static void Sett(string text, Player p)
+        {
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                if (text.StartsWith("change_settings"))
+                {
+                    string[] ar = text.Replace("#", ":").Split(':');
+                    p.settings.isca = int.Parse(ar[2]);
+                    p.settings.tsca = int.Parse(ar[4]);
+                    p.settings.mous = int.Parse(ar[6]);
+                    p.settings.pot = int.Parse(ar[8]);
+                    p.settings.frc = int.Parse(ar[10]);
+                    p.settings.ctrl = int.Parse(ar[12]);
+                    p.settings.mof = int.Parse(ar[14]);
+                    p.connection.Send("#S", "#cc#10#snd#0#mus#0#isca#" + p.settings.isca + "#tsca#" + p.settings.isca + "#mous#" + p.settings.mous + "#pot#" + p.settings.pot + "#frc#" + p.settings.frc + "#ctrl#" + p.settings.ctrl + "#mof#" + p.settings.mof);
                 }
             }
         }
