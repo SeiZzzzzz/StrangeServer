@@ -118,6 +118,11 @@ namespace StrangeServerCSharp
                     p.settings.mof = int.Parse(ar[14]);
                     p.connection.Send("#S", "#cc#10#snd#0#mus#0#isca#" + p.settings.isca + "#tsca#" + p.settings.isca + "#mous#" + p.settings.mous + "#pot#" + p.settings.pot + "#frc#" + p.settings.frc + "#ctrl#" + p.settings.ctrl + "#mof#" + p.settings.mof);
                 }
+                else if(text.StartsWith("create_сlan"))
+                {
+                    p.settings.Open(p.settings.winid + ".clan",p);
+                    return;
+                }
             }
         }
         public static void Console(string text, Player p)
@@ -156,6 +161,18 @@ namespace StrangeServerCSharp
         {
             if (string.IsNullOrWhiteSpace(text))
             {
+                return;
+            }
+            if (text.StartsWith("<"))
+            {
+                p.win = "market." + text.Substring(1);
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            if (text.StartsWith("misc"))
+            {
+                p.win = "market." + text;
+                p.cpack.Open(p, p.win);
                 return;
             }
             if (text.StartsWith("tab"))

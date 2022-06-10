@@ -403,7 +403,7 @@ namespace StrangeServerCSharp
                 }
                 if (ty.eventType == "Sett")
                 {
-                    this.player.settings.Open(this.player);
+                    this.player.settings.Open(this.player.settings.winid,this.player);
                 }
                 if (ty.eventType == "ADMN")
                 {

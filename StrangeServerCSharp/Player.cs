@@ -624,7 +624,7 @@ namespace StrangeServerCSharp
                     {
                     if (win.StartsWith("!!settings"))
                     {
-                        settings.Open(this);
+                        settings.Open(settings.winid,this);
                     }
                     this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                     return;
