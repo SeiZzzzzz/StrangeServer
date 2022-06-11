@@ -20,7 +20,6 @@ namespace StrangeServerCSharp
         public int mof { get; set; }
         public Settings()
         {
-            isca = 0;
         }
         public void SendSett(Player p)
         {

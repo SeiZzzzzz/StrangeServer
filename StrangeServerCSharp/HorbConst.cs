@@ -31,6 +31,14 @@ namespace StrangeServerCSharp
         {
             rhorb.card = $"{id}{miscid}:{title}";
         }
+        public void AddClanList()
+        {
+            rhorb.clanlist = new string[] { };
+        }
+        public void AddClanListLine(string id, string text, string nexttext, string action)
+        {
+            rhorb.clanlist = rhorb.list.Concat(new string[] {id, text, nexttext, action }).ToArray();
+        }
         public void SetText(string text)
         {
             rhorb.text = text;

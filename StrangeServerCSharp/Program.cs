@@ -321,10 +321,14 @@ namespace StrangeServerCSharp
             this.player.SendHp();
             this.player.SendLvl();
             this.player.TryToGetChunks();
+            this.player.settings = BDClass.THIS.settings.First(i => i.id == player.id);
+            if (this.player.settings != null)
+            { 
+                this.player.settings.SendSett(this.player);
+        }
             this.player.GimmeBotsUPD();
             SendOnline();
             this.player.inventory.Choose(-1);
-            this.player.settings.SendSett(this.player);
         }
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {

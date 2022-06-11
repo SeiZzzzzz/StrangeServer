@@ -33,14 +33,14 @@ namespace StrangeServerCSharp
                     {
                         Sett((string)button, p);
                     }
+                    if (p.win == "!!console")
+                    {
+                        Console((string)button, p);
+                    }
                 }
                 else if (p.win == "box")
                 {
                     box((string)button, p);
-                }
-                else if (p.win == "console")
-                {
-                    Console((string)button, p);
                 }
                 else if (p.win.StartsWith("market"))
                 {
@@ -122,10 +122,14 @@ namespace StrangeServerCSharp
                     p.settings.frc = int.Parse(ar[10]);
                     p.settings.ctrl = int.Parse(ar[12]);
                     p.settings.mof = int.Parse(ar[14]);
-                    p.connection.Send("#S", "#cc#10#snd#0#mus#0#isca#" + p.settings.isca + "#tsca#" + p.settings.isca + "#mous#" + p.settings.mous + "#pot#" + p.settings.pot + "#frc#" + p.settings.frc + "#ctrl#" + p.settings.ctrl + "#mof#" + p.settings.mof);
+                    p.settings.SendSett(p);
                     BDClass.THIS.SaveChanges();
                 }
-                else if (text.StartsWith("choose"))
+                if (p.clanid != 0)
+                {
+                    return;
+                }
+                if (text.StartsWith("choose"))
                 {
                     if (string.IsNullOrEmpty(Clan.finclan(int.Parse(text.Split(':')[1]) - 200).owner))
                     {
@@ -212,8 +216,17 @@ namespace StrangeServerCSharp
                         p.AddConsoleLine("cell:" + p.cellg);
                     }
                 }
+                if (text.StartsWith("clans"))
+                {
+                    new Clans().Open(p, "!!clans");
+                    return;
+                }
             }
             p.ShowConsole();
+        }
+        public static void ConsClans(string text, Player p)
+        {
+
         }
         private static void MarketO(string text, Player p)
         {
@@ -231,6 +244,7 @@ namespace StrangeServerCSharp
             {
                 string sd = p.win.Split(':')[1];
                 TrySell(10, sd, p);
+                p.inventory.SendInv();
                 p.cpack.Open(p, p.win);
                 return;
             }
@@ -238,6 +252,7 @@ namespace StrangeServerCSharp
             {
                 string sd = p.win.Split(':')[1];
                 TrySell(1, sd, p);
+                p.inventory.SendInv();
                 p.cpack.Open(p, p.win);
                 return;
             }
@@ -245,6 +260,7 @@ namespace StrangeServerCSharp
             {
                 string sd = p.win.Split(':')[1];
                 TryBuy(10, sd, p);
+                p.inventory.SendInv();
                 p.cpack.Open(p, p.win);
                 return;
             }
@@ -252,6 +268,7 @@ namespace StrangeServerCSharp
             {
                 string sd = p.win.Split(':')[1];
                 TryBuy(1, sd, p);
+                p.inventory.SendInv();
                 p.cpack.Open(p, p.win);
                 return;
             }
@@ -376,7 +393,7 @@ namespace StrangeServerCSharp
                     if (p.money - (buy * 10) >= 0)
                     {
                         p.money -= (buy * 10);
-                        p.inventory.items[int.Parse(itemid)].count++;
+                        p.inventory.items[int.Parse(itemid)].count += 10;
                     }
                 }
             }

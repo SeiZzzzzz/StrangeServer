@@ -340,6 +340,34 @@ namespace StrangeServerCSharp
         }
         public static string mtext = "choose:\n[ENTER] = установить рынок\n[ESC] = отмена:3:4:4:9:9:000000000000000000001101100001101100000000000001101100001101100000000000000000000 ";
     }
+    public class Clans : Building
+    {
+        public Clans() { winid = "clans"; }
+
+        public override string winid { get; set; }
+
+        public override void Open(Player p, string tab)
+        {
+            if (tab == "!!" + winid)
+            {
+                var c = new HorbConst();
+                c.AddTitle("КЛАНЫ");
+                c.AddClanList();
+                foreach (var cl in BDClass.THIS.clans.Where(clan => clan.name != ""))
+                {
+                    c.AddClanListLine(cl.id.ToString(), $"<color=white>{cl.name}</color>  [{cl.abr}]", "<color=#88ff88ff>прием открыт</color>", "clan:" + cl.id);
+                }
+                c.AddButton("ВЫХОД", "exit");
+                c.Send(tab, p);
+                return;
+            }
+        }
+
+        public override void Rebild()
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class Resp : Building
     {
         public uint respcost { get; set; }

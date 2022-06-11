@@ -12,7 +12,7 @@ namespace StrangeServerCSharp
     {
         public Clan()
         {
-            memberList = new ClanMemberList();
+            memberList = "";
         }
         public static void InitClans()
         {
@@ -35,9 +35,24 @@ namespace StrangeServerCSharp
             p.SendClan();
             BDClass.THIS.SaveChanges();
         }
+        public static void DeleteClan(int id,Player p)
+        {
+            var clan = BDClass.THIS.clans.First(i => i.id == id);
+            clan.name = "";
+            clan.abr = "";
+            clan.owner = "";
+            p.clanid = 0;
+            p.SendClan();
+            BDClass.THIS.SaveChanges();
+        }
         public static Clan finclan(int id)
         {
             return BDClass.THIS.clans.First(i => i.id == id);
+        }
+        public static void Addmember(int clanid,int memberid)
+        {
+            var clan = BDClass.THIS.clans.First(i => i.id == clanid);
+            clan.memberList += ":" + memberid.ToString();
         }
         public static List<Clan> GetAvlClanIcon()
         {
@@ -52,14 +67,20 @@ namespace StrangeServerCSharp
             }
             return l;
         }
+        public List<int> GetMemberList()
+        {
+            string[] m = memberList.Split(":");
+            int[] mem = new int[] { };
+            foreach (string mid in m)
+            {
+                if (!string.IsNullOrEmpty(mid)) { mem = mem.Concat(new int[] { int.Parse(mid) }).ToArray(); }
+            }
+            return mem.ToList();
+        }
         public string abr { get; set; }
         public int id { get; set; }
         public string name { get; set; }
         public string owner { get; set; }
-        public ClanMemberList memberList { get; set; }
-    }
-    public class ClanMemberList : List<int>
-    {
-        public int id { get; set; }
+        public string memberList { get; set; }
     }
 }

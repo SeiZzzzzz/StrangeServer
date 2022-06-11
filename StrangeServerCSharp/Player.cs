@@ -46,7 +46,6 @@ namespace StrangeServerCSharp
         public Building cpack = null;
         public Player()
         {
-            settings = new Settings();
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;
@@ -131,7 +130,7 @@ namespace StrangeServerCSharp
             }
             c.AddButton("ВЫПОЛНИТЬ", "%I%");
             c.AddButton("ВЫЙТИ", "exit");
-            c.Send("console", this);
+            c.Send("!!console", this);
         }
         public void AddConsoleLine(string text)
         {
@@ -450,10 +449,18 @@ namespace StrangeServerCSharp
         }
         public void CBox(uint x, uint y)
         {
-            var b = World.boxmap[x + y * World.height].AllCrys;
-            Box.CollectBox(x, y, this);
-            byte[] dat = Encoding.UTF8.GetBytes("+" + b);
-            this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+            if (World.boxmap[x + y * World.height] != null)
+            {
+                var b = World.boxmap[x + y * World.height].AllCrys;
+                Box.CollectBox(x, y, this);
+                byte[] dat = Encoding.UTF8.GetBytes("+" + b);
+
+                this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+            }
+            else
+            {
+                World.THIS.DestroyCell(x, y);
+            }
         }
         public void Bz(uint x, uint y)
         {
@@ -615,13 +622,13 @@ namespace StrangeServerCSharp
                 return;
             }
             var c = World.cellps[World.THIS.GetCell(x, y)];
-            /*
+            
             if (World.THIS.GetCellConst(x, y) == null || !World.THIS.GetCellConst(x, y).is_empty)
             {
                 this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                 return;
             }
-            */
+            
             var newpos = new Vector2(x, y);
             if (Vector2.Distance(pos, newpos) < 1.2f)
             {
@@ -656,6 +663,10 @@ namespace StrangeServerCSharp
             }
             if (!c.is_empty)
             {
+                if (c.id == 90)
+                {
+                    CBox(x, y);
+                }
                 this.Hurt(c.fall_damage);
             }
             TryToGetChunks();

@@ -33,9 +33,11 @@ namespace StrangeServerCSharp
             {
                 player.resp = BDClass.THIS.resps.First();
             }
-            catch (Exception) { player.resp = Resp.Build(player.x, player.y, player); player.resp.ownerid = 0; player.resp.Rebild(); }
+            catch (Exception) { player.resp = Resp.Build(player.x, player.y, player); player.resp.ownerid = 0; player.resp.Rebild(); player.settings = new Settings();BDClass.THIS.settings.Add(player.settings); }
             player.name = name;
+            player.settings = new Settings();
             player.passwd = passwd;
+            BDClass.THIS.settings.Add(player.settings);
             THIS.players.Add(player);
             try
             {

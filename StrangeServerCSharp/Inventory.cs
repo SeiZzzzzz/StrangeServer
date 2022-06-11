@@ -49,7 +49,7 @@
         public void Choose(int id)
         {
             sel = id;
-            this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
+            this.SendInv();
             if (sel == 1)
             {
                 this.player.connection.Send("IN", Resp.rtext);
@@ -86,7 +86,10 @@
                 {
                     World.packmap[xp + yp * World.width] = m;
                     BDClass.THIS.resps.Add(m);
+                    items[sel].count--;
+                    this.SendInv();
                 }
+                return;
             }
             if (sel == 3)
             {
@@ -97,7 +100,10 @@
                 {
                     World.packmap[xp + yp * World.width] = m;
                     BDClass.THIS.markets.Add(m);
+                    items[sel].count--;
+                    this.SendInv();
                 }
+                return;
             }
             this.player.GimmePacks();
             if (!World.THIS.GetCellConst(x, y).is_empty)
@@ -124,6 +130,10 @@
             {
                 items[sel].count--;
             }
+            this.SendInv();
+        }
+        public void SendInv()
+        {
             this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
         }
         public bool CanBoom(uint x, uint y)
