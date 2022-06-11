@@ -111,7 +111,14 @@ namespace StrangeServerCSharp
             Console.WriteLine(this.Id.ToString());
             sid = this.Id.ToString();
             Send("AU", sid);
-            online++;
+            online = 1;
+            foreach (var player in XServer.players)
+            {
+                if (player.Value.connection.IsConnected)
+                {
+                    online++;
+                }
+            }
             foreach (var player in XServer.players)
             {
                 player.Value.connection.SendOnline();
@@ -147,7 +154,14 @@ namespace StrangeServerCSharp
             });
             XServer.THIS.db.SaveChanges();
             XServer.players.Remove(this.player.id);
-            online--;
+            online = 1;
+            foreach (var player in XServer.players)
+            {
+                if (player.Value.connection.IsConnected)
+                {
+                    online++;
+                }
+            }
         }
         public void SendOnline()
         {
@@ -301,8 +315,8 @@ namespace StrangeServerCSharp
             Send("@T", $"{this.player.pos.X}:{this.player.pos.Y}");
             Send("BI", "{\"x\":" + this.player.pos.X + ",\"y\":" + this.player.pos.Y + ",\"id\":" + player.id + ",\"name\":\"" + player.name + "\"}");
             Send("sp", "25:20:100000");
-            Send("#S", "#cc#10#snd#0#mus#0#isca#" + this.player.settings.isca + "#tsca#" + this.player.settings.isca + "#mous#" + this.player.settings.mous + "#pot#" + this.player.settings.pot + "#frc#" + this.player.settings.frc + "#ctrl#" + this.player.settings.ctrl + "#mof#" + this.player.settings.mof);
             Send("@B", this.player.crys.GetCry);
+            this.player.SendClan();
             this.player.SendMoney();
             this.player.SendHp();
             this.player.SendLvl();
@@ -310,6 +324,7 @@ namespace StrangeServerCSharp
             this.player.GimmeBotsUPD();
             SendOnline();
             this.player.inventory.Choose(-1);
+            this.player.settings.SendSett(this.player);
         }
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {

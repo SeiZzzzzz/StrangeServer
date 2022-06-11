@@ -44,7 +44,7 @@ namespace StrangeServerCSharp
                 }
                 else if (p.win.StartsWith("market"))
                 {
-                    Market((string)button, p);
+                    MarketO((string)button, p);
                 }
                 else if (p.win.StartsWith("resp"))
                 {
@@ -106,6 +106,12 @@ namespace StrangeServerCSharp
         {
             if (!string.IsNullOrWhiteSpace(text))
             {
+                if (text.StartsWith("<"))
+                {
+                    p.win = "!!settings." + text.Substring(1);
+                    p.cpack.Open(p, p.win);
+                    return;
+                }
                 if (text.StartsWith("change_settings"))
                 {
                     string[] ar = text.Replace("#", ":").Split(':');
@@ -117,10 +123,62 @@ namespace StrangeServerCSharp
                     p.settings.ctrl = int.Parse(ar[12]);
                     p.settings.mof = int.Parse(ar[14]);
                     p.connection.Send("#S", "#cc#10#snd#0#mus#0#isca#" + p.settings.isca + "#tsca#" + p.settings.isca + "#mous#" + p.settings.mous + "#pot#" + p.settings.pot + "#frc#" + p.settings.frc + "#ctrl#" + p.settings.ctrl + "#mof#" + p.settings.mof);
+                    BDClass.THIS.SaveChanges();
                 }
-                else if(text.StartsWith("create_сlan"))
+                else if (text.StartsWith("choose"))
                 {
-                    p.settings.Open(p.settings.winid + ".clan",p);
+                    if (string.IsNullOrEmpty(Clan.finclan(int.Parse(text.Split(':')[1]) - 200).owner))
+                    {
+                        p.settings.Open(p.settings.winid + "." + text, p);
+                        return;
+                    }
+                    else
+                    {
+                        p.settings.Open(p.settings.winid + ".create_сlan2", p);
+                        System.Console.WriteLine("хуй2");
+                    }
+                    System.Console.WriteLine("хуй");
+                    return;
+                }
+                else if (text.StartsWith("create_сlan2"))
+                {
+                    p.settings.Open(p.settings.winid + ".create_сlan2", p);
+                    return;
+                }
+                else if (text.StartsWith("create_сlan3"))
+                {
+                    if (string.IsNullOrWhiteSpace(text.Split(':')[2]))
+                    {
+                        p.settings.Open(p.settings.winid + ".choose:" + (200 +int.Parse(text.Split(':')[1])), p);
+                        return;
+                    }
+                    p.settings.Open(p.settings.winid + "." + text, p);
+                    return;
+                }
+                else if (text.StartsWith("create_сlan4"))
+                {
+                    if (text.Split('#')[1].Length > 3 && string.IsNullOrWhiteSpace(text.Split('#')[1]))
+                    {
+                        Exit("exit", p);
+                        return;
+                    }
+                    p.settings.Open(p.settings.winid + "." + text, p);
+                    return;
+                }
+                else if (text.StartsWith("create_сlan5"))
+                {
+                    if (p.creds - 1000 >= 0)
+                    {
+                        p.creds -= 1000;
+                        Clan.CreateClan(int.Parse(text.Split(':')[1].Split('#')[0]), text.Split('#')[1], text.Split('#')[2], p);
+                        p.settings.Open(p.settings.winid + "." + text, p);
+                    }
+                    Exit("exit", p);
+                    return;
+                }
+                else if (text.StartsWith("create_сlan"))
+                {
+                    p.settings.Open(p.settings.winid + ".create_сlan", p);
                     return;
                 }
             }
@@ -157,7 +215,7 @@ namespace StrangeServerCSharp
             }
             p.ShowConsole();
         }
-        private static void Market(string text, Player p)
+        private static void MarketO(string text, Player p)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -169,7 +227,35 @@ namespace StrangeServerCSharp
                 p.cpack.Open(p, p.win);
                 return;
             }
-            if (text.StartsWith("misc"))
+            if (text.StartsWith("miscsellX"))
+            {
+                string sd = p.win.Split(':')[1];
+                TrySell(10, sd, p);
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            else if (text.StartsWith("miscsell"))
+            {
+                string sd = p.win.Split(':')[1];
+                TrySell(1, sd, p);
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            else if (text.StartsWith("miscbuyX"))
+            {
+                string sd = p.win.Split(':')[1];
+                TryBuy(10, sd, p);
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            else if (text.StartsWith("miscbuy"))
+            {
+                string sd = p.win.Split(':')[1];
+                TryBuy(1, sd, p);
+                p.cpack.Open(p, p.win);
+                return;
+            }
+            else if (text.StartsWith("misc"))
             {
                 p.win = "market." + text;
                 p.cpack.Open(p, p.win);
@@ -249,6 +335,100 @@ namespace StrangeServerCSharp
                 p.SendMoney();
                 p.cpack.Open(p, p.win);
             }
+        }
+        public static void TryBuy(int col, string itemid, Player p)
+        {
+            var cost = Market.findcost(itemid);
+            long buy = long.Parse(cost.Substring(cost.IndexOf("!") + 2).Replace(":", ""));
+            if (itemid == "8")
+            {
+                if (col == 1)
+                {
+                    if (p.money - buy >= 0)
+                    {
+                        p.money -= buy;
+                        p.creds += 1;
+                    }
+                }
+                else if (col == 10)
+                {
+                    if (p.money - (buy * 10) >= 0)
+                    {
+                        p.money -= (buy * 10);
+                        p.creds += 10;
+                    }
+                }
+                p.SendMoney();
+                return;
+            }
+            else
+            {
+                if (col == 1)
+                {
+                    if (p.money - buy >= 0)
+                    {
+                        p.money -= buy;
+                        p.inventory.items[int.Parse(itemid)].count++;
+                    }
+                }
+                else if (col == 10)
+                {
+                    if (p.money - (buy * 10) >= 0)
+                    {
+                        p.money -= (buy * 10);
+                        p.inventory.items[int.Parse(itemid)].count++;
+                    }
+                }
+            }
+            p.SendMoney();
+        }
+        public static void TrySell(int col, string itemid, Player p)
+        {
+            var cost = Market.findcost(itemid);
+            long sell = long.Parse(cost.Substring(cost.IndexOf('^') + 2, cost.Substring(cost.IndexOf('^') + 2).IndexOf(';')));
+            if (itemid == "8")
+            {
+                if (col == 1)
+                {
+                    if ((p.creds - 1) >= 0)
+                    {
+                        p.money += sell;
+                        p.creds--;
+                    }
+                }
+                if (col == 10)
+                {
+                    if ((p.creds - 10) >= 0)
+                    {
+                        p.money += (sell * 10);
+                        p.creds -= 10;
+                    }
+                }
+                p.SendMoney();
+                return;
+            }
+            else
+            {
+                if (col == 1)
+                {
+                    if ((p.inventory.items[int.Parse(itemid)].count - 1) >= 0)
+                    {
+                        p.money += sell;
+                        p.inventory.items[int.Parse(itemid)].count--;
+                    }
+                }
+                if (col == 10)
+                {
+                    if ((p.inventory.items[int.Parse(itemid)].count - 10) >= 0)
+                    {
+                        p.money += (sell * 10);
+                        p.inventory.items[int.Parse(itemid)].count -= 10;
+
+
+                    }
+                }
+            }
+            p.SendMoney();
         }
         private static void box(string text, Player p)
         {

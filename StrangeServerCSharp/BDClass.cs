@@ -9,7 +9,7 @@ namespace StrangeServerCSharp
         public DbSet<Market> markets { get; set; }
         public DbSet<Resp> resps { get; set; }
         public DbSet<Box> boxes { get; set; }
-        public DbSet<Settings> sets { get; set; }
+        public DbSet<Settings> settings { get; set; }
         public DbSet<Clan> clans { get; set; }
         public BDClass()
         {
@@ -33,7 +33,7 @@ namespace StrangeServerCSharp
             {
                 player.resp = BDClass.THIS.resps.First();
             }
-            catch (Exception) { player.resp = Resp.Build(player.x, player.y, player); player.resp.ownerid = 0; }
+            catch (Exception) { player.resp = Resp.Build(player.x, player.y, player); player.resp.ownerid = 0; player.resp.Rebild(); }
             player.name = name;
             player.passwd = passwd;
             THIS.players.Add(player);

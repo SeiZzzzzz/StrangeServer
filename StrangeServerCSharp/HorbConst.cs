@@ -15,13 +15,33 @@ namespace StrangeServerCSharp
         {
             rhorb.title = title;
         }
+        public void SetInv(string inv)
+        {
+            rhorb.inv = inv;
+        }
         public void AddTextLine(string text)
         {
             rhorb.text += text + "\n";
         }
+        public void AddMarketCard(string miscid,string title)
+        {
+            rhorb.card = $"i{miscid}:{title}";
+        }
+        public void AddCard(string id,string miscid, string title)
+        {
+            rhorb.card = $"{id}{miscid}:{title}";
+        }
         public void SetText(string text)
         {
             rhorb.text = text;
+        }
+        public void AddList()
+        {
+            rhorb.list = new string[] {};
+        }
+        public void AddListLine(string text,string nexttext,string action)
+        {
+            rhorb.list = rhorb.list.Concat(new string[] { text, nexttext, action }).ToArray();
         }
         public void AddIConsole()
         {
@@ -328,176 +348,176 @@ namespace StrangeServerCSharp
             };
         }
 
-        public class CardBuilder
+    }
+    public class CardBuilder
+    {
+
+        public CardBuilder()
         {
+            this.Reset();
+        }
 
-            public CardBuilder()
+
+        public void SetTitle(string title)
+        {
+            this.Title = title;
+        }
+
+
+        public void SetUnknown(string unk)
+        {
+            this.IDK = unk;
+        }
+
+
+        public void SetAction(string act)
+        {
+            this.Action = act;
+        }
+
+        public void SetURI(string uri)
+        {
+            this.URI = uri;
+        }
+
+
+        public void FlushLine()
+        {
+            string t = this.Title.Contains("&") ? this.Title.Substring(0, this.Title.IndexOf('&')) : this.Title;
+            string unk = this.IDK.Contains("&") ? this.IDK.Substring(0, this.IDK.IndexOf('&')) : this.IDK;
+            string act = this.Action.Contains("&") ? this.Action.Substring(0, this.Action.IndexOf('&')) : this.Action;
+            string uri = this.URI.Contains("&") ? this.URI.Substring(0, this.URI.IndexOf('&')) : this.URI;
+            this.UnsafeFlushLine(t, unk, act, uri, this.Width, this.Height);
+        }
+
+        public void Reset()
+        {
+            this.Title = "";
+            this.IDK = "";
+            this.Action = "";
+            this.URI = "";
+            this.Width = 8U;
+            this.Height = 8U;
+        }
+
+
+        public RichListEntry Result
+        {
+            get
             {
-                this.Reset();
-            }
-
-
-            public void SetTitle(string title)
-            {
-                this.Title = title;
-            }
-
-
-            public void SetUnknown(string unk)
-            {
-                this.IDK = unk;
-            }
-
-
-            public void SetAction(string act)
-            {
-                this.Action = act;
-            }
-
-            public void SetURI(string uri)
-            {
-                this.URI = uri;
-            }
-
-
-            public void FlushLine()
-            {
-                string t = this.Title.Contains("&") ? this.Title.Substring(0, this.Title.IndexOf('&')) : this.Title;
-                string unk = this.IDK.Contains("&") ? this.IDK.Substring(0, this.IDK.IndexOf('&')) : this.IDK;
-                string act = this.Action.Contains("&") ? this.Action.Substring(0, this.Action.IndexOf('&')) : this.Action;
-                string uri = this.URI.Contains("&") ? this.URI.Substring(0, this.URI.IndexOf('&')) : this.URI;
-                this.UnsafeFlushLine(t, unk, act, uri, this.Width, this.Height);
-            }
-
-            public void Reset()
-            {
-                this.Title = "";
-                this.IDK = "";
-                this.Action = "";
-                this.URI = "";
-                this.Width = 8U;
-                this.Height = 8U;
-            }
-
-
-            public RichListEntry Result
-            {
-                get
+                string text = "";
+                for (int i = 0; i < this.image.Count; i++)
                 {
-                    string text = "";
-                    for (int i = 0; i < this.image.Count; i++)
+                    if (text != "")
                     {
-                        if (text != "")
-                        {
-                            text += "&";
-                        }
-                        text = string.Concat(new object[]
-                        {
+                        text += "&";
+                    }
+                    text = string.Concat(new object[]
+                    {
                             text,
                             this.image[i],
                             "%",
                             this.width[i],
                             "%",
                             this.height[i]
-                        });
-                    }
-                    return new RichListEntry
-                    {
-                        Text = string.Join("&", this.title),
-                        Type = "3card",
-                        Values = string.Join("&", this.somethin),
-                        Action = string.Join("&", this.action),
-                        InitialValue = text
-                    };
+                    });
                 }
-            }
-
-
-            public new string ToString()
-            {
-                return this.Result.ToString();
-            }
-
-
-            public string Title { get; set; }
-
-
-            public string IDK { get; set; }
-
-
-            public string Action { get; set; }
-
-
-            public string URI { get; set; }
-
-            public void SetWidth(uint width)
-            {
-                this.Width = width;
-            }
-
-
-            public void SetHeight(uint height)
-            {
-                this.Height = height;
-            }
-
-
-            public void SetImageURL(string url, uint width, uint height)
-            {
-                this.SetURI(url);
-                this.SetWidth(width);
-                this.SetHeight(height);
-            }
-
-
-            public void UnsafeFlushLine(string t, string unk, string act, string uri, uint w, uint h)
-            {
-                this.title.Add(t);
-                this.somethin.Add(unk);
-                this.action.Add(act);
-                this.image.Add(uri);
-                this.width.Add(w);
-                this.height.Add(h);
-                this.Reset();
-            }
-
-
-            public uint Width { get; set; }
-
-
-            public uint Height { get; set; }
-
-
-            public void SetIngameImage(string spriteGroup, uint index, uint scale)
-            {
-
-
-                this.SetURI(string.Concat(new object[]
+                return new RichListEntry
                 {
+                    Text = string.Join("&", this.title),
+                    Type = "3card",
+                    Values = string.Join("&", this.somethin),
+                    Action = string.Join("&", this.action),
+                    InitialValue = text
+                };
+            }
+        }
+
+
+        public new string ToString()
+        {
+            return this.Result.ToString();
+        }
+
+
+        public string Title { get; set; }
+
+
+        public string IDK { get; set; }
+
+
+        public string Action { get; set; }
+
+
+        public string URI { get; set; }
+
+        public void SetWidth(uint width)
+        {
+            this.Width = width;
+        }
+
+
+        public void SetHeight(uint height)
+        {
+            this.Height = height;
+        }
+
+
+        public void SetImageURL(string url, uint width, uint height)
+        {
+            this.SetURI(url);
+            this.SetWidth(width);
+            this.SetHeight(height);
+        }
+
+
+        public void UnsafeFlushLine(string t, string unk, string act, string uri, uint w, uint h)
+        {
+            this.title.Add(t);
+            this.somethin.Add(unk);
+            this.action.Add(act);
+            this.image.Add(uri);
+            this.width.Add(w);
+            this.height.Add(h);
+            this.Reset();
+        }
+
+
+        public uint Width { get; set; }
+
+
+        public uint Height { get; set; }
+
+
+        public void SetIngameImage(string spriteGroup, uint index, uint scale)
+        {
+
+
+            this.SetURI(string.Concat(new object[]
+            {
                     "inner:",
                     spriteGroup.ToUpper(),
                     ":",
                     index
-                }));
-                this.SetWidth(scale);
-                this.SetHeight(0U);
-            }
-
-            private List<string> title = new List<string>();
-            private List<string> somethin = new List<string>();
-
-
-            private List<string> action = new List<string>();
-
-
-            private List<string> image = new List<string>();
-
-
-            private List<uint> width = new List<uint>();
-
-
-            private List<uint> height = new List<uint>();
+            }));
+            this.SetWidth(scale);
+            this.SetHeight(0U);
         }
+
+        private List<string> title = new List<string>();
+        private List<string> somethin = new List<string>();
+
+
+        private List<string> action = new List<string>();
+
+
+        private List<string> image = new List<string>();
+
+
+        private List<uint> width = new List<uint>();
+
+
+        private List<uint> height = new List<uint>();
     }
     public struct HORB
     {

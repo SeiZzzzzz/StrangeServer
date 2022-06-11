@@ -288,6 +288,7 @@ namespace StrangeServerCSharp
             canboom = new bool[width * height];
             c117UPD();
             BDClass.Load();
+            Clan.InitClans();
         }
         public static bool[] canboom;
         public static async void WorldUPD()

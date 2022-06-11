@@ -57,7 +57,7 @@ namespace StrangeServerCSharp
     {
         public static string[] mpcosts = new string[]
         {
-           "8:^$0;!$0:",
+           "8:^$10000;!$10000:",
            "1:^$0;!$0:",
            "2:^$0;!$0:",
            "3:^$0;!$0:",
@@ -240,6 +240,10 @@ namespace StrangeServerCSharp
             }
             return true;
         }
+        public static string findcost(string id)
+        {
+            return mpcosts.First(i => i.Split(':')[0] == id);
+        }
         public override void Open(Player p, string tab)
         {
             var c = new HorbConst();
@@ -311,6 +315,10 @@ namespace StrangeServerCSharp
             }
             else if (tab.StartsWith("market.misc"))
             {
+                string sd = tab.Split(':')[1];
+                string cost = mpcosts.First(i => i.Split(':')[0] == sd);
+                string sell = cost.Substring(cost.IndexOf('^') + 2, cost.Substring(cost.IndexOf('^') + 2).IndexOf(';'));
+                string buy = cost.Substring(cost.IndexOf("!") + 2).Replace(":","");
                 c.AddTab("ПРОДАТЬ КРИ", "tab_sell");
                 c.AddTab("КУПИТЬ КРИ", "tab_buy");
                 c.AddTab("КРЕДИТЫ И ПРОЧЕЕ", "");
@@ -320,9 +328,13 @@ namespace StrangeServerCSharp
                 c.AddTitle("МАРКЕТ");
                 c.AddButton("НАЗАД", "<tab_misc");
                 c.AddButton("ВЫЙТИ", "exit");
-                string sd = tab.Split(':')[1];
-                string cost = mpcosts.First(i => i.Split(':')[0] == sd);
-                
+                c.AddList();
+                c.AddListLine($"ПРОДАТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${sell}", "ПРОДАТЬ 1", "miscsell");
+                c.AddListLine($"                       10 ЗА ${(int.Parse(sell) * 10)}", "ПРОДАТЬ 10", "miscsellX");
+                c.AddListLine($"КУПИТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${buy}", "КУПИТЬ 1", "miscbuy");
+                c.AddListLine($"                       10 ЗА ${(int.Parse(buy) * 10)}","КУПИТЬ 10","miscbuyX");
+                c.AddMarketCard(sd," ");
+
             }
             c.Send(p.win, p);
         }
@@ -359,7 +371,8 @@ namespace StrangeServerCSharp
                 World.THIS.SetCell(x, y, 37);
                 var v1 = World.THIS.GetChunkPosByCoords(x, y);
                 Chunk.chunks[(uint)v1.X, (uint)v1.Y].AddPack(x, y);
-                return new Resp() { ownerid = 0, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
+                World.packmap[(int)(x + y * World.height)] = new Resp() { ownerid = 0, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
+                return (Resp)World.packmap[(int)(x + y * World.height)];
             }
             if (!checkcan(x, y, owner))
             {
@@ -367,8 +380,8 @@ namespace StrangeServerCSharp
             }
             rb(x, y);
             var v = World.THIS.GetChunkPosByCoords(x, y);
-            Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
-            return new Resp() { ownerid = owner.id, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1,crymax = 1000 };
+            Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);   
+            return new Resp() { ownerid = owner.id, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1, crymax = 1000 };
         }
         public void OnDeath(Player p)
         {

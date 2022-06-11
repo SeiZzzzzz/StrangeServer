@@ -122,7 +122,7 @@
             }
             if (items[sel].count > 0)
             {
-                //items[sel].count--;
+                items[sel].count--;
             }
             this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
         }

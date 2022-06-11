@@ -78,6 +78,17 @@ namespace StrangeServerCSharp
             hash = GenerateHash();
 
         }
+        public void SendClan()
+        {
+            if (clanid == 0)
+            {
+                this.connection.Send("cH", "_");
+            }
+            else
+            {
+                this.connection.Send("cS", clanid.ToString());
+            }
+        }
         public string GenerateHash()
         {
             var random = new Random();
