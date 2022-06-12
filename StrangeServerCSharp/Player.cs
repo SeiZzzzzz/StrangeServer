@@ -14,8 +14,19 @@ namespace StrangeServerCSharp
         public string hash { get; set; }
         public string passwd { get; set; }
         public Vector2 pos = new Vector2(0, 0);
-        public uint x { get { return (uint)pos.X; } set { pos.X = value; } }
-        public uint y { get { return (uint)pos.Y; } set { pos.Y = value; } }
+
+        public uint x
+        {
+            get => (uint)pos.X;
+            set => pos.X = value;
+        }
+
+        public uint y
+        {
+            get => (uint)pos.Y;
+            set => pos.Y = value;
+        }
+
         public Resp resp { get; set; }
         public int clanid { get; set; }
         public Settings settings { get; set; }
@@ -44,6 +55,7 @@ namespace StrangeServerCSharp
         public Stack<byte> geo = new Stack<byte>();
         Queue<Line> console = new Queue<Line>();
         public Building cpack = null;
+
         public Player()
         {
             inventory = new Inventory(this);
@@ -63,20 +75,22 @@ namespace StrangeServerCSharp
             lastupdchchunkx = 0;
             lastupdchchunky = 0;
             console.Enqueue(new Line { text = "@@> Добро пожаловать в консоль!" });
-            for (int i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 AddConsoleLine();
             }
+
             AddConsoleLine("Если вы не понимаете, что происходит,");
             AddConsoleLine("или вас попросили выполнить команду,");
             AddConsoleLine("сосите хуй глотайте сперму");
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 AddConsoleLine();
             }
-            hash = GenerateHash();
 
+            hash = GenerateHash();
         }
+
         public void SendClan()
         {
             if (clanid == 0)
@@ -88,6 +102,7 @@ namespace StrangeServerCSharp
                 this.connection.Send("cS", clanid.ToString());
             }
         }
+
         public string GenerateHash()
         {
             var random = new Random();
@@ -95,10 +110,12 @@ namespace StrangeServerCSharp
             return new string(Enumerable.Repeat(chars, 12)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
         public class Line
         {
             public string text { get; set; }
         }
+
         public void ForceRemove()
         {
             while (Chunk.chunks[this.chunkx, this.chunky].bots.ContainsKey(this.id))
@@ -106,32 +123,34 @@ namespace StrangeServerCSharp
                 Chunk.chunks[this.chunkx, this.chunky].bots.Remove(this.id);
             }
         }
+
         public void SendMoney()
         {
             this.connection.Send("P$", new V { money = this.money, creds = this.creds }.ToString());
         }
+
         public struct V
         {
             public long money;
             public long creds;
+
             public override string ToString()
             {
                 return Newtonsoft.Json.JsonConvert.SerializeObject(this);
             }
         }
+
         public void ShowConsole()
         {
-            var c = new HorbConst();
-            c.AddIConsole();
-            c.AddIConsolePlace("ваша команда");
-            foreach (var i in console)
-            {
-                c.AddTextLine(i.text);
-            }
-            c.AddButton("ВЫПОЛНИТЬ", "%I%");
-            c.AddButton("ВЫЙТИ", "exit");
-            c.Send("!!console", this);
+            new HorbBuilder()
+                .AddIConsole()
+                .AddIConsolePlace("ваша команда")
+                .AddTextLines(console.Select(x => x.text).ToArray())
+                .AddButton("ВЫПОЛНИТЬ", "%I%")
+                .AddButton("ВЫЙТИ", "exit")
+                .Send("!!console", this);
         }
+
         public void AddConsoleLine(string text)
         {
             console.Enqueue(new Line { text = ">" + text });
@@ -142,6 +161,7 @@ namespace StrangeServerCSharp
                 l.text = "@@" + l.text;
             }
         }
+
         public void AddConsoleLine()
         {
             console.Enqueue(new Line { text = ">    " });
@@ -152,10 +172,12 @@ namespace StrangeServerCSharp
                 l.text = "@@" + l.text;
             }
         }
+
         public void SendHp()
         {
             this.connection.Send("@L", hp + ":" + maxhp);
         }
+
         public void UpHp(int damage)
         {
             counter[2] += damage;
@@ -168,10 +190,14 @@ namespace StrangeServerCSharp
                 nextlvl[2] = (int)(nextlvl[2] * 1.5f);
             }
         }
+
         public void Hurt(int damage)
         {
             if (damage <= 0)
-            { return; }
+            {
+                return;
+            }
+
             UpHp(damage);
             if (hp - damage <= 0)
             {
@@ -183,6 +209,7 @@ namespace StrangeServerCSharp
                 SendHp();
                 SendDFToBots(6, 0, 0, 0, 0);
             }
+
             var cell = World.cellps[World.THIS.GetCell((uint)this.pos.X, (uint)this.pos.Y)];
 
             if (!cell.is_destructible)
@@ -192,21 +219,24 @@ namespace StrangeServerCSharp
                 */
                 return;
             }
+
             World.THIS.DestroyCell((uint)this.pos.X, (uint)this.pos.Y);
         }
+
         public void Death()
         {
             HorbDecoder.Exit("exit", this);
             this.resp.OnDeath(this);
             var rx = resp.x + 2;
             var ry = resp.y;
-            uint dx = (uint)this.pos.X;
-            uint dy = (uint)this.pos.Y;
+            var dx = (uint)this.pos.X;
+            var dy = (uint)this.pos.Y;
             var resped = false;
             while (!resped)
             {
                 var x = World.Random.Next(0, 4);
-                var y = World.Random.Next(-1, 3); ;
+                var y = World.Random.Next(-1, 3);
+                ;
 
                 var tx = (uint)(rx + x);
                 var ty = (uint)(ry + y);
@@ -220,18 +250,21 @@ namespace StrangeServerCSharp
                         Box.BuildBox(dx, dy, this.crys.cry);
                         this.crys.ClearCrys();
                     }
+
                     hp = maxhp;
                     SendHp();
                     resped = true;
                 }
             }
         }
+
         public Vector2 GetDirCord()
         {
-            uint x = (uint)(pos.X + (dir == 3 ? 1 : dir == 1 ? -1 : 0));
-            uint y = (uint)(pos.Y + (dir == 0 ? 1 : dir == 2 ? -1 : 0));
+            var x = (uint)(pos.X + (dir == 3 ? 1 : dir == 1 ? -1 : 0));
+            var y = (uint)(pos.Y + (dir == 0 ? 1 : dir == 2 ? -1 : 0));
             return new Vector2(x, y);
         }
+
         public void UseGeo(uint x, uint y)
         {
             var cell = World.THIS.GetCellConst(x, y);
@@ -239,21 +272,22 @@ namespace StrangeServerCSharp
             {
                 if (World.ongun[x + y * World.height].Count > 0)
                 {
-
-
-                    if (World.ongun[x + y * World.height].Count > 1 || World.ongun[x + y * World.height].First() != this.clanid)
+                    if (World.ongun[x + y * World.height].Count > 1 ||
+                        World.ongun[x + y * World.height].First() != this.clanid)
                     {
-                        byte[] dat = Encoding.UTF8.GetBytes("заблокировано под пушкой");
+                        var dat = Encoding.UTF8.GetBytes("заблокировано под пушкой");
 
                         this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
                         return;
                     }
                 }
             }
+
             if (cell.HP == -1)
             {
                 return;
             }
+
             if (cell.is_empty && cell.can_build_over)
             {
                 if (this.geo.Count > 0)
@@ -265,6 +299,7 @@ namespace StrangeServerCSharp
                     {
                         Console.WriteLine(XServer.players[i].name + ":");
                     }
+
                     if (this.geo.Count == 0)
                     {
                         this.connection.Send("GE", "empty");
@@ -282,6 +317,7 @@ namespace StrangeServerCSharp
                 World.THIS.DestroyCell(x, y);
             }
         }
+
         public async void GimmeBotsUPD()
         {
             try
@@ -292,15 +328,20 @@ namespace StrangeServerCSharp
                 {
                     GimmeBots();
                 }
-            } catch (Exception ex) { }
+            }
+            catch (Exception ex)
+            {
+            }
         }
+
         public void GimmeBots()
         {
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) &&
+                        ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (this.chunkx + xxx);
                         var y = (this.chunky + yyy);
@@ -310,21 +351,23 @@ namespace StrangeServerCSharp
                         {
                             var player = XServer.players[id.Key];
 
-                            this.connection.SendBot(player.id, (uint)player.pos.X, (uint)player.pos.Y, player.dir, player.clanid, player.skin, player.tail);
+                            this.connection.SendBot(player.id, (uint)player.pos.X, (uint)player.pos.Y, player.dir,
+                                player.clanid, player.skin, player.tail);
                             this.connection.SendNick(id.Key, player.name);
-
                         }
                     }
                 }
             }
         }
+
         public void GimmePacks()
         {
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) &&
+                        ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (this.chunkx + xxx);
                         var y = (this.chunky + yyy);
@@ -337,19 +380,20 @@ namespace StrangeServerCSharp
                             {
                                 this.connection.AddPack(pack.GetShpack);
                             }
-
                         }
                     }
                 }
             }
         }
+
         public void SendDFToBots(int fx, uint fxx, uint fxy, int dir, int col = 0)
         {
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) &&
+                        ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (this.chunkx + xxx);
                         var y = (this.chunky + yyy);
@@ -359,19 +403,20 @@ namespace StrangeServerCSharp
                         {
                             var player = XServer.players[id.Key];
                             player.connection.AddDFX(fx, dir, fxx, fxy, this.id, col);
-
                         }
                     }
                 }
             }
         }
+
         public void SendFXoBots(int fx, uint fxx, uint fxy)
         {
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) &&
+                        ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (this.chunkx + xxx);
                         var y = (this.chunky + yyy);
@@ -381,33 +426,34 @@ namespace StrangeServerCSharp
                         {
                             var player = XServer.players[id.Key];
                             player.connection.AddFX(fx, fxx, fxy);
-
                         }
                     }
                 }
             }
         }
+
         public void Build(uint x, uint y, string type)
         {
             if (!World.THIS.ValidCoordForPlace(x, y))
             {
                 return;
             }
+
             if (World.ongun[x + y * World.height] != null)
             {
                 if (World.ongun[x + y * World.height].Count > 0)
                 {
-
-
-                    if (World.ongun[x + y * World.height].Count > 1 || World.ongun[x + y * World.height].First() != this.clanid)
+                    if (World.ongun[x + y * World.height].Count > 1 ||
+                        World.ongun[x + y * World.height].First() != this.clanid)
                     {
-                        byte[] dat = Encoding.UTF8.GetBytes("заблокировано под пушкой");
+                        var dat = Encoding.UTF8.GetBytes("заблокировано под пушкой");
 
                         this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
                         return;
                     }
                 }
             }
+
             var cell = World.cellps[World.THIS.GetCell(x, y)];
             if (type == "G")
             {
@@ -415,10 +461,12 @@ namespace StrangeServerCSharp
                 {
                     World.THIS.SetCell(x, y, 101);
                 }
+
                 if (cell.id == 101 && this.crys.RemoveCrys(1, ybcost))
                 {
                     World.THIS.SetCell(x, y, 102);
                 }
+
                 if (cell.id == 102 && this.crys.RemoveCrys(2, rbcost))
                 {
                     World.THIS.SetCell(x, y, 105);
@@ -433,23 +481,28 @@ namespace StrangeServerCSharp
                 World.THIS.SetCell(x, y, 35);
             }
         }
+
         public byte cellg;
+
         public void HurtGun(int damage)
         {
             Hurt(damage);
         }
+
         public void Heal()
         {
             if (hp == maxhp)
             {
                 return;
             }
+
             var cost = 5 / lvl[1];
             if (!this.crys.RemoveCrys(2, (long)cost))
             {
                 return;
             }
-            int healhp = (int)(this.lvl[1] * 1.7f);
+
+            var healhp = (int)(this.lvl[1] * 1.7f);
             if ((hp + healhp) > maxhp)
             {
                 hp = maxhp;
@@ -462,6 +515,7 @@ namespace StrangeServerCSharp
                 SendDFToBots(5, 0, 0, 0, 0);
                 SendHp();
             }
+
             counter[1] += healhp;
             if (nextlvl[1] <= counter[1])
             {
@@ -471,11 +525,13 @@ namespace StrangeServerCSharp
                 nextlvl[1] = (int)(nextlvl[1] * 1.05f);
             }
         }
+
         public void SendLvl()
         {
-            string i = lvl.Sum().ToString();
+            var i = lvl.Sum().ToString();
             this.connection.Send("LV", i.ToString());
         }
+
         public void CDob()
         {
             counter[0]++;
@@ -486,13 +542,14 @@ namespace StrangeServerCSharp
                 nextlvl[0] = (int)(nextlvl[0] * 1.25f);
             }
         }
+
         public void CBox(uint x, uint y)
         {
             if (World.boxmap[x + y * World.height] != null)
             {
                 var b = World.boxmap[x + y * World.height].AllCrys;
                 Box.CollectBox(x, y, this);
-                byte[] dat = Encoding.UTF8.GetBytes("+" + b);
+                var dat = Encoding.UTF8.GetBytes("+" + b);
 
                 this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
             }
@@ -501,6 +558,7 @@ namespace StrangeServerCSharp
                 World.THIS.DestroyCell(x, y);
             }
         }
+
         public void Bz(uint x, uint y)
         {
             var cell = World.cells[x + y * World.height];
@@ -509,19 +567,23 @@ namespace StrangeServerCSharp
             {
                 this.Hurt(cell.damage);
             }
+
             if (!cell.is_destructible)
             {
                 return;
             }
+
             if (cell.id == 90)
             {
                 CBox(x, y);
                 return;
             }
+
             if (World.THIS.isCrys(cell.id))
             {
                 GetCry(x, y, (byte)cell.id);
             }
+
             if (cell.HP <= 1)
             {
                 if (cell.id == 105)
@@ -529,11 +591,14 @@ namespace StrangeServerCSharp
                     World.THIS.DestroyWithRoadCell(x, y);
                     return;
                 }
+
                 World.THIS.DestroyCell(x, y);
                 return;
             }
+
             cell.HP--;
         }
+
         public void RemoveMeFromChunk()
         {
             var chtoremove = Chunk.chunks[this.lastupdchchunkx, this.lastupdchchunky];
@@ -544,29 +609,35 @@ namespace StrangeServerCSharp
                 {
                     chtoremove.bots.Remove(this.id);
                 }
+
                 if (!chtoadd.bots.ContainsKey(this.id))
                 {
                     chtoadd.AddBot(this.id);
                 }
             }
         }
+
         public void SendBInfo()
         {
-            this.connection.Send("BI", "{\"x\":" + pos.X + ",\"y\":" + pos.Y + ",\"id\":" + id + ",\"name\":\"" + name + "\"}");
+            this.connection.Send("BI",
+                "{\"x\":" + pos.X + ",\"y\":" + pos.Y + ",\"id\":" + id + ",\"name\":\"" + name + "\"}");
         }
+
         public void SetNick(string text)
         {
             this.name = text;
             this.connection.SendNick(id, name);
             BDClass.THIS.SaveChanges();
         }
+
         public void SendLocalMsg(byte[] msg)
         {
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                    if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) &&
+                        ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (this.chunkx + xxx);
                         var y = (this.chunky + yyy);
@@ -574,13 +645,14 @@ namespace StrangeServerCSharp
                         foreach (var id in ch.bots)
                         {
                             var player = XServer.players[id.Key];
-                            player.connection.SendLocalChat(msg.Length, this.id, (uint)this.pos.X, (uint)this.pos.Y, msg);
-
+                            player.connection.SendLocalChat(msg.Length, this.id, (uint)this.pos.X, (uint)this.pos.Y,
+                                msg);
                         }
                     }
                 }
             }
         }
+
         public void TryToGetChunks()
         {
             var needupd = false;
@@ -591,6 +663,7 @@ namespace StrangeServerCSharp
                 chunkx = xd;
                 chunky = yd;
             }
+
             if (this.chunkx != this.lastupdchchunkx || this.chunky != this.lastupdchchunky)
             {
                 needupd = true;
@@ -598,6 +671,7 @@ namespace StrangeServerCSharp
                 this.lastupdchchunkx = this.chunkx;
                 this.lastupdchchunky = this.chunky;
             }
+
             if (needupd)
             {
                 GimmePacks();
@@ -607,21 +681,25 @@ namespace StrangeServerCSharp
                     {
                         var x = ((this.chunkx + xxx) * 32);
                         var y = ((this.chunky + yyy) * 32);
-                        if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) && ((this.chunkx + xxx) < XServer.THIS.chunkscx && (this.chunky + yyy) < XServer.THIS.chunkscy))
+                        if (((this.chunkx + xxx) >= 0 && (this.chunky + yyy) >= 0) &&
+                            ((this.chunkx + xxx) < XServer.THIS.chunkscx &&
+                             (this.chunky + yyy) < XServer.THIS.chunkscy))
                         {
                             if (Chunk.chunks[x / 32, y / 32] != null)
                             {
-                                connection.SendCells(32, 32, (uint)x, (uint)y, Chunk.chunks[(this.chunkx + xxx), (this.chunky + yyy)].cells);
+                                connection.SendCells(32, 32, (uint)x, (uint)y,
+                                    Chunk.chunks[(this.chunkx + xxx), (this.chunky + yyy)].cells);
                             }
                         }
                     }
                 }
             }
         }
+
         public void GetCry(uint x, uint y, byte cell)
         {
             CDob();
-            for (int p = 0; p < World.THIS.crys.Count; p++)
+            for (var p = 0; p < World.THIS.crys.Count; p++)
             {
                 if (World.THIS.crys[p] == cell)
                 {
@@ -631,22 +709,27 @@ namespace StrangeServerCSharp
                     {
                         SendDFToBots(2, x, y, d, 0);
                     }
+
                     if (p == 1)
                     {
                         SendDFToBots(2, x, y, d, 3);
                     }
+
                     if (p == 2)
                     {
                         SendDFToBots(2, x, y, d, 1);
                     }
+
                     if (p == 3)
                     {
                         SendDFToBots(2, x, y, d, 2);
                     }
+
                     if (p == 4)
                     {
                         SendDFToBots(2, x, y, d, 4);
                     }
+
                     if (p == 5)
                     {
                         SendDFToBots(2, x, y, d, 5);
@@ -654,12 +737,14 @@ namespace StrangeServerCSharp
                 }
             }
         }
+
         public void Move(uint x, uint y, int dir)
         {
             if (!World.THIS.ValidCoord(x, y))
             {
                 return;
             }
+
             var c = World.cellps[World.THIS.GetCell(x, y)];
             /*
             if (World.THIS.GetCellConst(x, y) == null || !World.THIS.GetCellConst(x, y).is_empty)
@@ -677,21 +762,25 @@ namespace StrangeServerCSharp
                     win = pack.winid;
                     cpack = pack;
                 }
+
                 if (win.StartsWith("!!"))
-                    {
+                {
                     if (win.StartsWith("!!settings"))
                     {
-                        settings.Open(settings.winid,this);
+                        settings.Open(settings.winid, this);
                     }
+
                     this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                     return;
                 }
+
                 if (win != "" && (World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null))
                 {
                     World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width].Open(this, this.win);
                     this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                     return;
                 }
+
                 pos = newpos;
                 this.dir = dir;
             }
@@ -700,14 +789,17 @@ namespace StrangeServerCSharp
                 this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                 return;
             }
+
             if (!c.is_empty)
             {
                 if (c.id == 90)
                 {
                     CBox(x, y);
                 }
+
                 this.Hurt(c.fall_damage);
             }
+
             TryToGetChunks();
         }
     }

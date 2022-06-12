@@ -7,18 +7,20 @@
         public Dictionary<System.Numerics.Vector2, string> packs = new Dictionary<System.Numerics.Vector2, string>();
         public static Chunk[,] chunks;
         public System.Numerics.Vector2 chpos;
+
         public Chunk(uint x, uint y)
         {
             this.chpos = new System.Numerics.Vector2(x, y);
-
         }
+
         public void SendCellToBots(uint x, uint y, byte cell)
         {
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((this.chpos.X + xxx) >= 0 && (this.chpos.Y + yyy) >= 0) && ((this.chpos.X + xxx) < XServer.THIS.chunkscx && (this.chpos.Y + yyy) < XServer.THIS.chunkscy))
+                    if (((this.chpos.X + xxx) >= 0 && (this.chpos.Y + yyy) >= 0) &&
+                        ((this.chpos.X + xxx) < XServer.THIS.chunkscx && (this.chpos.Y + yyy) < XServer.THIS.chunkscy))
                     {
                         var cx = (this.chpos.X + xxx);
                         var cy = (this.chpos.Y + yyy);
@@ -27,12 +29,12 @@
                         {
                             var player = XServer.players[id.Key];
                             player.connection.SendCell(x, y, cell);
-
                         }
                     }
                 }
             }
         }
+
         public void AddPack(uint x, uint y)
         {
             if (this != null)
@@ -44,6 +46,7 @@
                 }
             }
         }
+
         public void RemovePack(uint x, uint y)
         {
             if (this != null)
@@ -55,6 +58,7 @@
                 }
             }
         }
+
         public void Update()
         {
             for (uint y = 0; y < 32; y++)
@@ -65,7 +69,7 @@
                     var chy = (int)chpos.Y;
                     if (Chunk.chunks[chx, chy] != null)
                     {
-                        byte cell = World.THIS.GetCell((uint)((chx * 32) + x), (uint)(((chy * 32) + y)));
+                        var cell = World.THIS.GetCell((uint)((chx * 32) + x), (uint)(((chy * 32) + y)));
                         if (cells[x + y * 32] != cell)
                         {
                             cells[x + y * 32] = cell;
@@ -75,6 +79,7 @@
                 }
             }
         }
+
         public void AddBot(int id)
         {
             if (this != null)

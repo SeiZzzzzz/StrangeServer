@@ -17,8 +17,8 @@ namespace StrangeServerCSharp
             Buffer.BlockCopy(input, 0, l, 0, l.Length);
             Buffer.BlockCopy(input, l.Length, dt, 0, dt.Length);
             Buffer.BlockCopy(input, l.Length + dt.Length, et, 0, et.Length);
-            int headerLength = l.Length + dt.Length + et.Length;
-            uint packetLength = BitConverter.ToUInt32(l);
+            var headerLength = l.Length + dt.Length + et.Length;
+            var packetLength = BitConverter.ToUInt32(l);
             packetLength = packetLength > input.Length ? (uint)(input.Length - headerLength) : packetLength >= headerLength ? (uint)(packetLength - headerLength) : packetLength;
             data = new byte[packetLength];
             Buffer.BlockCopy(input, headerLength, data, 0, data.Length);
@@ -37,8 +37,8 @@ namespace StrangeServerCSharp
         {
             get
             {
-                byte[] ret = new byte[Length];
-                byte[] len = BitConverter.GetBytes(Length);
+                var ret = new byte[Length];
+                var len = BitConverter.GetBytes(Length);
                 Buffer.BlockCopy(len, 0, ret, 0, len.Length);
                 Buffer.BlockCopy(Encoding.UTF8.GetBytes(dataType), 0, ret, len.Length, dataType.Length);
                 Buffer.BlockCopy(Encoding.UTF8.GetBytes(eventType), 0, ret, len.Length + dataType.Length, eventType.Length);

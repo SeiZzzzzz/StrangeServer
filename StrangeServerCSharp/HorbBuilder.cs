@@ -1,186 +1,230 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using System.Dynamic;
+using Newtonsoft.Json;
+
 namespace StrangeServerCSharp
 {
-    public class HorbConst
+    public class HorbBuilder
     {
-        public HorbConst()
+        private dynamic _horb;
+
+        public HorbBuilder()
         {
-            this.rhorb = default(HORB);
-            cryslines = new List<string>();
-            buttons = new List<string>();
-            tabs = new List<string>();
+            this._horb = new ExpandoObject();
         }
-        public void AddTitle(string title)
+
+        public string Build()
         {
-            rhorb.title = title;
+            return "horb:" + JsonConvert.SerializeObject(_horb, Formatting.None);
         }
-        public void SetInv(string inv)
+
+        public HorbBuilder AddTitle(string title)
         {
-            rhorb.inv = inv;
+            _horb.title = title;
+            return this;
         }
-        public void AddTextLine(string text)
+
+        public HorbBuilder SetInv(string inv)
         {
-            rhorb.text += text + "\n";
+            _horb.inv = inv;
+            return this;
         }
-        public void AddMarketCard(string miscid,string title)
+
+        public HorbBuilder AddTextLine(string textLine)
         {
-            rhorb.card = $"i{miscid}:{title}";
+            if (!FieldExists("text"))
+            {
+                _horb.text = string.Empty;
+            }
+
+            _horb.text += textLine + "\n";
+            return this;
         }
-        public void AddCard(string id,string miscid, string title)
+
+        public HorbBuilder AddTextLines(params string[] textLines)
         {
-            rhorb.card = $"{id}{miscid}:{title}";
+            foreach (var textLine in textLines)
+            {
+                AddTextLine(textLine);
+            }
+
+            return this;
         }
-        public void AddClanList()
+
+        public HorbBuilder AddMarketCard(string miscid, string title)
         {
-            rhorb.clanlist = new string[] { };
+            _horb.card = $"i{miscid}:{title}";
+            return this;
         }
-        public void AddClanListLine(string id, string text, string nexttext, string action)
+
+        public HorbBuilder AddCard(string id, string miscid, string title)
         {
-            rhorb.clanlist = rhorb.clanlist.Concat(new string[] {id, text, nexttext, action }).ToArray();
+            _horb.card = $"{id}{miscid}:{title}";
+            return this;
         }
-        public void SetText(string text)
+
+        public HorbBuilder AddClanList()
         {
-            rhorb.text = text;
+            _horb.clanlist = new string[] { };
+            return this;
         }
-        public void AddList()
+
+        public HorbBuilder AddClanListLine(string id, string text, string nexttext, string action)
         {
-            rhorb.list = new string[] {};
+            _horb.clanlist = _horb.clanlist.Concat(new string[] { id, text, nexttext, action }).ToArray();
+            return this;
         }
-        public void AddListLine(string text,string nexttext,string action)
+
+
+        public HorbBuilder SetText(string text)
         {
-            rhorb.list = rhorb.list.Concat(new string[] { text, nexttext, action }).ToArray();
+            _horb.text = text;
+            return this;
         }
-        public void AddIConsole()
+
+        public HorbBuilder AddListLine(string text, string nexttext, string action)
         {
-            rhorb.input_console = true;
+            if (!FieldExists("list"))
+            {
+                _horb.list = new List<string>();
+                var list = new List<string>();
+            }
+
+            _horb.list.AddRange(new string[] { text, nexttext, action });
+            return this;
         }
-        public void AddIConsolePlace(string text)
+
+        public HorbBuilder AddIConsole()
         {
-            rhorb.input_place = text;
+            _horb.input_console = true;
+            return this;
         }
-        public void AddCrysRight(string text)
+
+        public HorbBuilder AddIConsolePlace(string text)
         {
-            rhorb.crys_right = text;
+            _horb.input_place = text;
+            return this;
         }
-        public void AddCrysLeft(string text)
+
+        public HorbBuilder AddCrysRight(string text)
         {
-            rhorb.crys_left = text;
+            _horb.crys_right = text;
+            return this;
         }
-        public void AddCrysBuy()
+
+        public HorbBuilder AddCrysLeft(string text)
         {
-            rhorb.crys_buy = true;
+            _horb.crys_left = text;
+            return this;
         }
-        public void Send(string type, Player to)
+
+        public HorbBuilder AddCrysBuy()
         {
-            to.connection.Send("GU", this.Result);
+            _horb.crys_buy = true;
+            return this;
+        }
+
+        public HorbBuilder Send(string type, Player to)
+        {
+            to.connection.Send("GU", Build());
             to.win = type;
+            return this;
         }
-        public void SendToSess(Session to)
+
+        public HorbBuilder SendToSess(Session to)
         {
-            to.Send("GU", this.Result);
+            to.Send("GU", Build());
+            return this;
         }
-        public void AddCrysLine(CrysLine line)
+
+        public HorbBuilder AddCrysLine(CrysLine line)
         {
-            cryslines.Add(line.ToString());
-            rhorb.crys_lines = cryslines.ToArray();
+            if (!FieldExists("crys_lines"))
+            {
+                _horb.crys_lines = new List<string>();
+            }
+
+            _horb.crys_lines.Add(line.ToString());
+            return this;
         }
-        public void AddCss(float ch = 0, float w = 0, float h = 0, string invb = "misc")
+
+        public HorbBuilder AddCrysLines(params CrysLine[] lines)
+        {
+            foreach (var line in lines)
+            {
+                AddCrysLine(line);
+            }
+
+            return this;
+        }
+
+        public HorbBuilder AddCss(float ch = 0, float w = 0, float h = 0, string invb = "misc")
         {
             var c = new css();
             c.ch = ch;
             c.w = w;
             c.h = h;
             c.InvButton = invb;
-            rhorb.css = c.ToString();
-        }
-        public void AddButton(string text, string command)
-        {
-            buttons.Add(text);
-            buttons.Add(command);
-            rhorb.buttons = buttons.ToArray();
-        }
-        public void AddTab(string text, string command)
-        {
-            tabs.Add(text);
-            tabs.Add(command);
-            rhorb.tabs = tabs.ToArray();
-        }
-        public void Admin()
-        {
-            rhorb.admin = true;
-        }
-        public List<string> cryslines = new List<string>();
-        public List<string> buttons = new List<string>();
-        public List<string> tabs = new List<string>();
-        public HORB rhorb;
-        public string Result
-        {
-            get
-            {
-                var j = JToken.Parse(rhorb.ToString());
-                RemoveNullNodes(j);
-                return "horb:" + j.ToString(Formatting.None);
-            }
-        }
-        private void RemoveNullNodes(JToken root)
-        {
-            if (root is JValue)
-            {
-                if (((JValue)root).Value == null)
-                {
-                    ((JValue)root).Parent.Remove();
-                }
-            }
-            else if (root is JArray)
-            {
-                ((JArray)root).ToList().ForEach(n => RemoveNullNodes(n));
-                if (!(((JArray)root)).HasValues)
-                {
-                    root.Parent.Remove();
-                }
-            }
-            else if (root is JProperty)
-            {
-                RemoveNullNodes(((JProperty)root).Value);
-            }
-            else
-            {
-                var children = ((JObject)root).Properties().ToList();
-                children.ForEach(n => RemoveNullNodes(n));
-
-                if (!((JObject)root).HasValues)
-                {
-                    if (((JObject)root).Parent is JArray)
-                    {
-                        ((JArray)root.Parent).Where(x => !x.HasValues).ToList().ForEach(n => n.Remove());
-                    }
-                    else
-                    {
-                        var propertyParent = ((JObject)root).Parent;
-                        while (!(propertyParent is JProperty))
-                        {
-                            propertyParent = propertyParent.Parent;
-                        }
-                        propertyParent.Remove();
-                    }
-                }
-            }
+            _horb.css = c.ToString();
+            return this;
         }
 
+        public HorbBuilder AddButton(string text, string command)
+        {
+            if (!FieldExists("buttons"))
+            {
+                _horb.buttons = new List<string>();
+            }
+
+            _horb.buttons.Add(text);
+            _horb.buttons.Add(command);
+            return this;
+        }
+
+        public HorbBuilder AddTab(string text, string command)
+        {
+            if (!FieldExists("tabs"))
+            {
+                _horb.tabs = new List<string>();
+            }
+
+            _horb.tabs.Add(text);
+            _horb.tabs.Add(command);
+            return this;
+        }
+
+        public HorbBuilder Admin()
+        {
+            _horb.admin = true;
+            return this;
+        }
+
+        public HorbBuilder SetRichList(params string[] richList)
+        {
+            _horb.richList = richList;
+            return this;
+        }
+
+        private bool FieldExists(string field)
+        {
+            return (_horb as IDictionary<string, object>).ContainsKey(field);
+        }
     }
+
     public struct CrysLine
     {
         public override string ToString()
         {
-            return leftMin.ToString() + ":" + rightMin.ToString() + ":" + d.ToString() + ":" + value.ToString() + ":" + descText;
+            return leftMin.ToString() + ":" + rightMin.ToString() + ":" + d.ToString() + ":" + value.ToString() + ":" +
+                   descText;
         }
+
         public long leftMin;
         public long rightMin;
         public long d;
         public long value;
         public string descText;
     }
+
     public struct RichListEntry
     {
         public string[] ToList()
@@ -194,6 +238,7 @@ namespace StrangeServerCSharp
                 this.InitialValue
             };
         }
+
         public override string ToString()
         {
             return "\"" + string.Join("\",\"", this.ToList()) + "\"";
@@ -209,22 +254,24 @@ namespace StrangeServerCSharp
 
         public string Action;
     }
+
     public class InvGen
-        {
+    {
         public static string getmarket(string[] mp)
         {
-            string s = "";
+            var s = "";
             foreach (var i in mp)
             {
                 s += i;
             }
+
             return s;
         }
-        }
+    }
+
     //Darkar25 richlistgen
     public static class RichListGenerator
     {
-
         public static RichListEntry Text(string text)
         {
             return new RichListEntry
@@ -266,8 +313,8 @@ namespace StrangeServerCSharp
 
         public static RichListEntry Drop(string text, string id, string[] values, int index)
         {
-            string text2 = "";
-            for (int i = 0; i < values.Length; i++)
+            var text2 = "";
+            for (var i = 0; i < values.Length; i++)
             {
                 text2 = string.Concat(new object[]
                 {
@@ -278,6 +325,7 @@ namespace StrangeServerCSharp
                     "#"
                 });
             }
+
             return new RichListEntry
             {
                 Text = text,
@@ -289,7 +337,8 @@ namespace StrangeServerCSharp
         }
 
 
-        public static RichListEntry Fill(string text, string barText, int percent, int crystalType, string action100, string action1000, string actionMax)
+        public static RichListEntry Fill(string text, string barText, int percent, int crystalType, string action100,
+            string action1000, string actionMax)
         {
             return new RichListEntry
             {
@@ -315,9 +364,10 @@ namespace StrangeServerCSharp
         }
 
 
-        public static RichListEntry Fill(string text, int current, int max, int crystalType, string action100, string action1000, string actionMax)
+        public static RichListEntry Fill(string text, int current, int max, int crystalType, string action100,
+            string action1000, string actionMax)
         {
-            int num = (current < 0) ? 0 : ((current > max) ? max : current);
+            var num = (current < 0) ? 0 : ((current > max) ? max : current);
             var per = num > 0 ? Math.Round((decimal)num / (max / 100)) : 0;
             return new RichListEntry
             {
@@ -355,11 +405,10 @@ namespace StrangeServerCSharp
                 InitialValue = ""
             };
         }
-
     }
+
     public class CardBuilder
     {
-
         public CardBuilder()
         {
             this.Reset();
@@ -391,10 +440,10 @@ namespace StrangeServerCSharp
 
         public void FlushLine()
         {
-            string t = this.Title.Contains("&") ? this.Title.Substring(0, this.Title.IndexOf('&')) : this.Title;
-            string unk = this.IDK.Contains("&") ? this.IDK.Substring(0, this.IDK.IndexOf('&')) : this.IDK;
-            string act = this.Action.Contains("&") ? this.Action.Substring(0, this.Action.IndexOf('&')) : this.Action;
-            string uri = this.URI.Contains("&") ? this.URI.Substring(0, this.URI.IndexOf('&')) : this.URI;
+            var t = this.Title.Contains("&") ? this.Title.Substring(0, this.Title.IndexOf('&')) : this.Title;
+            var unk = this.IDK.Contains("&") ? this.IDK.Substring(0, this.IDK.IndexOf('&')) : this.IDK;
+            var act = this.Action.Contains("&") ? this.Action.Substring(0, this.Action.IndexOf('&')) : this.Action;
+            var uri = this.URI.Contains("&") ? this.URI.Substring(0, this.URI.IndexOf('&')) : this.URI;
             this.UnsafeFlushLine(t, unk, act, uri, this.Width, this.Height);
         }
 
@@ -413,23 +462,25 @@ namespace StrangeServerCSharp
         {
             get
             {
-                string text = "";
-                for (int i = 0; i < this.image.Count; i++)
+                var text = "";
+                for (var i = 0; i < this.image.Count; i++)
                 {
                     if (text != "")
                     {
                         text += "&";
                     }
+
                     text = string.Concat(new object[]
                     {
-                            text,
-                            this.image[i],
-                            "%",
-                            this.width[i],
-                            "%",
-                            this.height[i]
+                        text,
+                        this.image[i],
+                        "%",
+                        this.width[i],
+                        "%",
+                        this.height[i]
                     });
                 }
+
                 return new RichListEntry
                 {
                     Text = string.Join("&", this.title),
@@ -499,14 +550,12 @@ namespace StrangeServerCSharp
 
         public void SetIngameImage(string spriteGroup, uint index, uint scale)
         {
-
-
             this.SetURI(string.Concat(new object[]
             {
-                    "inner:",
-                    spriteGroup.ToUpper(),
-                    ":",
-                    index
+                "inner:",
+                spriteGroup.ToUpper(),
+                ":",
+                index
             }));
             this.SetWidth(scale);
             this.SetHeight(0U);
@@ -527,63 +576,14 @@ namespace StrangeServerCSharp
 
         private List<uint> height = new List<uint>();
     }
-    public struct HORB
-    {
-        public override string ToString()
-        {
-            return JsonConvert.SerializeObject(this);
-        }
-        public string css { get; set; }
 
-        public string crys_right { get; set; }
-
-        public string crys_left { get; set; }
-
-        public string[] crys_lines { get; set; }
-
-        public string[] tabs { get; set; }
-
-        public string title { get; set; }
-
-        public string text { get; set; }
-
-        public string card { get; set; }
-
-        public string inv { get; set; }
-
-        public string input_place { get; set; }
-
-        public int input_len { get; set; }
-
-        public string[] buttons { get; set; }
-
-        public string[] clanlist { get; set; }
-
-        public string[] list { get; set; }
-
-        public string[] richList { get; set; }
-
-        public string[] canvas { get; set; }
-
-        public bool rich_no_scroll { get; set; }
-
-        public bool back { get; set; }
-
-        public bool crys_buy { get; set; }
-
-        public bool admin { get; set; }
-
-        public bool paint { get; set; }
-
-        public bool input_console { get; set; }
-    }
     public struct css
     {
         public override string ToString()
         {
             return "invButton=" + InvButton + ";inv-w=" + w.ToString() + ";inv-ch=" + ch.ToString();
-            
         }
+
         public string InvButton { get; set; }
         public float ch { get; set; }
         public float w { get; set; }
