@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using System.Linq;
 namespace StrangeServerCSharp
 {
     public class World
@@ -13,7 +13,7 @@ namespace StrangeServerCSharp
         public static World THIS;
         public static PeriodicTimer wupdtimer = null;
         public static PeriodicTimer cspdtimer = null;
-        public static Newtonsoft.Json.Linq.JObject cellspool = null;
+        public static JObject cellspool = null;
         public static Cell[] cells;
         public static Cell[] cellps = new Cell[255];
         public List<int> crys = new List<int>()
@@ -83,6 +83,18 @@ namespace StrangeServerCSharp
         {
             if ((x >= 0 && y >= 0) && (x < width && y < height))
             {
+                return true;
+            }
+            return false;
+        }
+        public bool ValidCoordForPlace(uint x, uint y)
+        {
+            if ((x >= 0 && y >= 0) && (x < width && y < height))
+            {
+                if (cells[x + y * height] != null)
+                {
+                    return cells[x + y * height].HP != -1;
+                }
                 return true;
             }
             return false;
@@ -253,12 +265,16 @@ namespace StrangeServerCSharp
                 }
             }
         }
-        public static void GUN(uint x, uint y, int cid)
+        public static void GUN(uint x, uint y, int cid, Gun g)
         {
-            World.THIS.OnGunBuild(x, y, cid);
-            for (int _x = -20; _x < 20; _x++)
+            if (g.off == 0)
             {
-                for (int _y = -20; _y < 20; _y++)
+                return;
+            }
+            World.THIS.OnGunBuild(x, y, cid);
+            for (int _x = -21; _x < 21; _x++)
+            {
+                for (int _y = -21; _y < 21; _y++)
                 {
                     if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
                     {
@@ -268,8 +284,11 @@ namespace StrangeServerCSharp
                             {
                                 if (XServer.players[id].clanid != cid)
                                 {
-                                    XServer.players[id].HurtGun(200);
-                                    World.THIS.SendDFToBotsGlobal(7, x, y, 0, id, 0);
+                                    if (g.OnShot(1))
+                                    {
+                                        XServer.players[id].HurtGun(200);
+                                        World.THIS.SendDFToBotsGlobal(7, x, y, 0, id, 0);
+                                    }
                                 }
                             }
                         }
@@ -374,6 +393,7 @@ namespace StrangeServerCSharp
                 THIS.UpdateWorld();
             }
         }
+        public static List<Building> packlist = new List<Building>();
         public static async void GunUPD()
         {
             gunupdtimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
@@ -382,7 +402,7 @@ namespace StrangeServerCSharp
             {
                 try
                 {
-                    var packs = BDClass.THIS.packs.ToList();
+                    var packs = packlist;
                     foreach (var p in packs)
                     {
                         p.Update("gun");
@@ -548,6 +568,10 @@ namespace StrangeServerCSharp
                 return roadmap[x + y * height];
             }
             return cell;
+        }
+        public bool isdest(uint x,uint y)
+        {
+            return World.cells[x + y * height].HP != -1;
         }
         public Cell GetCellConst(uint x, uint y)
         {

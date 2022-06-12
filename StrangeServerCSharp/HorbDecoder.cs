@@ -33,14 +33,26 @@ namespace StrangeServerCSharp
                     {
                         Sett((string)button, p);
                     }
-                    if (p.win == "!!console")
+                    else if (p.win == "!!console")
                     {
                         Console((string)button, p);
+                    }
+                    else if (p.win.StartsWith("!!clans"))
+                    {
+                        ConsClans((string)button, p);
+                    }
+                    else if (p.win.StartsWith("!!clan"))
+                    {
+                        cl((string)button, p);
                     }
                 }
                 else if (p.win == "box")
                 {
                     box((string)button, p);
+                }
+                else if (p.win == "gun")
+                {
+                    gun((string)button, p);
                 }
                 else if (p.win.StartsWith("market"))
                 {
@@ -50,10 +62,24 @@ namespace StrangeServerCSharp
                 {
                     Resp((string)button, p);
                 }
-
                 if (button != null && (string)button == "exit")
                 {
                     Exit((string)button, p);
+                }
+            }
+        }
+        public static void gun(string text, Player p)
+        {
+            if (text.StartsWith("fill"))
+            {
+                var resp = p.cpack as Gun;
+                if (text.StartsWith("fill:b_max"))
+                {
+                    resp.cryinside = resp.crymax;
+                    resp.off = 1;
+                    resp.UpdatePackVis();
+                    p.cpack.Open(p, p.win);
+                    return;
                 }
             }
         }
@@ -228,9 +254,75 @@ namespace StrangeServerCSharp
             }
             p.ShowConsole();
         }
+        public static void cl(string text, Player p)
+        {
+            if (p.clanid == 0)
+            {
+                return;
+            }
+            if (text.StartsWith("list"))
+            {
+                Clan.Open(text, p);
+            }
+            if (text.StartsWith("reqs"))
+            {
+                Clan.Open(text, p);
+            }
+            else if (text.StartsWith("req"))
+            {
+                Clan clan = null;
+                var id = text.Split(':')[2];
+                try { clan = BDClass.THIS.clans.First(c => c.id.ToString() == id); } catch (Exception) { }
+                if (clan == null)
+                {
+                    return;
+                }
+                if (int.TryParse(text.Split(':')[1],out var t))
+                {
+                    if (!clan.reqs.Contains(t))
+                    {
+                        Clan.Open("!!clan", p);
+                        return;
+                    }
+                    clan.Addmember(t);
+                    clan.RemoveReq(t);
+                    Clan.Open("reqs", p);
+                    return;
+                }
+                else
+                {
+                    clan.RemoveReq(t);
+                    return;
+                }
+                Clan.Open("!!clan", p);
+            }
+        }
         public static void ConsClans(string text, Player p)
         {
-
+            if (text.StartsWith("clans"))
+            {
+                new Clans().Open(p, "!!clans");
+            }
+            else if (text.StartsWith("clan"))
+            {
+                new Clans().Open(p, "!!clans." + text);
+            }
+            if (p.clanid != 0)
+            {
+                return;
+            }
+            else if (text.StartsWith("recruit_in"))
+            {
+                var id = text.Split(':')[1];
+                Clan clan = null;
+                try { clan = BDClass.THIS.clans.First(c => c.id.ToString() == id); } catch (Exception) { }
+                if (clan == null)
+                {
+                    return;
+                }
+                clan.AddReq(p.id);
+                new Clans().Open(p, "!!clans");
+            }
         }
         private static void MarketO(string text, Player p)
         {
@@ -365,18 +457,18 @@ namespace StrangeServerCSharp
             {
                 if (col == 1)
                 {
-                    if (p.money - buy >= 0)
+                    if (p.money - (buy * 10) >= 0)
                     {
                         p.money -= buy;
-                        p.creds += 1;
+                        p.creds += 10;
                     }
                 }
                 else if (col == 10)
                 {
-                    if (p.money - (buy * 10) >= 0)
+                    if (p.money - (buy * 100) >= 0)
                     {
-                        p.money -= (buy * 10);
-                        p.creds += 10;
+                        p.money -= (buy * 100);
+                        p.creds += 100;
                     }
                 }
                 p.SendMoney();
@@ -386,9 +478,9 @@ namespace StrangeServerCSharp
             {
                 if (col == 1)
                 {
-                    if (p.money - buy >= 0)
+                    if (p.money - (buy * 10) >= 0)
                     {
-                        p.money -= buy;
+                        p.money -= (buy * 10);
                         p.inventory.items[int.Parse(itemid)].count++;
                     }
                 }
@@ -411,18 +503,18 @@ namespace StrangeServerCSharp
             {
                 if (col == 1)
                 {
-                    if ((p.creds - 1) >= 0)
+                    if ((p.creds - 10) >= 0)
                     {
-                        p.money += sell;
-                        p.creds--;
+                        p.money += sell * 10;
+                        p.creds -= 10;
                     }
                 }
                 if (col == 10)
                 {
-                    if ((p.creds - 10) >= 0)
+                    if ((p.creds - 100) >= 0)
                     {
-                        p.money += (sell * 10);
-                        p.creds -= 10;
+                        p.money += (sell * 100);
+                        p.creds -= 100;
                     }
                 }
                 p.SendMoney();

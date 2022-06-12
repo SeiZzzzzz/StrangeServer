@@ -11,6 +11,7 @@ namespace StrangeServerCSharp
         public abstract string winid { get; set; }
         public abstract void Open(Player p, string tab);
         public abstract void Rebild();
+        public static void AddPack() { World.packlist = BDClass.THIS.packs.ToList(); }
         public abstract bool CanOpen(Player p);
         public abstract void Remove();
         public abstract void Update(string type);
@@ -123,55 +124,45 @@ namespace StrangeServerCSharp
         public override string winid { get; set; }
         public override void Rebild()
         {
-            if (World.THIS.GetCellConst(x + 3, y) != null)
-            {
+           
                 World.THIS.SetCell(x + 3, y, 35);
                 World.THIS.GetCellConst(x + 3, y).is_destructible = false;
-                World.THIS.GetCellConst(x + 3, y).can_build_over = false;
-            }
-            if (World.THIS.GetCellConst(x + 4, y) != null)
-            {
+                World.THIS.GetCellConst(x + 3, y).HP = -1;
                 World.THIS.SetCell(x + 4, y, 35);
                 World.THIS.GetCellConst(x + 4, y).is_destructible = false;
-                World.THIS.GetCellConst(x + 4, y).can_build_over = false;
-            }
-            if (World.THIS.GetCellConst(x - 3, y) != null)
-            {
+                World.THIS.GetCellConst(x + 4, y).HP = -1;
                 World.THIS.SetCell(x - 3, y, 35);
                 World.THIS.GetCellConst(x - 3, y).is_destructible = false;
-                World.THIS.GetCellConst(x - 3, y).can_build_over = false;
-            }
-            if (World.THIS.GetCellConst(x - 4, y) != null)
-            {
+                World.THIS.GetCellConst(x - 3, y).HP = -1;
                 World.THIS.SetCell(x - 4, y, 35);
                 World.THIS.GetCellConst(x - 4, y).is_destructible = false;
-                World.THIS.GetCellConst(x - 4, y).can_build_over = false;
-            }
+                World.THIS.GetCellConst(x - 4, y).HP = -1;
+            
 
             //y
             if (World.THIS.GetCellConst(x, y + 3) != null)
             {
                 World.THIS.SetCell(x, y + 3, 35);
                 World.THIS.GetCellConst(x, y + 3).is_destructible = false;
-                World.THIS.GetCellConst(x, y + 3).can_build_over = false;
+                World.THIS.GetCellConst(x, y + 3).HP = -1;
             }
             if (World.THIS.GetCellConst(x, y + 4) != null)
             {
                 World.THIS.SetCell(x, y + 4, 35);
                 World.THIS.GetCellConst(x, y + 4).is_destructible = false;
-                World.THIS.GetCellConst(x, y + 4).can_build_over = false;
+                World.THIS.GetCellConst(x, y + 4).HP = -1;
             }
             if (World.THIS.GetCellConst(x, y - 3) != null)
             {
                 World.THIS.SetCell(x, y - 3, 35);
                 World.THIS.GetCellConst(x, y - 3).is_destructible = false;
-                World.THIS.GetCellConst(x, y - 3).can_build_over = false;
+                World.THIS.GetCellConst(x, y - 3).HP = -1;
             }
             if (World.THIS.GetCellConst(x, y - 4) != null)
             {
                 World.THIS.SetCell(x, y - 4, 35);
                 World.THIS.GetCellConst(x, y - 4).is_destructible = false;
-                World.THIS.GetCellConst(x, y - 4).can_build_over = false;
+                World.THIS.GetCellConst(x, y - 4).HP = -1;
             }
             //osn
             World.THIS.SetCell(x, y, 37);
@@ -246,7 +237,7 @@ namespace StrangeServerCSharp
             {
                 for (int y = -4; y <= 4; y++)
                 {
-                    if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
+                    if (!World.THIS.ValidCoordForPlace((uint)(px + x), (uint)(py + y)))
                     {
                         valid++;
                     }
@@ -387,9 +378,27 @@ namespace StrangeServerCSharp
 
         public override void Open(Player p, string tab)
         {
-            if (tab == "!!" + winid)
+            var c = new HorbConst();
+            if (tab.StartsWith("!!clans.clan"))
             {
-                var c = new HorbConst();
+                string id = tab.Split(':')[1];
+                c.AddTitle("КЛАНЫ");
+                c.SetText("@@\n<color=#88ff88ff>Прием в клан открыт.</color> Условия для подачи заявки:\n\n<color=#88ff88ff>Подать заявку может кто угодно</color>\n");
+                if (p.clanid == 0)
+                {
+                    c.AddButton("ПОДАТЬ ЗАЯВКУ", $"@recruit_in:{id}");
+                }
+                Clan clan = null;
+                try { clan = BDClass.THIS.clans.First(c => c.id.ToString() == id); } catch (Exception) { }
+                if (clan == null)
+                {
+                    return;
+                }
+                c.AddCard("c", id, $"<color=white>{clan.name}</color>\nУчастники: <color=white>{clan.GetMemberList().Count + 1}</color>");
+                c.AddButton("НАЗАД", "<" + winid);
+            }
+            else if (tab.StartsWith("!!" + winid))
+            {
                 c.AddTitle("КЛАНЫ");
                 c.AddClanList();
                 c.SetText("@@Кланы шахт. Кликните на клан для подробной информации\n");
@@ -398,9 +407,8 @@ namespace StrangeServerCSharp
                     c.AddClanListLine(cl.id.ToString(), $"<color=white>{cl.name}</color>  [{cl.abr}]", "<color=#88ff88ff>прием открыт</color>", "clan:" + cl.id);
                 }
                 c.AddButton("ВЫХОД", "exit");
-                c.Send(tab, p);
-                return;
             }
+            c.Send(tab, p);
         }
 
         public override void Rebild()
@@ -440,8 +448,20 @@ namespace StrangeServerCSharp
         {
             if (type == "gun")
             {
-                World.GUN(this.x, this.y,this.cid);
+                World.GUN(this.x, this.y,this.cid,this);
             }
+        }
+        public bool OnShot(int cost)
+        {
+            if (cryinside - cost < 1)
+            {
+                cryinside = 0;
+                off = 0;
+                UpdatePackVis();
+                return false;
+            }
+            cryinside -= cost;
+            return true;
         }
         public override string winid { get; set; }
         public int cryinside { get; set; }
@@ -470,7 +490,7 @@ namespace StrangeServerCSharp
             {
                 for (int y = -2; y <= 2; y++)
                 {
-                    if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
+                    if (!World.THIS.ValidCoordForPlace((uint)(px + x), (uint)(py + y)))
                     {
                         valid++;
                     }
@@ -502,6 +522,9 @@ namespace StrangeServerCSharp
             var c = new HorbConst();
             c.AddTitle("ПУФКА");
             c.AddButton("ВЫХОД", "exit");
+            string[] l = new string[0];
+            l = l.Concat(RichListGenerator.Fill("Заряд", cryinside, crymax, 5, "fill:b_100", "fill:b_1000", "fill:b_max").ToList()).ToArray();
+            c.rhorb.richList = l;
             c.Send(this.winid + "." + tab, p);
         }
         public static Gun Build(uint x, uint y, Player p)
@@ -529,26 +552,26 @@ namespace StrangeServerCSharp
             //roads
             World.THIS.SetCell(x + 1, y, 35);
             World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).can_build_over = false;
+            World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).HP = -1;
             World.THIS.SetCell(x + 2, y, 35);
             World.THIS.GetCellConst((uint)(x + 2), (uint)(y)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x + 2), (uint)(y)).HP = -1;
             World.THIS.SetCell(x - 1, y, 35);
             World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).can_build_over = false;
+            World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).HP = -1;
             World.THIS.SetCell(x - 2, y, 35);
             World.THIS.GetCellConst((uint)(x - 2), (uint)(y)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x - 2), (uint)(y)).HP = -1;
             //
             World.THIS.SetCell(x, y + 1, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).can_build_over = false;
+            World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).HP = -1;
             World.THIS.SetCell(x, y + 2, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y + 2)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x), (uint)(y + 2)).HP = -1;
             World.THIS.SetCell(x, y - 1, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).can_build_over = false;
+            World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).HP = -1;
             World.THIS.SetCell(x, y - 2, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y - 2)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x), (uint)(y - 2)).HP = -1;
@@ -655,7 +678,7 @@ namespace StrangeServerCSharp
                     {
                         World.THIS.SetCell((uint)(x + px), (uint)(y + py), 35);
                         World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).is_destructible = false;
-                        World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).can_build_over = false;
+                        World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).HP = -1;
                     }
                 }
             }
@@ -690,7 +713,7 @@ namespace StrangeServerCSharp
             {
                 for (int y = -3; y <= 3; y++)
                 {
-                    if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
+                    if (!World.THIS.ValidCoordForPlace((uint)(px + x), (uint)(py + y)))
                     {
                         valid++;
                     }

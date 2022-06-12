@@ -18,7 +18,7 @@ namespace StrangeServerCSharp
         {
             if (BDClass.THIS.clans.Count() == 0)
             {
-                for (int i = 1; i <= 250; i++)
+                for (int i = 1; i <= 219; i++)
                 {
                     BDClass.THIS.clans.Add(new Clan() { abr = "",owner = "", name = ""});
                 }
@@ -35,18 +35,86 @@ namespace StrangeServerCSharp
             p.SendClan();
             BDClass.THIS.SaveChanges();
         }
-        public static void Open(Player p)
+        public void AddReq(int id)
         {
-            if (p.clanid == 0)
+            if (!reqs.Contains(id))
             {
-                return;
+                reqs.Add(id);
             }
-            var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+        }
+        public void RemoveReq(int id)
+        {
+            if (reqs.Contains(id))
+            {
+                reqs.Remove(id);
+            }
+        }
+        public static string winid = "!!clan";
+        public List<int> reqs = new List<int>();
+        public static void Open(string t,Player p)
+        {
             var c = new HorbConst();
-            c.AddTitle(clan.name);
-            c.AddCard("c", p.clanid.ToString(), $"<color=white>Winx </color>\nУчастники: <color=white> {1 + clan.GetMemberList().Count} </color> ");
-            c.AddTab("ОБЗОР", "");c.AddTab("СПИСОК", "list");
-            c.Send("!!clan",p);
+            if (t == winid)
+            {
+                if (p.clanid == 0)
+                {
+                    return;
+                }
+                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+                c.AddTitle(clan.name);
+                c.AddCard("c", p.clanid.ToString(), $"<color=white>Winx </color>\nУчастники: <color=white> {1 + clan.GetMemberList().Count} </color> ");
+                c.AddTab("ОБЗОР", ""); c.AddTab("СПИСОК", "list");
+                if (clan.reqs.Count > 0)
+                {
+                   c.AddTab($"<color=#ff8888ff>ЗАЯВКИ ({clan.reqs.Count})</color>", "reqs");
+                }
+
+            }
+            else if (t.StartsWith("reqs"))
+            {
+                if (p.clanid == 0)
+                {
+                    return;
+                }
+                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+                c.AddTitle(clan.name);
+                c.AddList();
+                int num = 0;
+                c.AddTab("ОБЗОР", "clan"); c.AddTab("СПИСОК", "list");
+                if (clan.reqs.Count > 0)
+                {
+                    c.AddTab($"<color=#ff8888ff>ЗАЯВКИ ({clan.reqs.Count})</color>", "");
+                }
+                foreach (var id in clan.reqs)
+                {
+                    var player = BDClass.THIS.players.First(i => i.id == id);
+                    num++;
+                    c.AddListLine($"{num} <color=white>{player.name}</color>", "...", $"req:{id}:{clan.id}");
+                }
+            }
+            else if (t.StartsWith("list"))
+            {
+                if (p.clanid == 0)
+                {
+                    return;
+                }
+                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+                c.AddTitle(clan.name);
+                c.AddClanList();
+                int num = 0;
+                c.AddTab("ОБЗОР", "clan"); c.AddTab("СПИСОК", "");
+                if (clan.reqs.Count > 0)
+                {
+                    c.AddTab($"<color=#ff8888ff>ЗАЯВКИ ({clan.reqs.Count})</color>", "");
+                }
+                foreach (var id in clan.GetMemberList())
+                {
+                    var player = BDClass.THIS.players.First(i => i.id == id);
+                    num++;
+                    c.AddClanListLine("0", $"{num}.<color=white>{player.name}</color>", "", "listrow:" + id);
+                }
+            }
+            c.Send("!!clan." + t, p);
         }
         public static void DeleteClan(int id,Player p)
         {
@@ -62,10 +130,21 @@ namespace StrangeServerCSharp
         {
             return BDClass.THIS.clans.First(i => i.id == id);
         }
-        public static void Addmember(int clanid,int memberid)
+        public void Addmember(int memberid)
         {
-            var clan = BDClass.THIS.clans.First(i => i.id == clanid);
-            clan.memberList += ":" + memberid.ToString();
+            Player player = null;
+            try
+            {
+                player = BDClass.THIS.players.First(p => p.id == memberid);
+                    } catch (Exception ex) { }
+            if (player == null) { return;  }
+            player.clanid = id;
+            player.SendClan();
+            if (!GetMemberList().Contains(memberid))
+            {
+                memberList += ":" + memberid.ToString();
+            }
+            BDClass.THIS.SaveChanges();
         }
         public static List<Clan> GetAvlClanIcon()
         {
@@ -73,7 +152,7 @@ namespace StrangeServerCSharp
             var col = 8;
             for (int i = 0; i < col; i++)
             {
-                int r = World.Random.Next(1, 200);
+                int r = World.Random.Next(1, 219);
                 var c = BDClass.THIS.clans.Where(j => string.IsNullOrEmpty(j.owner)).ToList();
                 var clan = c.ElementAt(new Index(World.Random.Next(1, c.Count())));
                 l.Add(clan);

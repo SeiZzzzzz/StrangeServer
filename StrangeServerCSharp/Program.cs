@@ -162,6 +162,10 @@ namespace StrangeServerCSharp
                     online++;
                 }
             }
+            foreach (var player in XServer.players)
+            {
+                player.Value.connection.SendOnline();
+            }
         }
         public void SendOnline()
         {
@@ -426,7 +430,7 @@ namespace StrangeServerCSharp
                 }
                 if (ty.eventType == "Clan")
                 {
-                    Clan.Open(this.player);
+                    Clan.Open(Clan.winid,this.player);
                 }
                 if (ty.eventType == "ADMN")
                 {
@@ -464,7 +468,7 @@ namespace StrangeServerCSharp
                     {
                         if (text.Length > 1)
                         {
-                            HorbDecoder.Console(text.Substring(1, text.Length - 1), this.player);
+                            HorbDecoder.Console(text.Substring(1), this.player);
                         }
                         player.ShowConsole();
                         return;

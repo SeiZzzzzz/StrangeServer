@@ -250,6 +250,10 @@ namespace StrangeServerCSharp
                     }
                 }
             }
+            if (cell.HP == -1)
+            {
+                return;
+            }
             if (cell.is_empty && cell.can_build_over)
             {
                 if (this.geo.Count > 0)
@@ -385,11 +389,25 @@ namespace StrangeServerCSharp
         }
         public void Build(uint x, uint y, string type)
         {
-            if (!World.THIS.ValidCoord(x, y))
+            if (!World.THIS.ValidCoordForPlace(x, y))
             {
                 return;
             }
+            if (World.ongun[x + y * World.height] != null)
+            {
+                if (World.ongun[x + y * World.height].Count > 0)
+                {
 
+
+                    if (World.ongun[x + y * World.height].Count > 1 || World.ongun[x + y * World.height].First() != this.clanid)
+                    {
+                        byte[] dat = Encoding.UTF8.GetBytes("заблокировано под пушкой");
+
+                        this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+                        return;
+                    }
+                }
+            }
             var cell = World.cellps[World.THIS.GetCell(x, y)];
             if (type == "G")
             {
@@ -450,7 +468,7 @@ namespace StrangeServerCSharp
                 counter[1] = 0;
                 lvl[1]++;
                 SendLvl();
-                nextlvl[1] = (int)(nextlvl[1] * 1.25f);
+                nextlvl[1] = (int)(nextlvl[1] * 1.05f);
             }
         }
         public void SendLvl()

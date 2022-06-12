@@ -96,6 +96,7 @@ namespace StrangeServerCSharp
                     var v = World.THIS.GetChunkPosByCoords(i.x, i.y);
                     Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
                 }
+                World.packlist = THIS.packs.ToList();
                 foreach (var i in THIS.boxes.ToList())
                 {
                     World.boxmap[i.x + i.y * World.height] = i;

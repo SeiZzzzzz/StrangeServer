@@ -96,6 +96,7 @@
                     BDClass.THIS.resps.Add(m);
                     items[sel].count--;
                     this.SendInv();
+                    Building.AddPack();
                 }
                 player.GimmePacks();
                 return;
@@ -111,13 +112,14 @@
                     BDClass.THIS.markets.Add(m);
                     items[sel].count--;
                     this.SendInv();
+                    Building.AddPack();
                 }
                 player.GimmePacks();
                 return;
             }
             if (sel == 26)
             {
-                if (player.id == 0)
+                if (player.clanid == 0)
                 {
                     byte[] dat = System.Text.Encoding.UTF8.GetBytes("ДОЛБАЕБ КЛАН НУЖЕН");
 
@@ -132,15 +134,23 @@
                     World.packmap[xp + yp * World.width] = g;
                     items[sel].count--;
                     this.SendInv();
+                    Building.AddPack();
                 }
                 player.GimmePacks();
                 return;
             }
             if (sel == 28)
             {
-                Diz(x, y);
-                this.player.GimmePacks();
-                items[sel].count--;
+                if (Diz(x, y, out var rpack))
+                {
+                    Building.AddPack();
+                    if (rpack.type == 'G')
+                    {
+                        items[26].count++;
+                    }
+                    this.player.GimmePacks();
+                    items[sel].count--;
+                }
                 return;
             }
             if (!World.THIS.GetCellConst(x, y).is_empty)
@@ -173,50 +183,96 @@
         {
             this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
         }
-        public void Diz(uint x, uint y)
+        public bool Diz(uint x, uint y, out Building rpack)
         {
+            x = player.x;
+            y = player.y;
             if (World.THIS.ValidCoord(x, y))
             {
-                if (World.packmap[x + y * World.width] != null)
+                if (World.packmap[x + y * World.width] != null && World.packmap[x + y * World.width].ownerid == player.id)
                 {
                     World.packmap[x + y * World.width].Remove();
-                    if (World.packmap[x + y * World.width].type == 'G')
-                    {
-                        items[26].count++;
-                    }
-
+                    rpack = World.packmap[x + y * World.width];
                     World.packmap[x + y * World.width] = null;
-                    return;
+                    return true;
                 }
             }
-            int mx = (int)(x + (player.dir == 3 ? 3 : player.dir == 1 ? -3 : 0));
-            int my = (int)(y + (player.dir == 0 ? 3 : player.dir == 2 ? -3 : 0));
-            int sx = (int)(mx == 0 ? 0 : x > mx? x - 3 : x + 3);
-            int sy = (int)(my == 0 ? 0 : y > my? y - 3 : y + 3);
-            for (;sx < mx;sx++)
+            uint xp = (uint)(x + (player.dir == 3 ? 3 : player.dir == 1 ? -3 : 0));
+            uint yp = (uint)(y + (player.dir == 0 ? 3 : player.dir == 2 ? -3 : 0));
+            var xx = xp;
+            var yy = yp;
+            if (player.dir == 3 || player.dir == 1)
             {
-                if (World.THIS.ValidCoord((uint)sx, y))
+                if (xp < x)
                 {
-                    if (World.packmap[sx + y * World.width] != null && World.packmap[sx + y * World.width].ownerid == player.id)
+                    for (; xx <= x;xx++)
                     {
-                        World.packmap[sx + y * World.width].Remove();
-                        World.packmap[sx + y * World.width] = null;
-                        return;
+                        if (World.THIS.ValidCoord(xx, y))
+                        {
+                            if (World.packmap[xx + y * World.width] != null && World.packmap[xx + y * World.width].ownerid == player.id)
+                            {
+                                World.packmap[xx + y * World.width].Remove();
+                                rpack = World.packmap[xx + y * World.width];
+                                World.packmap[xx + y * World.width] = null;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                if (xp > x)
+                {
+                    for (; xx >= x; xx--)
+                    {
+                        if (World.THIS.ValidCoord(xx, y))
+                        {
+                            if (World.packmap[xx + y * World.width] != null && World.packmap[xx + y * World.width].ownerid == player.id)
+                            {
+                                World.packmap[xx + y * World.width].Remove();
+                                rpack = World.packmap[xx + y * World.width];
+                                World.packmap[xx + y * World.width] = null;
+                                return true;
+                            }
+                        }
                     }
                 }
             }
-            for (; sy < my; sy++)
+            else if (player.dir == 0 || player.dir == 2)
             {
-                if (World.THIS.ValidCoord((uint)sx, y))
+                if (yp < y)
                 {
-                    if (World.packmap[x + sy * World.width] != null && World.packmap[x + sy * World.width].ownerid == player.id)
-                {
-                    World.packmap[x + sy * World.width].Remove();
-                    World.packmap[x + sy * World.width] = null;
-                    return;
+                    for (; yy <= y; yy++)
+                    {
+                        if (World.THIS.ValidCoord(x, yy))
+                        {
+                            if (World.packmap[x + yy * World.width] != null && World.packmap[x + yy * World.width].ownerid == player.id)
+                            {
+                                World.packmap[x + yy * World.width].Remove();
+                                rpack = World.packmap[x + yy * World.width];
+                                World.packmap[x + yy * World.width] = null;
+                                return true;
+                            }
+                        }
+                    }
                 }
-                 }
+                if (yp > y)
+                {
+                    for (; yy >= y; yy--)
+                    {
+                        if (World.THIS.ValidCoord(x, yy))
+                        {
+                            if (World.packmap[x + yy * World.width] != null && World.packmap[x + yy * World.width].ownerid == player.id)
+                            {
+                                World.packmap[x + yy * World.width].Remove();
+                                rpack = World.packmap[x + yy * World.width];
+                                World.packmap[x + yy * World.width] = null;
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
+            rpack = null;
+            return false;
         }
         public static string dizz = "choose:ДИЗЗ\n\n[ENTER] = собрать здание в пак\n[ESC] = отмена:1:0:0:0:0:0 ";
         public bool CanBoom(uint x, uint y)
