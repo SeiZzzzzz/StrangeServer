@@ -8,6 +8,7 @@ namespace StrangeServerCSharp
         public DbSet<Building> packs { get; set; }
         public DbSet<Market> markets { get; set; }
         public DbSet<Resp> resps { get; set; }
+        public DbSet<Gun> guns { get; set; }
         public DbSet<Box> boxes { get; set; }
         public DbSet<Settings> settings { get; set; }
         public DbSet<Clan> clans { get; set; }
@@ -82,6 +83,13 @@ namespace StrangeServerCSharp
                     Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
                 }
                 foreach (var i in THIS.resps.ToList())
+                {
+                    i.Rebild();
+                    World.packmap[i.x + i.y * World.height] = i;
+                    var v = World.THIS.GetChunkPosByCoords(i.x, i.y);
+                    Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
+                }
+                foreach (var i in THIS.guns.ToList())
                 {
                     i.Rebild();
                     World.packmap[i.x + i.y * World.height] = i;

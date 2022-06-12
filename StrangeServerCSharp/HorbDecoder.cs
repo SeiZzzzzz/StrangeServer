@@ -104,12 +104,16 @@ namespace StrangeServerCSharp
         }
         public static void Sett(string text, Player p)
         {
+            if (p.settings == null)
+            {
+                p.settings = BDClass.THIS.settings.First(s => s.id == p.id);
+            }
             if (!string.IsNullOrWhiteSpace(text))
             {
                 if (text.StartsWith("<"))
                 {
                     p.win = "!!settings." + text.Substring(1);
-                    p.cpack.Open(p, p.win);
+                    p.settings.Open(p.win,p);
                     return;
                 }
                 if (text.StartsWith("change_settings"))

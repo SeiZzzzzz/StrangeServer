@@ -35,6 +35,19 @@ namespace StrangeServerCSharp
             p.SendClan();
             BDClass.THIS.SaveChanges();
         }
+        public static void Open(Player p)
+        {
+            if (p.clanid == 0)
+            {
+                return;
+            }
+            var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+            var c = new HorbConst();
+            c.AddTitle(clan.name);
+            c.AddCard("c", p.clanid.ToString(), $"<color=white>Winx </color>\nУчастники: <color=white> {1 + clan.GetMemberList().Count} </color> ");
+            c.AddTab("ОБЗОР", "");c.AddTab("СПИСОК", "list");
+            c.Send("!!clan",p);
+        }
         public static void DeleteClan(int id,Player p)
         {
             var clan = BDClass.THIS.clans.First(i => i.id == id);

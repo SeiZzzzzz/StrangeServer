@@ -424,6 +424,10 @@ namespace StrangeServerCSharp
                 {
                     this.player.settings.Open(this.player.settings.winid,this.player);
                 }
+                if (ty.eventType == "Clan")
+                {
+                    Clan.Open(this.player);
+                }
                 if (ty.eventType == "ADMN")
                 {
                     if (this.player.cpack != null && (this.player.id == this.player.cpack.ownerid))

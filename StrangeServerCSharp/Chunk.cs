@@ -44,6 +44,17 @@
                 }
             }
         }
+        public void RemovePack(uint x, uint y)
+        {
+            if (this != null)
+            {
+                var v = new System.Numerics.Vector2(x, y);
+                if (packs.ContainsKey(v))
+                {
+                    packs.Remove(v);
+                }
+            }
+        }
         public void Update()
         {
             for (uint y = 0; y < 32; y++)

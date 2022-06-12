@@ -187,7 +187,9 @@ namespace StrangeServerCSharp
 
             if (!cell.is_destructible)
             {
+                /*
                 this.Move((uint)this.pos.X, (uint)this.pos.Y, this.dir);
+                */
                 return;
             }
             World.THIS.DestroyCell((uint)this.pos.X, (uint)this.pos.Y);
@@ -233,6 +235,21 @@ namespace StrangeServerCSharp
         public void UseGeo(uint x, uint y)
         {
             var cell = World.THIS.GetCellConst(x, y);
+            if (World.ongun[x + y * World.height] != null)
+            {
+                if (World.ongun[x + y * World.height].Count > 0)
+                {
+
+
+                    if (World.ongun[x + y * World.height].Count > 1 || World.ongun[x + y * World.height].First() != this.clanid)
+                    {
+                        byte[] dat = Encoding.UTF8.GetBytes("заблокировано под пушкой");
+
+                        this.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+                        return;
+                    }
+                }
+            }
             if (cell.is_empty && cell.can_build_over)
             {
                 if (this.geo.Count > 0)
@@ -271,7 +288,7 @@ namespace StrangeServerCSharp
                 {
                     GimmeBots();
                 }
-            }catch (Exception ex) { }
+            } catch (Exception ex) { }
         }
         public void GimmeBots()
         {
@@ -399,6 +416,10 @@ namespace StrangeServerCSharp
             }
         }
         public byte cellg;
+        public void HurtGun(int damage)
+        {
+            Hurt(damage);
+        }
         public void Heal()
         {
             if (hp == maxhp)
@@ -622,18 +643,18 @@ namespace StrangeServerCSharp
                 return;
             }
             var c = World.cellps[World.THIS.GetCell(x, y)];
-            
+            /*
             if (World.THIS.GetCellConst(x, y) == null || !World.THIS.GetCellConst(x, y).is_empty)
             {
                 this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                 return;
             }
-            
+            */
             var newpos = new Vector2(x, y);
             if (Vector2.Distance(pos, newpos) < 1.2f)
             {
                 var pack = World.packmap[(uint)newpos.X + (uint)newpos.Y * World.width];
-                if (pack != null && win == "")
+                if (pack != null && win == "" && pack.CanOpen(this))
                 {
                     win = pack.winid;
                     cpack = pack;

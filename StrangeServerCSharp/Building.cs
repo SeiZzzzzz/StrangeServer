@@ -11,6 +11,9 @@ namespace StrangeServerCSharp
         public abstract string winid { get; set; }
         public abstract void Open(Player p, string tab);
         public abstract void Rebild();
+        public abstract bool CanOpen(Player p);
+        public abstract void Remove();
+        public abstract void Update(string type);
         public void UpdatePackVis()
         {
             var v = World.THIS.GetChunkPosByCoords(x, y);
@@ -40,6 +43,7 @@ namespace StrangeServerCSharp
         public int cid { get; set; }
         public int off { get; set; }
         public char type { get; set; }
+        public int hp { get; set; }
         public uint x { get; set; }
 
         public uint y { get; set; }
@@ -55,6 +59,18 @@ namespace StrangeServerCSharp
     }
     public class Market : Building
     {
+        public override void Remove()
+        {
+        }
+        public override void Update(string type)
+        {
+
+        }
+        public override bool CanOpen(Player p)
+        {
+            return true;
+        }
+
         public static string[] mpcosts = new string[]
         {
            "8:^$10000;!$10000:",
@@ -212,6 +228,19 @@ namespace StrangeServerCSharp
         }
         public static bool checkcan(uint px, uint py, Player p)
         {
+            if (World.ongun[px + py * World.height] != null)
+            {
+                if (World.ongun[px + py * World.height].Count > 0)
+            {
+                    if (World.ongun[px + py * World.height].First() != p.clanid || World.ongun[px + py * World.height].Count > 1)
+                    {
+                        byte[] dat = System.Text.Encoding.UTF8.GetBytes("блок под пуфкой");
+
+                        p.connection.SendLocalChat(dat.Length, 0, px, py, dat);
+                        return false;
+                    }
+                }
+            }
             int valid = 0;
             for (int x = -4; x <= 4; x++)
             {
@@ -342,6 +371,16 @@ namespace StrangeServerCSharp
     }
     public class Clans : Building
     {
+        public override void Remove()
+        {
+        }
+        public override bool CanOpen(Player p)
+        {
+            return true;
+        }
+        public override void Update(string type)
+        {
+        }
         public Clans() { winid = "clans"; }
 
         public override string winid { get; set; }
@@ -353,7 +392,8 @@ namespace StrangeServerCSharp
                 var c = new HorbConst();
                 c.AddTitle("КЛАНЫ");
                 c.AddClanList();
-                foreach (var cl in BDClass.THIS.clans.Where(clan => clan.name != ""))
+                c.SetText("@@Кланы шахт. Кликните на клан для подробной информации\n");
+                foreach (var cl in BDClass.THIS.clans.Where(clan => !string.IsNullOrEmpty(clan.owner)))
                 {
                     c.AddClanListLine(cl.id.ToString(), $"<color=white>{cl.name}</color>  [{cl.abr}]", "<color=#88ff88ff>прием открыт</color>", "clan:" + cl.id);
                 }
@@ -368,8 +408,170 @@ namespace StrangeServerCSharp
             throw new NotImplementedException();
         }
     }
+    public class Gun : Building
+    {
+        public override void Remove()
+        {
+            World.THIS.SetCell(x + 1, y + 1, 32);
+            World.THIS.SetCell(x - 1, y + 1, 32);
+            World.THIS.SetCell(x + 1, y - 1, 32);
+            World.THIS.SetCell(x - 1, y - 1, 32);
+            //roads
+            World.THIS.SetCell(x + 1, y, 35);
+            World.THIS.SetCell(x + 2, y, 35);
+            World.THIS.SetCell(x - 1, y, 35);
+            World.THIS.SetCell(x - 2, y, 35);
+            //
+            World.THIS.SetCell(x, y + 1, 35);
+            World.THIS.SetCell(x, y + 2, 35);
+            World.THIS.SetCell(x, y - 1, 35);
+            World.THIS.SetCell(x, y - 2, 35);
+            BDClass.THIS.guns.Remove(this);
+            BDClass.THIS.SaveChanges();
+            this.UpdatePackVis();
+            World.ClearPack(x, y);
+            World.THIS.OnGunDel(x, y, this.cid);
+        }
+        public override bool CanOpen(Player p)
+        {
+            return p.clanid == cid;
+        }
+        public override void Update(string type)
+        {
+            if (type == "gun")
+            {
+                World.GUN(this.x, this.y,this.cid);
+            }
+        }
+        public override string winid { get; set; }
+        public int cryinside { get; set; }
+        public int crymax { get; set; }
+        public static string gtext = "choose:\n[ENTER] = установить пушку\n[ESC] = отмена:2:20:20:41:41:0000000000000000000010000000000000000000000000000000000111111011111100000000000000000000000000110000000000000110000000000000000000000110000000000000000011000000000000000000110000000000000000000001100000000000000010000000000000000000000000100000000000001000000000000000000000000000100000000000100000000000000000000000000000100000000010000000000000000000000000000000100000000100000000000000000000000000000001000000010000000000000000000000000000000001000000100000000000000000000000000000000010000010000000000000000000000000000000000010000100000000000000000000000000000000000100010000000000000000000000000000000000000100100000000000000000000000000000000000001001000000000000000000000000000000000000010010000000000000000000000000000000000000100100000000000000000000000000000000000001001000000000000000001010000000000000000010100000000000000000000000000000000000000010100000000000000000101000000000000000001001000000000000000000000000000000000000010010000000000000000000000000000000000000100100000000000000000000000000000000000001001000000000000000000000000000000000000010010000000000000000000000000000000000000100010000000000000000000000000000000000010000100000000000000000000000000000000000100000100000000000000000000000000000000010000001000000000000000000000000000000000100000001000000000000000000000000000000010000000010000000000000000000000000000000100000000010000000000000000000000000000010000000000010000000000000000000000000001000000000000010000000000000000000000000100000000000000011000000000000000000000110000000000000000001100000000000000000110000000000000000000000110000000000000110000000000000000000000000011111101111110000000000000000000000000000000000100000000000000000000 ";
+        public Gun() { winid = "gun"; crymax = 10000;cryinside = 1000; type = 'G';off = 1; }
+        public static bool checkcan(uint px, uint py, Player p)
+        {
+
+                if (World.ongun[px + py * World.height] != null)
+                {
+                    if (World.ongun[px + py * World.height].Count > 0)
+            {
+                        if (World.ongun[px + py * World.height].First() != p.clanid || World.ongun[px + py * World.height].Count > 1)
+                        {
+                            byte[] dat = System.Text.Encoding.UTF8.GetBytes("блок под пуфкой");
+
+                            p.connection.SendLocalChat(dat.Length, 0, px, py, dat);
+                            return false;
+                        }
+                    }
+                }
+            
+            int valid = 0;
+            for (int x = -2; x <= 2; x++)
+            {
+                for (int y = -2; y <= 2; y++)
+                {
+                    if (!World.THIS.ValidCoord((uint)(px + x), (uint)(py + y)))
+                    {
+                        valid++;
+                    }
+                    else
+                    {
+
+
+                        var c = World.THIS.GetCellConst((uint)(px + x), (uint)(py + y));
+                        if (!(c.is_empty && c.can_build_over))
+                        {
+                            p.connection.AddFX(0, (uint)(px + x), (uint)(py + y));
+                            valid++;
+                        }
+                    }
+                }
+            }
+            if (valid > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        public override void Open(Player p, string tab)
+        {
+            if (p.clanid != cid)
+            {
+                return;
+            }
+            var c = new HorbConst();
+            c.AddTitle("ПУФКА");
+            c.AddButton("ВЫХОД", "exit");
+            c.Send(this.winid + "." + tab, p);
+        }
+        public static Gun Build(uint x, uint y, Player p)
+        {
+            if (p.clanid == 0 || !checkcan(x,y,p))
+            {
+                return null;
+            }
+            rb(x, y);
+            var g = new Gun() { cid = p.clanid, ownerid = p.id,x = x, y = y };
+            var v = World.THIS.GetChunkPosByCoords(x, y);
+            Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
+            BDClass.THIS.guns.Add(g);
+            BDClass.THIS.SaveChanges();
+            return g;
+        }
+        public static void rb(uint x, uint y)
+        {
+            World.THIS.SetCell(x, y, 32);
+            //walls
+            World.THIS.SetCell(x + 1, y + 1, 106);
+            World.THIS.SetCell(x - 1, y + 1, 106);
+            World.THIS.SetCell(x + 1, y - 1, 106);
+            World.THIS.SetCell(x - 1, y - 1, 106);
+            //roads
+            World.THIS.SetCell(x + 1, y, 35);
+            World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).can_build_over = false;
+            World.THIS.SetCell(x + 2, y, 35);
+            World.THIS.GetCellConst((uint)(x + 2), (uint)(y)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x + 2), (uint)(y)).HP = -1;
+            World.THIS.SetCell(x - 1, y, 35);
+            World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).can_build_over = false;
+            World.THIS.SetCell(x - 2, y, 35);
+            World.THIS.GetCellConst((uint)(x - 2), (uint)(y)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x - 2), (uint)(y)).HP = -1;
+            //
+            World.THIS.SetCell(x, y + 1, 35);
+            World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).can_build_over = false;
+            World.THIS.SetCell(x, y + 2, 35);
+            World.THIS.GetCellConst((uint)(x), (uint)(y + 2)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x), (uint)(y + 2)).HP = -1;
+            World.THIS.SetCell(x, y - 1, 35);
+            World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).can_build_over = false;
+            World.THIS.SetCell(x, y - 2, 35);
+            World.THIS.GetCellConst((uint)(x), (uint)(y - 2)).is_destructible = false;
+            World.THIS.GetCellConst((uint)(x), (uint)(y - 2)).HP = -1;
+        }
+        public override void Rebild()
+        {
+            rb(x, y);
+            World.THIS.OnGunBuild(x, y, cid);
+        }
+    }
     public class Resp : Building
     {
+        public override void Remove()
+        {
+        }
+        public override bool CanOpen(Player p)
+        {
+            return true;
+        }
+        public override void Update(string type)
+        {
+
+        }
         public uint respcost { get; set; }
         public int cryinside { get; set; }
         public int crymax { get; set; }
@@ -470,6 +672,19 @@ namespace StrangeServerCSharp
         }
         public static bool checkcan(uint px, uint py, Player p)
         {
+            if (World.ongun[px + py * World.height] != null)
+            {
+                if (World.ongun[px + py * World.height].Count > 0)
+             {
+                    if (World.ongun[px + py * World.height].First() != p.clanid || World.ongun[px + py * World.height].Count > 1)
+                    {
+                        byte[] dat = System.Text.Encoding.UTF8.GetBytes("блок под пуфкой");
+
+                        p.connection.SendLocalChat(dat.Length, 0, px, py, dat);
+                        return false;
+                    }
+                }
+            }
             int valid = 0;
             for (int x = -3; x <= 7; x++)
             {

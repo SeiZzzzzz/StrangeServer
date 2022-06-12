@@ -187,7 +187,7 @@ namespace StrangeServerCSharp
                              {
                                  if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
                                  {
-                                        SetCell((uint)(x + _x), (uint)(y + _y),118);
+                                     SetCell((uint)(x + _x), (uint)(y + _y), 118);
                                  }
                                  else if (GetCell((uint)(x + _x), (uint)(y + _y)) == 118)
                                  {
@@ -197,7 +197,7 @@ namespace StrangeServerCSharp
                                  {
                                      DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
                                  }
-                                 
+
                              }
                          }
                      }
@@ -206,6 +206,76 @@ namespace StrangeServerCSharp
                  ClearPack(x, y);
                  canboom[x + y * height] = false;
              });
+        }
+        public void OnGunBuild(uint x, uint y, int cid)
+        {
+            for (int _x = -20; _x < 20; _x++)
+            {
+                for (int _y = -20; _y < 20; _y++)
+                {
+                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
+                    {
+                        if (ValidCoord((uint)(x + _x), (uint)(y + _y)))
+                        {
+                            if (ongun[(uint)(x + _x) + (uint)(y + _y) * World.height] == null)
+                            {
+                                ongun[(uint)(x + _x) + (uint)(y + _y) * World.height] = new List<int>();
+                            }
+                            if (!ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Contains(cid))
+                            {
+                                ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Add(cid);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public void OnGunDel (uint x, uint y, int cid)
+        {
+            for (int _x = -20; _x < 20; _x++)
+            {
+                for (int _y = -20; _y < 20; _y++)
+                {
+                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
+                    {
+                        if (ValidCoord((uint)(x + _x), (uint)(y + _y)))
+                        {
+                            if (ongun[(uint)(x + _x) + (uint)(y + _y) * World.height] == null)
+                            {
+                                ongun[(uint)(x + _x) + (uint)(y + _y) * World.height] = new List<int>();
+                            }
+                            if (ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Contains(cid))
+                            {
+                                ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Remove(cid);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public static void GUN(uint x, uint y, int cid)
+        {
+            World.THIS.OnGunBuild(x, y, cid);
+            for (int _x = -20; _x < 20; _x++)
+            {
+                for (int _y = -20; _y < 20; _y++)
+                {
+                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
+                    {
+                        if (World.THIS.ValidCoord((uint)(x + _x), (uint)(y + _y)))
+                        {
+                            foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
+                            {
+                                if (XServer.players[id].clanid != cid)
+                                {
+                                    XServer.players[id].HurtGun(200);
+                                    World.THIS.SendDFToBotsGlobal(7, x, y, 0, id, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         public void Raz(uint x, uint y)
         {
@@ -286,11 +356,15 @@ namespace StrangeServerCSharp
             packmap = new Building[width * height];
             boxmap = new Box[width * height];
             canboom = new bool[width * height];
+            ongun = new List<int>[width * height];
             c117UPD();
             BDClass.Load();
             Clan.InitClans();
+            GunUPD();
         }
         public static bool[] canboom;
+        public static List<int>[] ongun;
+        public static PeriodicTimer gunupdtimer = null;
         public static async void WorldUPD()
         {
             wupdtimer = new PeriodicTimer(TimeSpan.FromSeconds(3));
@@ -298,6 +372,19 @@ namespace StrangeServerCSharp
             while (await wupdtimer.WaitForNextTickAsync())
             {
                 THIS.UpdateWorld();
+            }
+        }
+        public static async void GunUPD()
+        {
+            gunupdtimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+
+            while (await gunupdtimer.WaitForNextTickAsync())
+            {
+                var packs = BDClass.THIS.packs.ToList();
+                foreach (var p in packs)
+                {
+                    p.Update("gun");
+                }
             }
         }
         public static async void c117UPD() //кс
@@ -350,20 +437,19 @@ namespace StrangeServerCSharp
                         var x = (xd + xxx);
                         var y = (yd + yyy);
                         var ch = Chunk.chunks[x, y];
-
-                        foreach (var id in ch.bots)
-                        {
-                            if (XServer.players.ContainsKey(id.Key))
+                            foreach (var id in ch.bots.Keys.ToList())
                             {
-                                var player = XServer.players[id.Key];
-
-                                if (player.pos.X == bx && player.pos.Y == by)
+                                if (XServer.players.ContainsKey(id))
                                 {
-                                    st.Push(id.Key);
-                                }
-                            }
+                                    var player = XServer.players[id];
 
-                        }
+                                    if (player.pos.X == bx && player.pos.Y == by)
+                                    {
+                                        st.Push(id);
+                                    }
+                                }
+
+                            }
                     }
                 }
             }
@@ -382,6 +468,10 @@ namespace StrangeServerCSharp
             if (r == 35)
             {
                 if (!GetCellConst(x, y).can_build_over)
+                {
+                    return;
+                }
+                if (GetCellConst(x, y).HP == -1)
                 {
                     return;
                 }

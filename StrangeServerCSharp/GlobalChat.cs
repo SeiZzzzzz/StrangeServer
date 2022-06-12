@@ -26,7 +26,7 @@
             {
                 id++;
                 time++;
-                return CHPacket.id + "±" + 15 + "±" + 29 + "±" + CHPacket.time + "±" + player.name + "±" + msg + "±" + player.id;
+                return CHPacket.id + "±" + 15 + "±" + player.clanid + "±" + CHPacket.time + "±" + player.name + "±" + msg + "±" + player.id;
             }
             public static int id = 0;
             public static int time = 0;

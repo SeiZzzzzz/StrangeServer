@@ -70,6 +70,14 @@
             {
                 this.player.connection.Send("IN", Item.usetextraz);
             }
+            else if (sel == 26)
+            {
+                this.player.connection.Send("IN", Gun.gtext);
+            }
+            else if (sel == 28)
+            {
+                this.player.connection.Send("IN", dizz);
+            }
         }
         public void Use(uint x, uint y)
         {
@@ -89,6 +97,7 @@
                     items[sel].count--;
                     this.SendInv();
                 }
+                player.GimmePacks();
                 return;
             }
             if (sel == 3)
@@ -103,9 +112,37 @@
                     items[sel].count--;
                     this.SendInv();
                 }
+                player.GimmePacks();
                 return;
             }
-            this.player.GimmePacks();
+            if (sel == 26)
+            {
+                if (player.id == 0)
+                {
+                    byte[] dat = System.Text.Encoding.UTF8.GetBytes("ДОЛБАЕБ КЛАН НУЖЕН");
+
+                    player.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+                    return;
+                }
+                uint xp = (uint)(x + (player.dir == 3 ? 1 : player.dir == 1 ? -1 : 0));
+                uint yp = (uint)(y + (player.dir == 0 ? 1 : player.dir == 2 ? -1 : 0));
+                var g = Gun.Build(xp, yp, this.player);
+                if (g != null)
+                {
+                    World.packmap[xp + yp * World.width] = g;
+                    items[sel].count--;
+                    this.SendInv();
+                }
+                player.GimmePacks();
+                return;
+            }
+            if (sel == 28)
+            {
+                Diz(x, y);
+                this.player.GimmePacks();
+                items[sel].count--;
+                return;
+            }
             if (!World.THIS.GetCellConst(x, y).is_empty)
             {
                 return;
@@ -136,8 +173,65 @@
         {
             this.player.connection.Send("IN", "show:" + GetInvL() + ":" + sel + ":" + getinv());
         }
+        public void Diz(uint x, uint y)
+        {
+            Console.WriteLine(World.packmap[x + y * World.width] != null);
+            if (World.THIS.ValidCoord(x, y))
+            {
+                if (World.packmap[x + y * World.width] != null)
+                {
+                    World.packmap[x + y * World.width].Remove();
+                    if (World.packmap[x + y * World.width].type == 'G')
+                    {
+                        items[26].count++;
+                    }
+
+                    World.packmap[x + y * World.width] = null;
+                    return;
+                }
+            }
+            int mx = (int)(x + (player.dir == 3 ? 3 : player.dir == 1 ? -3 : 0));
+            int my = (int)(y + (player.dir == 0 ? 3 : player.dir == 2 ? -3 : 0));
+            int sx = (int)(mx == 0 ? 0 : x > mx? x - 3 : x + 3);
+            int sy = (int)(my == 0 ? 0 : y > my? y - 3 : y + 3);
+            for (;sx < mx;sx++)
+            {
+                if (World.THIS.ValidCoord((uint)sx, y))
+                {
+                    if (World.packmap[sx + y * World.width] != null && World.packmap[sx + y * World.width].ownerid == player.id)
+                    {
+                        World.packmap[sx + y * World.width].Remove();
+                        World.packmap[sx + y * World.width] = null;
+                        return;
+                    }
+                }
+            }
+            for (; sy < my; sy++)
+            {
+                if (World.THIS.ValidCoord((uint)sx, y))
+                {
+                    if (World.packmap[x + sy * World.width] != null && World.packmap[x + sy * World.width].ownerid == player.id)
+                {
+                    World.packmap[x + sy * World.width].Remove();
+                    World.packmap[x + sy * World.width] = null;
+                    return;
+                }
+                 }
+            }
+        }
+        public static string dizz = "choose:ДИЗЗ\n\n[ENTER] = собрать здание в пак\n[ESC] = отмена:1:0:0:0:0:0 ";
         public bool CanBoom(uint x, uint y)
         {
+            if (World.ongun[x + y * World.height] != null)
+            {
+                if (World.ongun[x + y * World.height].First() != player.clanid || World.ongun[x + y * World.height].Count > 1)
+                {
+                    byte[] dat = System.Text.Encoding.UTF8.GetBytes("блок под пуфкой");
+
+                    player.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+                    return false;
+                }
+            }
             if (World.canboom[x + y * World.height] == false)
             {
                 return true;

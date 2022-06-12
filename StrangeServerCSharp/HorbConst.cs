@@ -37,7 +37,7 @@ namespace StrangeServerCSharp
         }
         public void AddClanListLine(string id, string text, string nexttext, string action)
         {
-            rhorb.clanlist = rhorb.list.Concat(new string[] {id, text, nexttext, action }).ToArray();
+            rhorb.clanlist = rhorb.clanlist.Concat(new string[] {id, text, nexttext, action }).ToArray();
         }
         public void SetText(string text)
         {
