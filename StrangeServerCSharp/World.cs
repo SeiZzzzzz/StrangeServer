@@ -380,11 +380,15 @@ namespace StrangeServerCSharp
 
             while (await gunupdtimer.WaitForNextTickAsync())
             {
-                var packs = BDClass.THIS.packs.ToList();
-                foreach (var p in packs)
+                try
                 {
-                    p.Update("gun");
+                    var packs = BDClass.THIS.packs.ToList();
+                    foreach (var p in packs)
+                    {
+                        p.Update("gun");
+                    }
                 }
+                catch (Exception ex) { }
             }
         }
         public static async void c117UPD() //кс

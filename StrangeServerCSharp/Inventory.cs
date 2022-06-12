@@ -224,12 +224,15 @@
         {
             if (World.ongun[x + y * World.height] != null)
             {
-                if (World.ongun[x + y * World.height].First() != player.clanid || World.ongun[x + y * World.height].Count > 1)
+                if (World.ongun[x + y * World.height].Count > 0)
                 {
-                    byte[] dat = System.Text.Encoding.UTF8.GetBytes("блок под пуфкой");
+                    if (World.ongun[x + y * World.height].First() != player.clanid || World.ongun[x + y * World.height].Count > 1)
+                    {
+                        byte[] dat = System.Text.Encoding.UTF8.GetBytes("блок под пуфкой");
 
-                    player.connection.SendLocalChat(dat.Length, 0, x, y, dat);
-                    return false;
+                        player.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+                        return false;
+                    }
                 }
             }
             if (World.canboom[x + y * World.height] == false)
