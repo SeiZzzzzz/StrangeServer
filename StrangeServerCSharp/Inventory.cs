@@ -175,7 +175,6 @@
         }
         public void Diz(uint x, uint y)
         {
-            Console.WriteLine(World.packmap[x + y * World.width] != null);
             if (World.THIS.ValidCoord(x, y))
             {
                 if (World.packmap[x + y * World.width] != null)
