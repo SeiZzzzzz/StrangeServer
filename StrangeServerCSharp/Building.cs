@@ -75,6 +75,54 @@ namespace StrangeServerCSharp
     {
         public override void Remove()
         {
+            World.THIS.SetCell(x + 3, y, 35);
+            World.THIS.SetCell(x + 4, y, 35);
+            World.THIS.SetCell(x - 3, y, 35);
+            World.THIS.SetCell(x - 4, y, 35);
+
+
+            //y
+                World.THIS.SetCell(x, y + 3, 35);
+                World.THIS.SetCell(x, y + 4, 35);
+
+                World.THIS.SetCell(x, y - 3, 35);
+
+                World.THIS.SetCell(x, y - 4, 35);
+            //osn
+            World.THIS.SetCell(x, y, 32);
+            World.THIS.SetCell(x + 1, y, 32);
+            World.THIS.SetCell(x + 2, y, 32);
+            World.THIS.SetCell(x - 2, y, 32);
+            World.THIS.SetCell(x - 1, y, 32);
+            World.THIS.SetCell(x, y + 1, 32);
+            World.THIS.SetCell(x, y + 2, 32);
+            World.THIS.SetCell(x, y - 2, 32);
+            World.THIS.SetCell(x, y - 1, 32);
+            //
+            World.THIS.SetCell(x - 1, y - 1, 32);
+            World.THIS.SetCell(x + 1, y - 1, 32);
+            World.THIS.SetCell(x - 1, y + 1, 32);
+            World.THIS.SetCell(x + 1, y + 1, 32);
+            //
+            World.THIS.SetCell(x - 1, y - 2, 32);
+            World.THIS.SetCell(x - 2, y - 1, 32);
+            World.THIS.SetCell(x - 2, y - 2, 32);
+            //
+            World.THIS.SetCell(x - 1, y + 2, 32);
+            World.THIS.SetCell(x - 2, y + 1, 32);
+            World.THIS.SetCell(x - 2, y + 2, 38);
+            //
+            World.THIS.SetCell(x + 1, y - 2, 32);
+            World.THIS.SetCell(x + 2, y - 1, 32);
+            World.THIS.SetCell(x + 2, y - 2, 32);
+            //
+            World.THIS.SetCell(x + 1, y + 2, 32);
+            World.THIS.SetCell(x + 2, y + 1, 32);
+            World.THIS.SetCell(x + 2, y + 2, 32);
+            BDClass.THIS.markets.Remove(this);
+            BDClass.THIS.SaveChanges();
+            this.UpdatePackVis();
+            World.ClearPack(x, y);
         }
 
         public override void Update(string type)
@@ -144,47 +192,47 @@ namespace StrangeServerCSharp
 
         public override void Rebild()
         {
-            World.THIS.SetCell(x + 3, y, 35);
-            World.THIS.GetCellConst(x + 3, y).is_destructible = false;
-            World.THIS.GetCellConst(x + 3, y).HP = -1;
-            World.THIS.SetCell(x + 4, y, 35);
-            World.THIS.GetCellConst(x + 4, y).is_destructible = false;
-            World.THIS.GetCellConst(x + 4, y).HP = -1;
-            World.THIS.SetCell(x - 3, y, 35);
-            World.THIS.GetCellConst(x - 3, y).is_destructible = false;
-            World.THIS.GetCellConst(x - 3, y).HP = -1;
-            World.THIS.SetCell(x - 4, y, 35);
-            World.THIS.GetCellConst(x - 4, y).is_destructible = false;
-            World.THIS.GetCellConst(x - 4, y).HP = -1;
 
+                World.THIS.SetCell(x + 3, y, 35);
+                World.THIS.GetCellConst(x + 3, y).is_destructible = false;
+                World.THIS.GetCellConst(x + 3, y).HP = -2;
+                World.THIS.SetCell(x + 4, y, 35);
+                World.THIS.GetCellConst(x + 4, y).is_destructible = false;
+                World.THIS.GetCellConst(x + 4, y).HP = -2;
+                World.THIS.SetCell(x - 3, y, 35);
+                World.THIS.GetCellConst(x - 3, y).is_destructible = false;
+                World.THIS.GetCellConst(x - 3, y).HP = -2;
+                World.THIS.SetCell(x - 4, y, 35);
+                World.THIS.GetCellConst(x - 4, y).is_destructible = false;
+                World.THIS.GetCellConst(x - 4, y).HP = -2;
 
             //y
             if (World.THIS.GetCellConst(x, y + 3) != null)
             {
                 World.THIS.SetCell(x, y + 3, 35);
                 World.THIS.GetCellConst(x, y + 3).is_destructible = false;
-                World.THIS.GetCellConst(x, y + 3).HP = -1;
+                World.THIS.GetCellConst(x, y + 3).HP = -2;
             }
 
             if (World.THIS.GetCellConst(x, y + 4) != null)
             {
                 World.THIS.SetCell(x, y + 4, 35);
                 World.THIS.GetCellConst(x, y + 4).is_destructible = false;
-                World.THIS.GetCellConst(x, y + 4).HP = -1;
+                World.THIS.GetCellConst(x, y + 4).HP = -2;
             }
 
             if (World.THIS.GetCellConst(x, y - 3) != null)
             {
                 World.THIS.SetCell(x, y - 3, 35);
                 World.THIS.GetCellConst(x, y - 3).is_destructible = false;
-                World.THIS.GetCellConst(x, y - 3).HP = -1;
+                World.THIS.GetCellConst(x, y - 3).HP = -2;
             }
 
             if (World.THIS.GetCellConst(x, y - 4) != null)
             {
                 World.THIS.SetCell(x, y - 4, 35);
                 World.THIS.GetCellConst(x, y - 4).is_destructible = false;
-                World.THIS.GetCellConst(x, y - 4).HP = -1;
+                World.THIS.GetCellConst(x, y - 4).HP = -2;
             }
 
             //osn
@@ -305,6 +353,7 @@ namespace StrangeServerCSharp
             if (tab == this.winid)
             {
                 var cry = p.crys.cry;
+
                 builder.AddTab("ПРОДАТЬ КРИ", "")
                     .AddTab("КУПИТЬ КРИ", "tab_buy")
                     .AddTab("КРЕДИТЫ И ПРОЧЕЕ", "tab_misc")
@@ -324,6 +373,7 @@ namespace StrangeServerCSharp
                 {
                     builder.Admin();
                 }
+                catch (Exception) { }
             }
             else if (tab == "market.tab_buy")
             {
@@ -345,6 +395,7 @@ namespace StrangeServerCSharp
                 {
                     builder.Admin();
                 }
+                catch (Exception) { }
             }
             else if (tab == "market.tab_misc")
             {
@@ -470,6 +521,8 @@ namespace StrangeServerCSharp
     {
         public override void Remove()
         {
+            World.THIS.SetCell(x, y, 32);
+            World.cells[x + y * World.height].HP = 1;
             World.THIS.SetCell(x + 1, y + 1, 32);
             World.THIS.SetCell(x - 1, y + 1, 32);
             World.THIS.SetCell(x + 1, y - 1, 32);
@@ -484,6 +537,11 @@ namespace StrangeServerCSharp
             World.THIS.SetCell(x, y + 2, 35);
             World.THIS.SetCell(x, y - 1, 35);
             World.THIS.SetCell(x, y - 2, 35);
+            try
+            {
+                Box.BuildBox(x, y, new long[] { 0, 0, 0, 0, 0, cryinside }, null);
+            }
+            catch (Exception e) { }
             BDClass.THIS.guns.Remove(this);
             BDClass.THIS.SaveChanges();
             this.UpdatePackVis();
@@ -586,7 +644,6 @@ namespace StrangeServerCSharp
             {
                 return;
             }
-
             var l = new string[0];
             l = l.Concat(RichListGenerator
                 .Fill("Заряд", cryinside, crymax, 5, "fill:b_100", "fill:b_1000", "fill:b_max").ToList()).ToArray();
@@ -616,6 +673,8 @@ namespace StrangeServerCSharp
         public static void rb(uint x, uint y)
         {
             World.THIS.SetCell(x, y, 32);
+            World.THIS.GetCellConst(x, y).is_destructible = false;
+            World.THIS.GetCellConst(x, y).HP = -2;
             //walls
             World.THIS.SetCell(x + 1, y + 1, 106);
             World.THIS.SetCell(x - 1, y + 1, 106);
@@ -624,26 +683,26 @@ namespace StrangeServerCSharp
             //roads
             World.THIS.SetCell(x + 1, y, 35);
             World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).HP = -1;
+            World.THIS.GetCellConst((uint)(x + 1), (uint)(y)).HP = -2;
             World.THIS.SetCell(x + 2, y, 35);
             World.THIS.GetCellConst((uint)(x + 2), (uint)(y)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x + 2), (uint)(y)).HP = -1;
             World.THIS.SetCell(x - 1, y, 35);
             World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).HP = -1;
+            World.THIS.GetCellConst((uint)(x - 1), (uint)(y)).HP = -2;
             World.THIS.SetCell(x - 2, y, 35);
             World.THIS.GetCellConst((uint)(x - 2), (uint)(y)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x - 2), (uint)(y)).HP = -1;
             //
             World.THIS.SetCell(x, y + 1, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).HP = -1;
+            World.THIS.GetCellConst((uint)(x), (uint)(y + 1)).HP = -2;
             World.THIS.SetCell(x, y + 2, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y + 2)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x), (uint)(y + 2)).HP = -1;
             World.THIS.SetCell(x, y - 1, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).is_destructible = false;
-            World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).HP = -1;
+            World.THIS.GetCellConst((uint)(x), (uint)(y - 1)).HP = -2;
             World.THIS.SetCell(x, y - 2, 35);
             World.THIS.GetCellConst((uint)(x), (uint)(y - 2)).is_destructible = false;
             World.THIS.GetCellConst((uint)(x), (uint)(y - 2)).HP = -1;
@@ -660,6 +719,38 @@ namespace StrangeServerCSharp
     {
         public override void Remove()
         {
+            World.THIS.SetCell(x, y, 32);
+            World.THIS.SetCell(x, y + 2, 32);
+            World.THIS.SetCell(x + 1, y, 32);
+            for (int px = 2; px < 6; px++)
+            {
+                for (int py = -1; py < 3; py++)
+                {
+                    if (World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)) != null)
+                    {
+                        World.THIS.SetCell((uint)(x + px), (uint)(y + py), 35);
+                    }
+                }
+            }
+            //walls
+            World.THIS.SetCell(x - 1, y, 32);
+            World.THIS.SetCell(x - 1, y + 1, 32);
+            World.THIS.SetCell(x - 1, y - 1, 32);
+            World.THIS.SetCell(x, y - 1, 32);
+            World.THIS.SetCell(x, y + 1, 32);
+            World.THIS.SetCell(x + 1, y + 1, 32);
+            World.THIS.SetCell(x + 1, y - 1, 32);
+            World.THIS.SetCell(x + 1, y + 2, 32);
+            World.THIS.SetCell(x - 1, y + 2, 32);
+            try
+            {
+                Box.BuildBox(x, y, new long[] { 0, cryinside, 0, 0, 0, 0 }, null);
+            }
+            catch (Exception e) { }
+            BDClass.THIS.resps.Remove(this);
+            BDClass.THIS.SaveChanges();
+            this.UpdatePackVis();
+            World.ClearPack(x, y);
         }
 
         public override bool CanOpen(Player p)
@@ -747,6 +838,7 @@ namespace StrangeServerCSharp
                 if (p.money >= respcost)
                 {
                     p.money -= respcost;
+                    p.SendMoney();
                 }
                 else
                 {
@@ -776,7 +868,7 @@ namespace StrangeServerCSharp
                     {
                         World.THIS.SetCell((uint)(x + px), (uint)(y + py), 35);
                         World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).is_destructible = false;
-                        World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).HP = -1;
+                        World.THIS.GetCellConst((uint)(x + px), (uint)(y + py)).HP = -2;
                     }
                 }
             }
@@ -860,10 +952,14 @@ namespace StrangeServerCSharp
                 builder.AddButton("ВЫХОД", "exit");
                 if (ownerid > 0)
                 {
-                    if (p == BDClass.THIS.players.First(p => p.id == ownerid))
+                    try
                     {
-                        builder.Admin();
+                        if (p == BDClass.THIS.players.First(p => p.id == ownerid))
+                        {
+                             builder.Admin();
+                        }
                     }
+                    catch (Exception) { }
                 }
             }
             else if (tab == "resp.ADMN")

@@ -436,8 +436,7 @@
             {
                 return false;
             }
-
-            if (!World.THIS.ValidCoordForPlace(x, y))
+            if (!World.THIS.ValidForB(x, y))
             {
                 return false;
             }
@@ -447,7 +446,7 @@
 
         public bool vf(uint x, uint y)
         {
-            if (!World.THIS.ValidCoordForPlace(x, y))
+            if (!World.THIS.ValidForB(x, y))
             {
                 return false;
             }

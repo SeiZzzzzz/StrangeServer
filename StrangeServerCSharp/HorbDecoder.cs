@@ -424,8 +424,33 @@ namespace StrangeServerCSharp
             {
                 return;
             }
-
-            if (text.StartsWith("list"))
+            if (text.StartsWith("!!clan"))
+            {
+                Clan.Open("!!clan", p);
+                return;
+            }
+            if (text.StartsWith("leave"))
+            {
+                Clan clan = null;
+                clan = BDClass.THIS.clans.First(c => c.id == p.clanid);
+                clan.Kick(p.id);
+                Exit("exit", p);
+                return;
+            }
+            if (text.StartsWith("listrow_kick"))
+            {
+                Clan clan = null;
+                var id = text.Split(':')[1];
+                clan = BDClass.THIS.clans.First(c => c.id == p.clanid);
+                if (int.TryParse(text.Split(':')[1], out var t))
+                {
+                    clan.Kick(t);
+                    Clan.Open("list", p);
+                    return;
+                }
+                Clan.Open("list", p);
+            }
+            else if (text.StartsWith("list"))
             {
                 Clan.Open(text, p);
             }
@@ -752,31 +777,22 @@ namespace StrangeServerCSharp
         {
             if (text.StartsWith("dropbox"))
             {
-                var cry = text.Split(":");
-                var box = new long[6];
-                var x = (uint)p.GetDirCord().X;
-                var y = (uint)p.GetDirCord().Y;
-                if (!World.THIS.ValidCoord(x, y) || !(World.THIS.GetCellConst(x, y).is_empty &&
-                                                      World.THIS.GetCellConst(x, y).can_build_over))
+                string[] cry = text.Split(":");
+                long[] box = new long[6];
+                uint x = (uint)p.GetDirCord().X;
+                uint y = (uint)p.GetDirCord().Y;
+                if (!(World.THIS.GetCellConst(x, y).is_empty && World.THIS.GetCellConst(x, y).can_build_over))
                 {
                     return;
                 }
 
                 for (var i = 0; i < 6; i++)
                 {
-                    var remcry = long.Parse(cry[i + 1]);
-                    if (p.crys.RemoveCrys(i, remcry))
-                    {
-                        box[i] = remcry;
-                    }
+                    long remcry = long.Parse(cry[i + 1]);
+                    box[i] = remcry;
                 }
-
-                if (box.Sum() <= 0)
-                {
-                    return;
-                }
-
-                Box.BuildBox(x, y, box);
+               
+                Box.BuildBox(x, y, box,p);
                 p.connection.Send("Gu", "");
                 p.win = "";
             }

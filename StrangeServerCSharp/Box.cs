@@ -3,14 +3,37 @@
     public class Box
     {
         public int id { get; set; }
-
         public static void BuildBox(uint x, uint y, long[] cry)
+{
+  BuildBox(x,y,cry,null);
+}
+        public static void BuildBox(uint x, uint y, long[] cry, Player p)
         {
             if (!(World.THIS.GetCellConst(x, y).is_empty && World.THIS.GetCellConst(x, y).can_build_over))
             {
                 return;
             }
-
+            if (!World.THIS.ValidForB(x, y))
+            {
+                return;
+            }
+            long[] bbox = new long[6];
+            for (int i = 0; i < 6; i++)
+            {
+                long remcry = cry[i];
+                if (p == null)
+                {
+                    bbox[i] = remcry;
+                }
+                else if (p.crys.RemoveCrys(i, remcry))
+                {
+                    bbox[i] = remcry;
+                }
+            }
+            if (bbox.Sum() <= 0)
+            {
+                return;
+            }
             var box = new Box() { bxcry = cry.Clone() as long[], x = x, y = y };
             BDClass.THIS.boxes.Add(box);
             World.boxmap[x + y * World.height] = box;

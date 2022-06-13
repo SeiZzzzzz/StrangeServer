@@ -103,7 +103,19 @@ namespace StrangeServerCSharp
             {
                 if (cells[x + y * height] != null)
                 {
-                    return cells[x + y * height].HP != -1;
+                    return cells[x + y * height].HP > -2;
+                }
+                return true;
+            }
+            return false;
+        }
+        public bool ValidForB(uint x, uint y)
+        {
+            if ((x >= 0 && y >= 0) && (x < width && y < height))
+            {
+                if (cells[x + y * height] != null)
+                {
+                    return cells[x + y * height].HP > 0;
                 }
 
                 return true;
@@ -201,44 +213,40 @@ namespace StrangeServerCSharp
             SendPack('B', x, y, 0, 0);
             canboom[x + y * height] = true;
             AsyncAction(7, () =>
-            {
-                for (var _x = -4; _x < 4; _x++)
-                {
-                    for (var _y = -4; _y < 4; _y++)
-                    {
-                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
-                                new System.Numerics.Vector2((x + _x), (y + _y))) <= 3.5f)
-                        {
-                            foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
-                            {
-                                XServer.players[id].Hurt(40);
-                            }
+             {
+                 for (int _x = -4; _x < 4; _x++)
+                 {
+                     for (int _y = -4; _y < 4; _y++)
+                     {
+                         if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 3.5f)
+                         {
+                             foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
+                             {
+                                 XServer.players[id].Hurt(40);
+                             }
+                             if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_percent))
+                             {
+                                 if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
+                                 {
+                                     SetCell((uint)(x + _x), (uint)(y + _y), 118);
+                                 }
+                                 else if (GetCell((uint)(x + _x), (uint)(y + _y)) == 118)
+                                 {
+                                     SetCell((uint)(x + _x), (uint)(y + _y), 103);
+                                 }
+                                 else
+                                 {
+                                     DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
+                                 }
 
-                            if (ValidCoord((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) <
-                                                                               GetCellConst((uint)(x + _x),
-                                                                                   (uint)(y + _y)).boom_percent))
-                            {
-                                if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
-                                {
-                                    SetCell((uint)(x + _x), (uint)(y + _y), 118);
-                                }
-                                else if (GetCell((uint)(x + _x), (uint)(y + _y)) == 118)
-                                {
-                                    SetCell((uint)(x + _x), (uint)(y + _y), 103);
-                                }
-                                else
-                                {
-                                    DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                SendDFToBotsGlobal(1, x, y, 3, 0, 0);
-                ClearPack(x, y);
-                canboom[x + y * height] = false;
-            });
+                             }
+                         }
+                     }
+                 }
+                 SendDFToBotsGlobal(1, x, y, 3, 0, 0);
+                 ClearPack(x, y);
+                 canboom[x + y * height] = false;
+             });
         }
 
         public void OnGunBuild(uint x, uint y, int cid)
@@ -372,9 +380,7 @@ namespace StrangeServerCSharp
                         if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
                                 new System.Numerics.Vector2((x + _x), (y + _y))) <= 2f)
                         {
-                            if (ValidCoord((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) <
-                                                                               GetCellConst((uint)(x + _x),
-                                                                                   (uint)(y + _y)).boom_proton_percent))
+                            if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_proton_percent))
                             {
                                 DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
                             }
@@ -548,11 +554,6 @@ namespace StrangeServerCSharp
             var r = roadmap[x + y * height];
             if (r == 35)
             {
-                if (!GetCellConst(x, y).can_build_over)
-                {
-                    return;
-                }
-
                 if (GetCellConst(x, y).HP == -1)
                 {
                     return;

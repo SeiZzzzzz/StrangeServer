@@ -102,6 +102,10 @@ namespace StrangeServerCSharp
 
         public void SendClan()
         {
+            if (this.connection == null)
+            {
+                return;
+            }
             if (clanid == 0)
             {
                 this.connection.Send("cH", "_");
@@ -223,9 +227,8 @@ namespace StrangeServerCSharp
 
             if (!cell.is_destructible)
             {
-                /*
-                this.Move((uint)this.pos.X, (uint)this.pos.Y, this.dir);
-                */
+                //this.Move((uint)this.pos.X, (uint)this.pos.Y, this.dir);
+              
                 return;
             }
 
@@ -256,7 +259,7 @@ namespace StrangeServerCSharp
                     this.connection.Send("@T", $"{pos.X}:{pos.Y}");
                     if (this.crys.AllCry > 0)
                     {
-                        Box.BuildBox(dx, dy, this.crys.cry);
+                        Box.BuildBox(dx, dy, this.crys.cry,this);
                         this.crys.ClearCrys();
                     }
 
@@ -291,8 +294,7 @@ namespace StrangeServerCSharp
                     }
                 }
             }
-
-            if (cell.HP == -1)
+            if (cell.HP < 0)
             {
                 return;
             }
@@ -443,7 +445,7 @@ namespace StrangeServerCSharp
 
         public void Build(uint x, uint y, string type)
         {
-            if (!World.THIS.ValidCoordForPlace(x, y))
+            if (!World.THIS.ValidForB(x, y))
             {
                 return;
             }
