@@ -126,6 +126,13 @@
                     player.connection.SendLocalChat(dat.Length, 0, x, y, dat);
                     return;
                 }
+                if (y < 70)
+                {
+                    byte[] dat = System.Text.Encoding.UTF8.GetBytes("крит высота пух 70");
+
+                    player.connection.SendLocalChat(dat.Length, 0, x, y, dat);
+                    return;
+                }
                 uint xp = (uint)(x + (player.dir == 3 ? 1 : player.dir == 1 ? -1 : 0));
                 uint yp = (uint)(y + (player.dir == 0 ? 1 : player.dir == 2 ? -1 : 0));
                 var g = Gun.Build(xp, yp, this.player);
@@ -148,6 +155,14 @@
                     {
                         items[26].count++;
                     }
+                    else if (rpack.type == 'R')
+                    {
+                        items[1].count++;
+                    }
+                    else if (rpack.type == 'M')
+                    {
+                        items[3].count++;
+                    }
                     this.player.GimmePacks();
                     items[sel].count--;
                 }
@@ -167,7 +182,7 @@
             }
             else if (this.sel == 6)
             {
-                World.THIS.Prot(x, y);
+               World.THIS.Prot(x, y);
             }
             else if (this.sel == 7)
             {
@@ -191,45 +206,43 @@
             {
                 if (World.packmap[x + y * World.width] != null && World.packmap[x + y * World.width].ownerid == player.id)
                 {
-                    World.packmap[x + y * World.width].Remove();
                     rpack = World.packmap[x + y * World.width];
+                    World.packmap[x + y * World.width].Remove();
                     World.packmap[x + y * World.width] = null;
                     return true;
                 }
             }
-            uint xp = (uint)(x + (player.dir == 3 ? 3 : player.dir == 1 ? -3 : 0));
-            uint yp = (uint)(y + (player.dir == 0 ? 3 : player.dir == 2 ? -3 : 0));
-            var xx = xp;
-            var yy = yp;
+            int xp = (player.dir == 3 ? 3 : player.dir == 1 ? -3 : 0);
+            int yp = (player.dir == 0 ? 3 : player.dir == 2 ? -3 : 0);
             if (player.dir == 3 || player.dir == 1)
             {
-                if (xp < x)
+                if (xp < 0)
                 {
-                    for (; xx <= x;xx++)
+                    for (;(x + xp) <= x;xp++)
                     {
-                        if (World.THIS.ValidCoord(xx, y))
+                        if (World.THIS.ValidCoord((uint)(x + xp), y))
                         {
-                            if (World.packmap[xx + y * World.width] != null && World.packmap[xx + y * World.width].ownerid == player.id)
+                            if (World.packmap[(uint)(x + xp) + y * World.width] != null && World.packmap[(uint)(x + xp) + y * World.width].ownerid == player.id)
                             {
-                                World.packmap[xx + y * World.width].Remove();
-                                rpack = World.packmap[xx + y * World.width];
-                                World.packmap[xx + y * World.width] = null;
+                                rpack = World.packmap[(uint)(x + xp) + y * World.width];
+                                World.packmap[(uint)(x + xp) + y * World.width].Remove();
+                                World.packmap[(uint)(x + xp) + y * World.width] = null;
                                 return true;
                             }
                         }
                     }
                 }
-                if (xp > x)
+                if ((y + xp) > y)
                 {
-                    for (; xx >= x; xx--)
+                    for (; (y + xp) >= y; xp--)
                     {
-                        if (World.THIS.ValidCoord(xx, y))
+                        if (World.THIS.ValidCoord((uint)(x + xp), y))
                         {
-                            if (World.packmap[xx + y * World.width] != null && World.packmap[xx + y * World.width].ownerid == player.id)
+                            if (World.packmap[(uint)(x + xp) + y * World.width] != null && World.packmap[(uint)(x + xp) + y * World.width].ownerid == player.id)
                             {
-                                World.packmap[xx + y * World.width].Remove();
-                                rpack = World.packmap[xx + y * World.width];
-                                World.packmap[xx + y * World.width] = null;
+                                rpack = World.packmap[(uint)(x + xp) + y * World.width];
+                                World.packmap[(uint)(x + xp) + y * World.width].Remove();
+                                World.packmap[(uint)(x + xp) + y * World.width] = null;
                                 return true;
                             }
                         }
@@ -238,33 +251,33 @@
             }
             else if (player.dir == 0 || player.dir == 2)
             {
-                if (yp < y)
+                if ((y + yp) < y)
                 {
-                    for (; yy <= y; yy++)
+                    for (; (y + yp) <= y; yp++)
                     {
-                        if (World.THIS.ValidCoord(x, yy))
+                        if (World.THIS.ValidCoord(x, (uint)(y + yp)))
                         {
-                            if (World.packmap[x + yy * World.width] != null && World.packmap[x + yy * World.width].ownerid == player.id)
+                            if (World.packmap[x + (uint)(y + yp) * World.width] != null && World.packmap[x + (uint)(y + yp) * World.width].ownerid == player.id)
                             {
-                                World.packmap[x + yy * World.width].Remove();
-                                rpack = World.packmap[x + yy * World.width];
-                                World.packmap[x + yy * World.width] = null;
+                                rpack = World.packmap[x + (uint)(y + yp) * World.width];
+                                World.packmap[x + (uint)(y + yp) * World.width].Remove();
+                                World.packmap[x + (uint)(y + yp) * World.width] = null;
                                 return true;
                             }
                         }
                     }
                 }
-                if (yp > y)
+                if ((y + yp) > y)
                 {
-                    for (; yy >= y; yy--)
+                    for (; (y + yp) >= y; yp--)
                     {
-                        if (World.THIS.ValidCoord(x, yy))
+                        if (World.THIS.ValidCoord(x, (uint)(y + yp)))
                         {
-                            if (World.packmap[x + yy * World.width] != null && World.packmap[x + yy * World.width].ownerid == player.id)
+                            if (World.packmap[x + (uint)(y + yp) * World.width] != null && World.packmap[x + (uint)(y + yp) * World.width].ownerid == player.id)
                             {
-                                World.packmap[x + yy * World.width].Remove();
-                                rpack = World.packmap[x + yy * World.width];
-                                World.packmap[x + yy * World.width] = null;
+                                rpack = World.packmap[x + (uint)(y + yp) * World.width];
+                                World.packmap[x + (uint)(y + yp) * World.width].Remove();
+                                World.packmap[x + (uint)(y + yp) * World.width] = null;
                                 return true;
                             }
                         }

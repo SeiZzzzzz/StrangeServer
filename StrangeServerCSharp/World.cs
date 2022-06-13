@@ -93,7 +93,19 @@ namespace StrangeServerCSharp
             {
                 if (cells[x + y * height] != null)
                 {
-                    return cells[x + y * height].HP != -1;
+                    return cells[x + y * height].HP > -2;
+                }
+                return true;
+            }
+            return false;
+        }
+        public bool ValidForB(uint x, uint y)
+        {
+            if ((x >= 0 && y >= 0) && (x < width && y < height))
+            {
+                if (cells[x + y * height] != null)
+                {
+                    return cells[x + y * height].HP > 0;
                 }
                 return true;
             }
@@ -195,7 +207,7 @@ namespace StrangeServerCSharp
                              {
                                  XServer.players[id].Hurt(40);
                              }
-                             if (ValidCoord((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_percent))
+                             if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_percent))
                              {
                                  if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
                                  {
@@ -336,7 +348,7 @@ namespace StrangeServerCSharp
                         }
                         if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 2f)
                         {
-                            if (ValidCoord((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_proton_percent))
+                            if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_proton_percent))
                             {
                                 DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
                             }
@@ -491,10 +503,6 @@ namespace StrangeServerCSharp
             byte r = roadmap[x + y * height];
             if (r == 35)
             {
-                if (!GetCellConst(x, y).can_build_over)
-                {
-                    return;
-                }
                 if (GetCellConst(x, y).HP == -1)
                 {
                     return;
