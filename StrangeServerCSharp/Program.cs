@@ -15,6 +15,10 @@ namespace StrangeServerCSharp
             var port = 8090;
             var server = new XServer(IPAddress.Any, port);
             server.Start();
+            Task.Run(() =>
+            {
+                ProgInterpreter.THIS.Init();
+            });
             for (;;)
             {
                 var line = Console.ReadLine();
@@ -47,9 +51,10 @@ namespace StrangeServerCSharp
         public static XServer THIS;
         public static Dictionary<int, Player> players = new Dictionary<int, Player>();
         public BDClass db = new BDClass();
-
+        public IList<Session> PlayerSessions { get; set; }
         public XServer(IPAddress address, int port) : base(address, port)
         {
+            PlayerSessions = new List<Session>();
             Console.WriteLine("Started");
             THIS = this;
             chunkscx = width / 32;
@@ -92,7 +97,9 @@ namespace StrangeServerCSharp
 
         protected override TcpSession CreateSession()
         {
-            return new Session(this);
+            var session = new Session(this);
+            PlayerSessions.Add(session);
+            return session;
         }
 
         protected override void OnError(SocketError error)
@@ -639,6 +646,12 @@ namespace StrangeServerCSharp
                 }
                 else if (ty.eventType == "pRST")
                 {
+                    Send("@P", "");
+                    if (player.ProgData != null)
+                    {
+                        player.ProgData.IsActive = false;
+                    }
+                    
                 }
                 else if (ty.eventType == "PROG")
                 {
@@ -649,6 +662,8 @@ namespace StrangeServerCSharp
                         var source = Encoding.UTF8.GetString(ty.data.Skip(sizeof(int) * 2 + length).ToArray());
                         var prog = player.Progs.FirstOrDefault(x => x.id == id);
                         prog.source = source;
+                        Send("@P", "1");
+                        player.ProgData = ProgData.FromString(source);
                     }
                 }
                 else if (ty.eventType == "PDEL")
@@ -662,6 +677,11 @@ namespace StrangeServerCSharp
                     var id = int.Parse(Encoding.UTF8.GetString(ty.data).Trim());
                     HorbDecoder.Prog("copy:" + id, player);
                 } 
+                else if (ty.eventType == "PREN")
+                {
+                    var id = int.Parse(Encoding.UTF8.GetString(ty.data).Trim());
+                    HorbDecoder.Prog("rename:" + id, player);
+                }
             }
         }
 
