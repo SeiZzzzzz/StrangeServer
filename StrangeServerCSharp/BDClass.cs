@@ -17,8 +17,11 @@ namespace StrangeServerCSharp
 
         public BDClass()
         {
-            Console.WriteLine(Database.EnsureCreated());
-            THIS = this;
+            if (THIS == null)
+            {
+                Console.WriteLine(Database.EnsureCreated());
+                THIS = this;
+            }
         }
 
         public static bool NickAvl(string nick)
@@ -68,7 +71,7 @@ namespace StrangeServerCSharp
             return player;
         }
 
-        public static BDClass THIS;
+        public static BDClass THIS = null;
 
         public static void Save()
         {
