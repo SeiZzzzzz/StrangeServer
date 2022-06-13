@@ -17,27 +17,29 @@ namespace StrangeServerCSharp
 
         public static void InitClans()
         {
-            if (BDClass.THIS.clans.Count() == 0)
+            using var db = new BDClass();
+            if (!db.clans.Any())
             {
                 for (var i = 1; i <= 219; i++)
                 {
-                    BDClass.THIS.clans.Add(new Clan() { abr = "", owner = "", name = "" });
+                    db.clans.Add(new Clan() { abr = "", owner = "", name = "" });
                 }
             }
 
-            BDClass.THIS.SaveChanges();
+            db.SaveChanges();
         }
 
         public static void CreateClan(int id, string name, string abr, Player p)
         {
-            var clan = BDClass.THIS.clans.First(i => i.id == id);
+            using var db = new BDClass();
+            var clan = db.clans.First(i => i.id == id);
             clan.name = name;
             clan.abr = abr;
             clan.owner = p.id.ToString();
             p.clanid = id;
             p.SendMoney();
             p.SendClan();
-            BDClass.THIS.SaveChanges();
+            db.SaveChanges();
         }
 
         public void AddReq(int id)
@@ -61,6 +63,7 @@ namespace StrangeServerCSharp
 
         public static void Open(string t, Player p)
         {
+            using var db = new BDClass();
             var builder = new HorbBuilder();
             if (t == winid)
             {
@@ -69,13 +72,13 @@ namespace StrangeServerCSharp
                     return;
                 }
 
-                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+                var clan = db.clans.First(clan => clan.id == p.clanid);
                 builder.SetTitle(clan.name)
                     .AddCard("c", p.clanid.ToString(),
                         $"<color=white>Winx </color>\nУчастники: <color=white> {1 + clan.GetMemberList().Count} </color> ")
                     .AddTab("ОБЗОР", "");
                 builder.AddTab("СПИСОК", "list");
-               builder.AddButton("ПОКИНУТЬ КЛАН", "leave");
+                builder.AddButton("ПОКИНУТЬ КЛАН", "leave");
                 if (clan.reqs.Count > 0)
                 {
                     builder.AddTab($"<color=#ff8888ff>ЗАЯВКИ ({clan.reqs.Count})</color>", "reqs");
@@ -88,7 +91,7 @@ namespace StrangeServerCSharp
                     return;
                 }
 
-                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+                var clan = db.clans.First(clan => clan.id == p.clanid);
                 builder.SetTitle(clan.name);
                 var num = 0;
                 builder.AddTab("ОБЗОР", "clan");
@@ -101,7 +104,7 @@ namespace StrangeServerCSharp
 
                 foreach (var id in clan.reqs)
                 {
-                    var player = BDClass.THIS.players.First(i => i.id == id);
+                    var player = db.players.First(i => i.id == id);
                     num++;
                     builder.AddListLine($"{num} <color=white>{player.name}</color>", "...", $"req:{id}:{clan.id}");
                 }
@@ -112,31 +115,42 @@ namespace StrangeServerCSharp
                 {
                     return;
                 }
-                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+
+                var clan = db.clans.First(clan => clan.id == p.clanid);
                 if (p.id.ToString() != clan.owner)
                 {
                     return;
                 }
+
                 builder.SetTitle(clan.name);
                 int num = 0;
-                builder.AddTab("ОБЗОР", "!!clan"); builder.AddTab("СПИСОК", "list");
-                if (!int.TryParse(t.Split(':')[1],out var v))
+                builder.AddTab("ОБЗОР", "!!clan");
+                builder.AddTab("СПИСОК", "list");
+                if (!int.TryParse(t.Split(':')[1], out var v))
                 {
                     return;
                 }
-                     Player player = null;
+
+                Player player = null;
                 try
                 {
-                    player = BDClass.THIS.players.First(p => p.id == v);
+                    player = db.players.First(p => p.id == v);
                 }
-                catch (Exception ex) { }
-                if (player == null) { return; }
-                builder.SetText($"@@ПРОФИЛЬ СОКЛАНА\n\nНик:<color=white>{player.name}</color>\nУровень:{player.lvl.Sum()}");
+                catch (Exception ex)
+                {
+                }
+
+                if (player == null)
+                {
+                    return;
+                }
+
+                builder.SetText(
+                    $"@@ПРОФИЛЬ СОКЛАНА\n\nНик:<color=white>{player.name}</color>\nУровень:{player.lvl.Sum()}");
                 if (p.id != player.id && player.id.ToString() != clan.owner)
                 {
                     builder.AddButton("ИСКЛЮЧИТЬ ИЗ КЛАНА", "listrow_kick:" + player.id);
                 }
-
             }
             else if (t.StartsWith("list"))
             {
@@ -145,7 +159,7 @@ namespace StrangeServerCSharp
                     return;
                 }
 
-                var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
+                var clan = db.clans.First(clan => clan.id == p.clanid);
                 builder.SetTitle(clan.name);
                 builder.AddClanList();
                 var num = 0;
@@ -155,11 +169,12 @@ namespace StrangeServerCSharp
                 {
                     builder.AddTab($"<color=#ff8888ff>ЗАЯВКИ ({clan.reqs.Count})</color>", "");
                 }
-                var player = BDClass.THIS.players.First(i => i.id.ToString() == clan.owner);
+
+                var player = db.players.First(i => i.id.ToString() == clan.owner);
                 builder.AddClanListLine("0", $"{num}.<color=white>{player.name}</color>", "", "listrow:" + clan.owner);
                 foreach (var id in clan.GetMemberList())
                 {
-                    player = BDClass.THIS.players.First(i => i.id == id);
+                    player = db.players.First(i => i.id == id);
                     num++;
                     builder.AddClanListLine("0", $"{num}.<color=white>{player.name}</color>", "", "listrow:" + id);
                 }
@@ -170,7 +185,8 @@ namespace StrangeServerCSharp
 
         public static void DeleteClan(int id, Player p)
         {
-            var clan = BDClass.THIS.clans.First(i => i.id == id);
+            using var db = new BDClass();
+            var clan = db.clans.First(i => i.id == id);
             clan.name = "";
             clan.abr = "";
             clan.owner = "";
@@ -178,20 +194,22 @@ namespace StrangeServerCSharp
             p.SendClan();
             p.creds += 1000;
             p.SendMoney();
-            BDClass.THIS.SaveChanges();
+            db.SaveChanges();
         }
 
         public static Clan finclan(int id)
         {
-            return BDClass.THIS.clans.First(i => i.id == id);
+            using var db = new BDClass();
+            return db.clans.First(i => i.id == id);
         }
 
-        public void Addmember(int memberid)
+        public void AddMember(int memberid)
         {
+            using var db = new BDClass();
             Player player = null;
             try
             {
-                player = BDClass.THIS.players.First(p => p.id == memberid);
+                player = db.players.First(p => p.id == memberid);
             }
             catch (Exception ex)
             {
@@ -209,25 +227,28 @@ namespace StrangeServerCSharp
                 memberList += ":" + memberid.ToString();
             }
 
-            BDClass.THIS.SaveChanges();
+            db.SaveChanges();
         }
 
         public static List<Clan> GetAvlClanIcon()
         {
+            using var db = new BDClass();
             var l = new List<Clan>();
             var col = 8;
             for (var i = 0; i < col; i++)
             {
                 var r = World.Random.Next(1, 219);
-                var c = BDClass.THIS.clans.Where(j => string.IsNullOrEmpty(j.owner)).ToList();
+                var c = db.clans.Where(j => string.IsNullOrEmpty(j.owner)).ToList();
                 var clan = c.ElementAt(new Index(World.Random.Next(1, c.Count())));
                 l.Add(clan);
             }
 
             return l;
         }
+
         public void Kick(int id)
         {
+            using var db = new BDClass();
             var members = GetMemberList();
             if (members.Contains(id))
             {
@@ -237,26 +258,36 @@ namespace StrangeServerCSharp
             {
                 if (owner == id.ToString())
                 {
-                    DeleteClan(this.id,BDClass.THIS.players.First(p => p.id == id));
+                    DeleteClan(this.id, db.players.First(p => p.id == id));
                 }
             }
+
             Player player = null;
             try
             {
-                player = BDClass.THIS.players.First(p => p.id == id);
+                player = db.players.First(p => p.id == id);
             }
-            catch (Exception ex) { }
-            if (player == null) { return; }
+            catch (Exception ex)
+            {
+            }
+
+            if (player == null)
+            {
+                return;
+            }
+
             player.clanid = 0;
             player.SendClan();
-           
+
             memberList = "";
             foreach (var memberid in members)
             {
                 memberList += ":" + memberid.ToString();
             }
-            BDClass.THIS.SaveChanges();
+
+            db.SaveChanges();
         }
+
         public List<int> GetMemberList()
         {
             var m = memberList.Split(":");

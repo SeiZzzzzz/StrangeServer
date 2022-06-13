@@ -12,6 +12,16 @@ namespace StrangeServerCSharp
     {
         static void Main(string[] a)
         {
+            var configPath = "config.json";
+            if (File.Exists(configPath))
+            {
+                Config.THIS = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
+            }
+            else
+            {
+                Config.THIS = new Config();
+                File.WriteAllText(configPath, JsonConvert.SerializeObject(Config.THIS, Formatting.Indented));
+            }
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
             var port = 8090;
             var server = new XServer(IPAddress.Any, port);
@@ -344,7 +354,8 @@ namespace StrangeServerCSharp
                     if (!string.IsNullOrWhiteSpace(auname) && !string.IsNullOrWhiteSpace(aupasswd) &&
                         !BDClass.NickAvl(auname))
                     {
-                        this.player = BDClass.THIS.CreatePlayer(auname, aupasswd);
+                        using var db = new BDClass();
+                        this.player = db.CreatePlayer(auname, aupasswd);
                         autosed = false;
                         Send("AH", this.player.id + "_" + this.player.hash);
                         ret = false;
@@ -360,6 +371,7 @@ namespace StrangeServerCSharp
 
         public void InitPlayer()
         {
+            using var db = new BDClass();
             this.player.connection = this;
             Console.WriteLine("connected " + player.id);
             if (!XServer.players.ContainsKey(this.player.id))
@@ -389,7 +401,7 @@ namespace StrangeServerCSharp
             this.player.SendHp();
             this.player.SendLvl();
             this.player.TryToGetChunks();
-            this.player.settings = BDClass.THIS.settings.First(i => i.id == player.id);
+            this.player.settings = db.settings.First(i => i.id == player.id);
             if (this.player.settings != null)
             {
                 this.player.settings.SendSett(this.player);

@@ -410,9 +410,8 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var id in ch.bots)
+                        foreach (var player in ch.bots.Select(id => XServer.players[id.Key]))
                         {
-                            var player = XServer.players[id.Key];
                             player.connection.AddDFX(fx, dir, fxx, fxy, this.id, col);
                         }
                     }
@@ -433,9 +432,8 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var id in ch.bots)
+                        foreach (var player in ch.bots.Select(id => XServer.players[id.Key]))
                         {
-                            var player = XServer.players[id.Key];
                             player.connection.AddFX(fx, fxx, fxy);
                         }
                     }
@@ -513,8 +511,8 @@ namespace StrangeServerCSharp
                 return;
             }
 
-            var healhp = (int)(this.lvl[1] * 1.7f);
-            if ((hp + healhp) > maxhp)
+            var healHp = (int)(this.lvl[1] * 1.7f);
+            if ((hp + healHp) > maxhp)
             {
                 hp = maxhp;
                 SendDFToBots(5, 0, 0, 0, 0);
@@ -522,12 +520,12 @@ namespace StrangeServerCSharp
             }
             else
             {
-                hp += healhp;
+                hp += healHp;
                 SendDFToBots(5, 0, 0, 0, 0);
                 SendHp();
             }
 
-            counter[1] += healhp;
+            counter[1] += healHp;
             if (nextlvl[1] <= counter[1])
             {
                 counter[1] = 0;
@@ -638,7 +636,8 @@ namespace StrangeServerCSharp
         {
             this.name = text;
             this.connection.SendNick(id, name);
-            BDClass.THIS.SaveChanges();
+            using var db = new BDClass();
+            db.SaveChanges();
         }
 
         public void SendLocalMsg(byte[] msg)

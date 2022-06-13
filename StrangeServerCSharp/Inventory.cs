@@ -102,8 +102,9 @@
                 var m = Resp.Build(xp, yp, this.player);
                 if (m != null)
                 {
+                    using var db = new BDClass();
                     World.packmap[xp + yp * World.width] = m;
-                    BDClass.THIS.resps.Add(m);
+                    db.resps.Add(m);
                     items[sel].count--;
                     this.SendInv();
                     Building.AddPack();
@@ -120,8 +121,9 @@
                 var m = Market.Build(xp, yp, this.player);
                 if (m != null)
                 {
+                    using var db = new BDClass();
                     World.packmap[xp + yp * World.width] = m;
-                    BDClass.THIS.markets.Add(m);
+                    db.markets.Add(m);
                     items[sel].count--;
                     this.SendInv();
                     Building.AddPack();

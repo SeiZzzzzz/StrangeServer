@@ -278,7 +278,8 @@ namespace StrangeServerCSharp
         {
             if (p.settings == null)
             {
-                p.settings = BDClass.THIS.settings.First(s => s.id == p.id);
+                var db = new BDClass();
+                p.settings = db.settings.First(s => s.id == p.id);
             }
 
             if (!string.IsNullOrWhiteSpace(text))
@@ -301,7 +302,8 @@ namespace StrangeServerCSharp
                     p.settings.ctrl = int.Parse(ar[12]);
                     p.settings.mof = int.Parse(ar[14]);
                     p.settings.SendSett(p);
-                    BDClass.THIS.SaveChanges();
+                    var db = new BDClass();
+                    db.SaveChanges();
                 }
 
                 if (p.clanid != 0)
@@ -416,6 +418,7 @@ namespace StrangeServerCSharp
 
         public static void cl(string text, Player p)
         {
+            var db = new BDClass();
             if (p.clanid == 0)
             {
                 return;
@@ -427,8 +430,7 @@ namespace StrangeServerCSharp
             }
             if (text.StartsWith("leave"))
             {
-                Clan clan = null;
-                clan = BDClass.THIS.clans.First(c => c.id == p.clanid);
+                var clan = db.clans.First(c => c.id == p.clanid);
                 clan.Kick(p.id);
                 Exit("exit", p);
                 return;
@@ -437,7 +439,7 @@ namespace StrangeServerCSharp
             {
                 Clan clan = null;
                 var id = text.Split(':')[1];
-                clan = BDClass.THIS.clans.First(c => c.id == p.clanid);
+                clan = db.clans.First(c => c.id == p.clanid);
                 if (int.TryParse(text.Split(':')[1], out var t))
                 {
                     clan.Kick(t);
@@ -461,7 +463,7 @@ namespace StrangeServerCSharp
                 var id = text.Split(':')[2];
                 try
                 {
-                    clan = BDClass.THIS.clans.First(c => c.id.ToString() == id);
+                    clan = db.clans.First(c => c.id.ToString() == id);
                 }
                 catch (Exception)
                 {
@@ -480,7 +482,7 @@ namespace StrangeServerCSharp
                         return;
                     }
 
-                    clan.Addmember(t);
+                    clan.AddMember(t);
                     clan.RemoveReq(t);
                     Clan.Open("reqs", p);
                     return;
@@ -497,6 +499,7 @@ namespace StrangeServerCSharp
 
         public static void ConsClans(string text, Player p)
         {
+            var db = new BDClass();
             if (text.StartsWith("clans"))
             {
                 new Clans().Open(p, "!!clans");
@@ -516,7 +519,7 @@ namespace StrangeServerCSharp
                 Clan clan = null;
                 try
                 {
-                    clan = BDClass.THIS.clans.First(c => c.id.ToString() == id);
+                    clan = db.clans.First(c => c.id.ToString() == id);
                 }
                 catch (Exception)
                 {
