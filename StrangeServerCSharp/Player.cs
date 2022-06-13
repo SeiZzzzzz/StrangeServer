@@ -33,9 +33,11 @@ namespace StrangeServerCSharp
         public int clanid { get; set; }
         public Settings settings { get; set; }
 
-        public IList<Prog> Progs { get; set; }
+        public List<Prog> Progs { get; set; }
         [NotMapped]
         public ProgData ProgData { get; set; }
+        [NotMapped]
+        public int CurrentProgId { get; set; }
 
         public int dir;
         public int skin;
@@ -65,7 +67,6 @@ namespace StrangeServerCSharp
 
         public Player()
         {
-            Progs = new List<Prog>();
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;
@@ -746,7 +747,7 @@ namespace StrangeServerCSharp
             }
         }
 
-        public void Move(uint x, uint y, int dir, bool update = false)
+        public void Move(uint x, uint y, int dir, bool smooth = false)
         {
             if (!World.THIS.ValidCoord(x, y))
             {
@@ -770,33 +771,36 @@ namespace StrangeServerCSharp
                     win = pack.winid;
                     cpack = pack;
                 }
+                
 
-                if (!string.IsNullOrEmpty(win) && win.StartsWith("!!"))
+                if (!string.IsNullOrEmpty(win))
                 {
-                    if (win.StartsWith("!!settings"))
+                    if (win.StartsWith("!!"))
                     {
-                        settings.Open(settings.winid, this);
+                        if (win.StartsWith("!!settings"))
+                        {
+                            settings.Open(settings.winid, this);
+                        }
+
+                        this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
+                        return;
                     }
 
-                    this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
-                    return;
-                }
-
-                if (!string.IsNullOrEmpty(win) &&
-                    World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null)
-                {
-                    World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width].Open(this, this.win);
-                    this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(win) && update)
-                {
-                    this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
+                    if (World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null)
+                    {
+                        World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width].Open(this, this.win);
+                        this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
+                        return;
+                    }
                 }
 
                 pos = newpos;
                 this.dir = dir;
+
+                if (smooth)
+                {
+                    this.connection.Send("@t", $"{this.pos.X}:{this.pos.Y}");
+                }
             }
             else
             {

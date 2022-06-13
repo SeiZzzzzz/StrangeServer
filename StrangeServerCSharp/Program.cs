@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace StrangeServerCSharp
@@ -650,6 +651,7 @@ namespace StrangeServerCSharp
                     if (player.ProgData != null)
                     {
                         player.ProgData.IsActive = false;
+                        player.tail = 0;
                     }
                     
                 }
@@ -658,18 +660,29 @@ namespace StrangeServerCSharp
                     var length = BitConverter.ToInt32(ty.data.Take(sizeof(int)).ToArray());
                     if (length != 0)
                     {
+                        using var db = new BDClass();
                         var id = BitConverter.ToInt32(ty.data.Skip(sizeof(int)).Take(sizeof(int)).ToArray());
                         var source = Encoding.UTF8.GetString(ty.data.Skip(sizeof(int) * 2 + length).ToArray());
-                        var prog = player.Progs.FirstOrDefault(x => x.id == id);
+                        var progs = db.players.Include(x => x.Progs).FirstOrDefault(x => x.id == player.id)?.Progs;
+                        var prog = progs.FirstOrDefault(x => x.id == id);
                         prog.source = source;
+                        db.SaveChanges();
+                        player.tail = 1;
                         Send("@P", "1");
                         player.ProgData = ProgData.FromString(source);
                     }
                 }
                 else if (ty.eventType == "PDEL")
                 {
+                    using var db = new BDClass();
+                    
                     var id = int.Parse(Encoding.UTF8.GetString(ty.data).Trim());
-                    player.Progs.Remove(player.Progs.FirstOrDefault(x => x.id == id));
+                    var prog = db.progs.Include(x => x.player).FirstOrDefault(x => x.id == id);
+                    if (prog.player.id == player.id)
+                    {
+                        db.progs.Remove(prog);
+                        db.SaveChanges();
+                    }
                     HorbDecoder.Prog("prog", player);
                 }
                 else if (ty.eventType == "PCOP")
@@ -680,7 +693,7 @@ namespace StrangeServerCSharp
                 else if (ty.eventType == "PREN")
                 {
                     var id = int.Parse(Encoding.UTF8.GetString(ty.data).Trim());
-                    HorbDecoder.Prog("rename:" + id, player);
+                    HorbDecoder.Prog("rename", player);
                 }
             }
         }
@@ -720,8 +733,8 @@ namespace StrangeServerCSharp
             var data = new byte[13];
             data[0] = (byte)'X';
             data[1] = (byte)dir;
-            data[2] = (byte)0;
-            data[3] = (byte)0;
+            data[2] = (byte)skin;
+            data[3] = (byte)tail;
             System.Buffer.BlockCopy(BitConverter.GetBytes(bid), 0, data, 4, 2);
             System.Buffer.BlockCopy(BitConverter.GetBytes(x), 0, data, 6, 2);
             System.Buffer.BlockCopy(BitConverter.GetBytes(y), 0, data, 8, 2);

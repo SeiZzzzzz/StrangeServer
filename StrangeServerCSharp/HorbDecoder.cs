@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -78,10 +79,13 @@ namespace StrangeServerCSharp
 
         public static void Prog(string text, Player p)
         {
-            if (text.StartsWith("open") )
+            using var db = new BDClass();
+            var progs = db.players.Include(x => x.Progs).FirstOrDefault(x => x.id == p.id)?.Progs;
+            if (text.StartsWith("open"))
             {
                 var id = int.Parse(text.Split(":").Last());
-                var prog = p.Progs.FirstOrDefault(x => x.id == id);
+                p.CurrentProgId = id;
+                var prog = progs.FirstOrDefault(x => x.id == id);
                 p.connection.Send("Gu", "");
                 p.win = null;
                 p.connection.Send("#P", JsonConvert.SerializeObject(prog));
@@ -102,15 +106,17 @@ namespace StrangeServerCSharp
             else if (text.StartsWith("create2"))
             {
                 var title = text.Split(":").Last();
+                var id = db.progs.Any() ? db.progs.OrderBy(x => x.id).Last().id + 1 : 1;
                 var prog = new Prog
                 {
-                    id = BDClass.THIS.progs.Any() ? BDClass.THIS.progs.OrderBy(x => x.id).Last().id + 1 : 1,
+                    id = id,
                     title = title,
                     source = ""
                 };
-                BDClass.THIS.progs.Add(prog);
-                p.Progs.Add(prog);
-                BDClass.THIS.SaveChanges();
+                p.CurrentProgId = id;
+                db.progs.Add(prog);
+                progs.Add(prog);
+                db.SaveChanges();
                 p.connection.Send("Gu", "");
                 p.win = null;
                 p.connection.Send("#P", JsonConvert.SerializeObject(prog));
@@ -118,29 +124,32 @@ namespace StrangeServerCSharp
             else if (text.StartsWith("copy"))
             {
                 var id = int.Parse(text.Split(":").Last());
-                var oldProg = p.Progs.FirstOrDefault(x => x.id == id);
+                var oldProg = progs.FirstOrDefault(x => x.id == id);
                 var newTitle = oldProg.title;
                 if (newTitle[newTitle.Length - 2] == '#')
                 {
                     if (int.TryParse(newTitle.Last().ToString(), out var index))
                     {
-                        newTitle = newTitle[..^1] + (index+1);
+                        newTitle = newTitle[..^1] + (index + 1);
                     }
-                    
+
                 }
                 else
                 {
                     newTitle += " #2";
                 }
+
+                var newId = db.progs.Any() ? db.progs.OrderBy(x => x.id).Last().id + 1 : 1;
                 var prog = new Prog
                 {
-                    id = BDClass.THIS.progs.Any() ? BDClass.THIS.progs.OrderBy(x => x.id).Last().id + 1 : 1,
+                    id = newId,
                     title = newTitle,
                     source = oldProg.source
                 };
-                BDClass.THIS.progs.Add(prog);
-                p.Progs.Add(prog);
-                BDClass.THIS.SaveChanges();
+                p.CurrentProgId = newId;
+                db.progs.Add(prog);
+                progs.Add(prog);
+                db.SaveChanges();
                 p.connection.Send("Gu", "");
                 p.win = null;
                 p.connection.Send("#P", JsonConvert.SerializeObject(prog));
@@ -176,11 +185,30 @@ namespace StrangeServerCSharp
                     .AddTab("КАТАЛОГ", "cat")
                     .AddTab("СОБСТВЕННЫЕ ПРОГРАММЫ", "")
                     .AddCss("fixScroll=prg");
-                for (var i = 0; i < p.Progs.Count; i++)
+                for (var i = 0; i < progs.Count; i++)
                 {
-                    builder.AddListLine($"#{i+1}. {p.Progs[i].title}", "ОТКРЫТЬ", "open:" + p.Progs[i].id);
+                    builder.AddListLine($"#{i + 1}. {progs[i].title}", "ОТКРЫТЬ", "open:" + progs[i].id);
                 }
+
                 builder.Send("prog", p);
+            }
+            else if (text == "rename")
+            {
+                new HorbBuilder()
+                    .SetTitle("ПРОГРАММАТОР")
+                    .AddButton("ПЕРЕИМЕНОВАТЬ", "rename:%I%")
+                    .AddButton("ОТМЕНА", "exit")
+                    .SetText("Введите новое название вашей программы\n")
+                    .AddIConsolePlace("Новое название программы...")
+                    .Send("prog", p);
+            }
+            else if (text.StartsWith("rename"))
+            {
+                var title = text.Split(":").Last();
+                var prog = progs.FirstOrDefault(x => x.id == p.CurrentProgId);
+                prog.title = title;
+                db.SaveChanges();
+                Prog("open:" + p.CurrentProgId, p);
             }
         }
 

@@ -13,8 +13,9 @@ namespace StrangeServerCSharp
         public int id { get; set; }
         public string title { get; set; }
         public string source { get; set; }
+
         [JsonIgnore]
-        public Player player { get; set; }
+        public Player? player { get; set; }
 
     }
 }
