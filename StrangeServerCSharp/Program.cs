@@ -518,6 +518,7 @@ namespace StrangeServerCSharp
                     {
                         Send("Gu", "");
                         player.win = "";
+                        Console.WriteLine(ex.Message);
                     }
                 }
                 else if (ty.eventType == "Whoi")
@@ -650,6 +651,17 @@ namespace StrangeServerCSharp
                         prog.source = source;
                     }
                 }
+                else if (ty.eventType == "PDEL")
+                {
+                    var id = int.Parse(Encoding.UTF8.GetString(ty.data).Trim());
+                    player.Progs.Remove(player.Progs.FirstOrDefault(x => x.id == id));
+                    HorbDecoder.Prog("prog", player);
+                }
+                else if (ty.eventType == "PCOP")
+                {
+                    var id = int.Parse(Encoding.UTF8.GetString(ty.data).Trim());
+                    HorbDecoder.Prog("copy:" + id, player);
+                } 
             }
         }
 

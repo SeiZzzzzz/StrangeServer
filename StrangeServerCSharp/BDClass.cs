@@ -12,6 +12,8 @@ namespace StrangeServerCSharp
         public DbSet<Box> boxes { get; set; }
         public DbSet<Settings> settings { get; set; }
         public DbSet<Clan> clans { get; set; }
+        public DbSet<Prog> progs { get; set; }
+
 
         public BDClass()
         {

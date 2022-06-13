@@ -102,23 +102,45 @@ namespace StrangeServerCSharp
             else if (text.StartsWith("create2"))
             {
                 var title = text.Split(":").Last();
-                int id;
-                if (!p.Progs.Any())
-                {
-                    id = 1;
-                }
-                else
-                {
-                    id = p.Progs.Count() + 1;
-                }
-
                 var prog = new Prog
                 {
-                    id = id,
+                    id = BDClass.THIS.progs.Any() ? BDClass.THIS.progs.OrderBy(x => x.id).Last().id + 1 : 1,
                     title = title,
                     source = ""
                 };
+                BDClass.THIS.progs.Add(prog);
                 p.Progs.Add(prog);
+                BDClass.THIS.SaveChanges();
+                p.connection.Send("Gu", "");
+                p.win = null;
+                p.connection.Send("#P", JsonConvert.SerializeObject(prog));
+            }
+            else if (text.StartsWith("copy"))
+            {
+                var id = int.Parse(text.Split(":").Last());
+                var oldProg = p.Progs.FirstOrDefault(x => x.id == id);
+                var newTitle = oldProg.title;
+                if (newTitle[newTitle.Length - 2] == '#')
+                {
+                    if (int.TryParse(newTitle.Last().ToString(), out var index))
+                    {
+                        newTitle = newTitle[..^1] + (index+1);
+                    }
+                    
+                }
+                else
+                {
+                    newTitle += " #2";
+                }
+                var prog = new Prog
+                {
+                    id = BDClass.THIS.progs.Any() ? BDClass.THIS.progs.OrderBy(x => x.id).Last().id + 1 : 1,
+                    title = newTitle,
+                    source = oldProg.source
+                };
+                BDClass.THIS.progs.Add(prog);
+                p.Progs.Add(prog);
+                BDClass.THIS.SaveChanges();
                 p.connection.Send("Gu", "");
                 p.win = null;
                 p.connection.Send("#P", JsonConvert.SerializeObject(prog));
@@ -154,9 +176,9 @@ namespace StrangeServerCSharp
                     .AddTab("КАТАЛОГ", "cat")
                     .AddTab("СОБСТВЕННЫЕ ПРОГРАММЫ", "")
                     .AddCss("fixScroll=prg");
-                foreach (var prog in p.Progs)
+                for (var i = 0; i < p.Progs.Count; i++)
                 {
-                    builder.AddListLine($"#{prog.id}. {prog.title}", "ОТКРЫТЬ", "open:" + prog.id);
+                    builder.AddListLine($"#{i+1}. {p.Progs[i].title}", "ОТКРЫТЬ", "open:" + p.Progs[i].id);
                 }
                 builder.Send("prog", p);
             }
