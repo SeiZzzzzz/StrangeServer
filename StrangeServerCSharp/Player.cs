@@ -41,7 +41,7 @@ namespace StrangeServerCSharp
 
         public int dir;
         public int skin;
-        public int tail;
+        public int tail { get; set; }
         public Session connection;
         public int chunkx;
         public int lastupdchchunkx;

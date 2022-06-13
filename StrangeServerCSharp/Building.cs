@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace StrangeServerCSharp
 {
@@ -136,14 +138,14 @@ namespace StrangeServerCSharp
 
         public static string[] mpcosts = new string[]
         {
-            "8:^$10000;!$10000:",
+            "8:^$1000000;!$1000000:",
             "1:^$0;!$0:",
             "2:^$0;!$0:",
             "3:^$0;!$0:",
             "4:^$0;!$0:",
-            "5:^$0;!$0:",
-            "6:^$0;!$0:",
-            "7:^$0;!$0:",
+            "5:^$500000;!$500000:",
+            "6:^$20000000;!$20000000:",
+            "7:^$1000000000;!$1000000000:",
             "9:^$0;!$0:",
             "10:^$0;!$0:",
             "11:^$0;!$0:",
@@ -161,9 +163,9 @@ namespace StrangeServerCSharp
             "23:^$0;!$0:",
             "24:^$0;!$0:",
             "25:^$0;!$0:",
-            "26:^$0;!$0:",
+            "26:^$100000000;!$100000000:",
             "27:^$0;!$0:",
-            "28:^$0;!$0:",
+            "28:^$20000000;!$20000000:",
             "29:^$0;!$0:",
             "30:^$0;!$0:",
             "34:^$0;!$0:",
@@ -424,16 +426,20 @@ namespace StrangeServerCSharp
                     .SetTitle("МАРКЕТ")
                     .AddButton("НАЗАД", "<tab_misc")
                     .AddButton("ВЫЙТИ", "exit")
-                    .AddListLine($"ПРОДАТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${sell}", "ПРОДАТЬ 1", "miscsell")
-                    .AddListLine($"                       10 ЗА ${(int.Parse(sell) * 10)}", "ПРОДАТЬ 10", "miscsellX")
-                    .AddListLine($"КУПИТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${buy}", "КУПИТЬ 1", "miscbuy")
-                    .AddListLine($"                       10 ЗА ${(int.Parse(buy) * 10)}", "КУПИТЬ 10", "miscbuyX")
+                    .AddListLine($"ПРОДАТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${makeK(sell)}", "ПРОДАТЬ 1", "miscsell")
+                    .AddListLine($"                       10 ЗА ${makeK((int.Parse(sell) * 10).ToString())}", "ПРОДАТЬ 10", "miscsellX")
+                    .AddListLine($"КУПИТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${makeK(buy)}", "КУПИТЬ 1", "miscbuy")
+                    .AddListLine($"                       10 ЗА ${makeK((int.Parse(buy) * 10).ToString())}", "КУПИТЬ 10", "miscbuyX")
                     .AddMarketCard(sd, " ");
             }
 
             builder.Send(p.win, p);
         }
-
+        public string makeK(string text)
+        {
+            text = Regex.Replace(text, "000", "k", RegexOptions.RightToLeft);
+            return text;
+        }
         public static string mtext =
             "choose:\n[ENTER] = установить рынок\n[ESC] = отмена:3:4:4:9:9:000000000000000000001101100001101100000000000001101100001101100000000000000000000 ";
     }

@@ -106,17 +106,15 @@ namespace StrangeServerCSharp
             else if (text.StartsWith("create2"))
             {
                 var title = text.Split(":").Last();
-                var id = db.progs.Any() ? db.progs.OrderBy(x => x.id).Last().id + 1 : 1;
                 var prog = new Prog
                 {
-                    id = id,
                     title = title,
                     source = ""
                 };
-                p.CurrentProgId = id;
                 db.progs.Add(prog);
                 progs.Add(prog);
                 db.SaveChanges();
+                p.CurrentProgId = prog.id;
                 p.connection.Send("Gu", "");
                 p.win = null;
                 p.connection.Send("#P", JsonConvert.SerializeObject(prog));
@@ -139,17 +137,15 @@ namespace StrangeServerCSharp
                     newTitle += " #2";
                 }
 
-                var newId = db.progs.Any() ? db.progs.OrderBy(x => x.id).Last().id + 1 : 1;
                 var prog = new Prog
                 {
-                    id = newId,
                     title = newTitle,
                     source = oldProg.source
                 };
-                p.CurrentProgId = newId;
                 db.progs.Add(prog);
                 progs.Add(prog);
                 db.SaveChanges();
+                p.CurrentProgId = prog.id;
                 p.connection.Send("Gu", "");
                 p.win = null;
                 p.connection.Send("#P", JsonConvert.SerializeObject(prog));

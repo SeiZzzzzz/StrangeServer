@@ -94,12 +94,12 @@ namespace StrangeServerCSharp
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=X;Trusted_Connection=True;");
-            optionsBuilder.UseSqlite("Data Source=mines.db");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;MultipleActiveResultSets=true;Database=X;Trusted_Connection=True;");
         }
 
         public static void Load()
