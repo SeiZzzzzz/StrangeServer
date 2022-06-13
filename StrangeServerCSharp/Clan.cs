@@ -124,9 +124,14 @@ namespace StrangeServerCSharp
 
                 builder.SetTitle(clan.name);
                 int num = 0;
+<<<<<<< HEAD
                 builder.AddTab("ОБЗОР", "!!clan");
                 builder.AddTab("СПИСОК", "list");
                 if (!int.TryParse(t.Split(':')[1], out var v))
+=======
+                builder.AddTab("ОБЗОР", "clan"); builder.AddTab("СПИСОК", "list");
+                if (!int.TryParse(t.Split(':')[1],out var v))
+>>>>>>> 9c346d33e58835b0fd5c18b28bfb0ec33f6e8b0a
                 {
                     return;
                 }
@@ -256,9 +261,15 @@ namespace StrangeServerCSharp
             }
             else
             {
-                if (owner == id.ToString())
+                if (owner == id.ToString() && members.Count < 1)
                 {
+<<<<<<< HEAD
                     DeleteClan(this.id, db.players.First(p => p.id == id));
+                }
+                else
+                {
+                    return;
+>>>>>>> 9c346d33e58835b0fd5c18b28bfb0ec33f6e8b0a
                 }
             }
 

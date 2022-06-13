@@ -147,7 +147,7 @@ namespace StrangeServerCSharp
             "4:^$0;!$0:",
             "5:^$500000;!$500000:",
             "6:^$20000000;!$20000000:",
-            "7:^$1000000000;!$1000000000:",
+            "7:^$1000000;!$1000000:",
             "9:^$0;!$0:",
             "10:^$0;!$0:",
             "11:^$0;!$0:",
@@ -438,7 +438,7 @@ namespace StrangeServerCSharp
 
             builder.Send(p.win, p);
         }
-        public string makeK(string text)
+        public static string makeK(string text)
         {
             text = Regex.Replace(text, "000", "k", RegexOptions.RightToLeft);
             return text;
@@ -661,7 +661,7 @@ namespace StrangeServerCSharp
                 .SetTitle("ПУФКА")
                 .AddButton("ВЫХОД", "exit")
                 .SetRichList(l)
-                .Send(this.winid + "." + tab, p);
+                .Send(this.winid, p);
         }
 
         public static Gun Build(uint x, uint y, Player p)

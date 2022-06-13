@@ -212,12 +212,27 @@ namespace StrangeServerCSharp
         {
             if (text.StartsWith("fill"))
             {
-                var resp = p.cpack as Gun;
+                var g = p.cpack as Gun;
                 if (text.StartsWith("fill:b_max"))
                 {
-                    resp.cryinside = resp.crymax;
-                    resp.off = 1;
-                    resp.UpdatePackVis();
+                    var have = p.crys.cry[5];
+                    var needcry = g.crymax - g.cryinside;
+                    if (needcry <= have)
+                    {
+                        if (p.crys.RemoveCrys(5, needcry))
+                        {
+                            g.cryinside += needcry;
+                        }
+                    }
+                    else if (needcry >= have)
+                    {
+                        if (p.crys.RemoveCrys(5, have))
+                        {
+                            g.cryinside += (int)have;
+                        }
+                    }
+                    g.off = g.cryinside > 0 ? 1 : 0;
+                    g.UpdatePackVis();
                     p.cpack.Open(p, p.win);
                     return;
                 }
@@ -423,7 +438,7 @@ namespace StrangeServerCSharp
             {
                 return;
             }
-            if (text.StartsWith("!!clan"))
+            if (text.StartsWith("clan"))
             {
                 Clan.Open("!!clan", p);
                 return;
@@ -435,7 +450,7 @@ namespace StrangeServerCSharp
                 Exit("exit", p);
                 return;
             }
-            if (text.StartsWith("listrow_kick"))
+            else if (text.StartsWith("listrow_kick"))
             {
                 Clan clan = null;
                 var id = text.Split(':')[1];
@@ -447,6 +462,10 @@ namespace StrangeServerCSharp
                     return;
                 }
                 Clan.Open("list", p);
+            }
+            else if (text.StartsWith("listrow"))
+            {
+                Clan.Open(text, p);
             }
             else if (text.StartsWith("list"))
             {
@@ -484,7 +503,7 @@ namespace StrangeServerCSharp
 
                     clan.AddMember(t);
                     clan.RemoveReq(t);
-                    Clan.Open("reqs", p);
+                    Clan.Open("!!clan", p);
                     return;
                 }
                 else
@@ -669,6 +688,8 @@ namespace StrangeServerCSharp
                 p.SendMoney();
                 p.cpack.Open(p, p.win);
             }
+            p.SendMoney();
+            p.cpack.Open(p, p.win + "." + text);
         }
 
         public static void TryBuy(int col, string itemid, Player p)
@@ -701,9 +722,9 @@ namespace StrangeServerCSharp
             {
                 if (col == 1)
                 {
-                    if (p.money - (buy * 10) >= 0)
+                    if (p.money - (buy) >= 0)
                     {
-                        p.money -= (buy * 10);
+                        p.money -= (buy);
                         p.inventory.items[int.Parse(itemid)].count++;
                     }
                 }
