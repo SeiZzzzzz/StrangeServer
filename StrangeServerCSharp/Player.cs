@@ -755,15 +755,12 @@ namespace StrangeServerCSharp
             {
                 return;
             }
-
             var c = World.cellps[World.THIS.GetCell(x, y)];
-            /*
             if (World.THIS.GetCellConst(x, y) == null || !World.THIS.GetCellConst(x, y).is_empty)
             {
                 this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");
                 return;
             }
-            */
             var newpos = new Vector2(x, y);
             if (Vector2.Distance(pos, newpos) < 1.2f)
             {

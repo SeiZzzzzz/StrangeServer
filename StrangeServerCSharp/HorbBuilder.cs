@@ -1,5 +1,6 @@
 ﻿using System.Dynamic;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace StrangeServerCSharp
 {
@@ -70,7 +71,7 @@ namespace StrangeServerCSharp
 
         public HorbBuilder AddClanListLine(string id, string text, string nexttext, string action)
         {
-            _horb.clanlist = _horb.clanlist.Concat(new string[] { id, text, nexttext, action }).ToArray();
+            _horb.clanlist = ((string[])_horb.clanlist).Concat(new string[] { id, text, nexttext, action }).ToArray();
             return this;
         }
 
@@ -274,10 +275,12 @@ namespace StrangeServerCSharp
             var s = "";
             foreach (var i in mp)
             {
-                s += i;
+                var id = i.Split(':')[0]; 
+                var sell = i.Substring(i.IndexOf('^') + 2, i.Substring(i.IndexOf('^') + 2).IndexOf(';'));
+                var buy = i.Substring(i.IndexOf("!") + 2).Replace(":", "");
+                s += id + ":^$" + Market.makeK(sell) + ";!$" + Market.makeK(buy) + ":";
             }
-
-            return s;
+            return s.Substring(0,s.Length - 1);
         }
     }
 

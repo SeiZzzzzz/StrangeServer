@@ -292,7 +292,7 @@
                         }
                     }
                 }
-                if (yp > y)
+                if ((y + yp) > y)
                 {
                     for (; (y + yp) >= y; yp--)
                     {

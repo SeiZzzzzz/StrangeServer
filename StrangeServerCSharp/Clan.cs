@@ -75,7 +75,7 @@ namespace StrangeServerCSharp
                         $"<color=white>Winx </color>\nУчастники: <color=white> {1 + clan.GetMemberList().Count} </color> ")
                     .AddTab("ОБЗОР", "");
                 builder.AddTab("СПИСОК", "list");
-               builder.AddButton("ПОКИНУТЬ КЛАН", "leave");
+                builder.AddButton("ПОКИНУТЬ КЛАН", "leave");
                 if (clan.reqs.Count > 0)
                 {
                     builder.AddTab($"<color=#ff8888ff>ЗАЯВКИ ({clan.reqs.Count})</color>", "reqs");
@@ -119,7 +119,7 @@ namespace StrangeServerCSharp
                 }
                 builder.SetTitle(clan.name);
                 int num = 0;
-                builder.AddTab("ОБЗОР", "!!clan"); builder.AddTab("СПИСОК", "list");
+                builder.AddTab("ОБЗОР", "clan"); builder.AddTab("СПИСОК", "list");
                 if (!int.TryParse(t.Split(':')[1],out var v))
                 {
                     return;
@@ -235,9 +235,13 @@ namespace StrangeServerCSharp
             }
             else
             {
-                if (owner == id.ToString())
+                if (owner == id.ToString() && members.Count < 1)
                 {
-                    DeleteClan(this.id,BDClass.THIS.players.First(p => p.id == id));
+                    DeleteClan(this.id, BDClass.THIS.players.First(p => p.id == id));
+                }
+                else
+                {
+                    return;
                 }
             }
             Player player = null;
