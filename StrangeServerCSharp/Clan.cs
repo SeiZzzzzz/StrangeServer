@@ -117,10 +117,9 @@ namespace StrangeServerCSharp
                 {
                     return;
                 }
-                c.AddTitle(clan.name);
-                c.AddList();
+                builder.SetTitle(clan.name);
                 int num = 0;
-                c.AddTab("ОБЗОР", "!!clan"); c.AddTab("СПИСОК", "list");
+                builder.AddTab("ОБЗОР", "!!clan"); builder.AddTab("СПИСОК", "list");
                 if (!int.TryParse(t.Split(':')[1],out var v))
                 {
                     return;
@@ -132,10 +131,10 @@ namespace StrangeServerCSharp
                 }
                 catch (Exception ex) { }
                 if (player == null) { return; }
-                c.SetText($"@@ПРОФИЛЬ СОКЛАНА\n\nНик:<color=white>{player.name}</color>\nУровень:{player.lvl.Sum()}");
+                builder.SetText($"@@ПРОФИЛЬ СОКЛАНА\n\nНик:<color=white>{player.name}</color>\nУровень:{player.lvl.Sum()}");
                 if (p.id != player.id && player.id.ToString() != clan.owner)
                 {
-                    c.AddButton("ИСКЛЮЧИТЬ ИЗ КЛАНА", "listrow_kick:" + player.id);
+                    builder.AddButton("ИСКЛЮЧИТЬ ИЗ КЛАНА", "listrow_kick:" + player.id);
                 }
 
             }

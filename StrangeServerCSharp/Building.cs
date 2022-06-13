@@ -373,7 +373,6 @@ namespace StrangeServerCSharp
                 {
                     builder.Admin();
                 }
-                catch (Exception) { }
             }
             else if (tab == "market.tab_buy")
             {
@@ -395,7 +394,6 @@ namespace StrangeServerCSharp
                 {
                     builder.Admin();
                 }
-                catch (Exception) { }
             }
             else if (tab == "market.tab_misc")
             {
