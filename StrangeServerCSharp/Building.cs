@@ -310,7 +310,7 @@ namespace StrangeServerCSharp
                     .AddTab("КРЕДИТЫ И ПРОЧЕЕ", "tab_misc")
                     .AddTab("ОРДЕРЫ", "tab_mkt")
                     .AddTab("АУКЦИОН", "tab_auc")
-                    .AddTitle("МАРКЕТ")
+                    .SetTitle("МАРКЕТ")
                     .AddTextLine("Используйте полосы прокрутки, чтобы выбрать сколько продать кристаллов")
                     .AddTextLine("")
                     .AddCrysRight("будет продано")
@@ -332,7 +332,7 @@ namespace StrangeServerCSharp
                     .AddTab("КРЕДИТЫ И ПРОЧЕЕ", "tab_misc")
                     .AddTab("ОРДЕРЫ", "tab_mkt")
                     .AddTab("АУКЦИОН", "tab_auc")
-                    .AddTitle("МАРКЕТ")
+                    .SetTitle("МАРКЕТ")
                     .SetText("<color=#f88></color>")
                     .AddCrysRight("сколько покупаем")
                     .AddCrysLeft("станет в грузе")
@@ -353,7 +353,7 @@ namespace StrangeServerCSharp
                     .AddTab("КРЕДИТЫ И ПРОЧЕЕ", "")
                     .AddTab("ОРДЕРЫ", "tab_mkt")
                     .AddTab("АУКЦИОН", "tab_auc")
-                    .AddTitle("МАРКЕТ")
+                    .SetTitle("МАРКЕТ")
                     .SetText("##")
                     .AddButton("ПРОДЛИТЬ ЛИЦЕНЗИЮ", "maker")
                     .AddButton("ВЫЙТИ", "exit")
@@ -372,7 +372,7 @@ namespace StrangeServerCSharp
                     .AddTab("ОРДЕРЫ", "tab_mkt")
                     .AddTab("АУКЦИОН", "tab_auc")
                     .SetText("\n ")
-                    .AddTitle("МАРКЕТ")
+                    .SetTitle("МАРКЕТ")
                     .AddButton("НАЗАД", "<tab_misc")
                     .AddButton("ВЫЙТИ", "exit")
                     .AddListLine($"ПРОДАТЬ ПО ЛУЧШЕЙ ЦЕНЕ: 1 ЗА ${sell}", "ПРОДАТЬ 1", "miscsell")
@@ -417,7 +417,7 @@ namespace StrangeServerCSharp
             if (tab.StartsWith("!!clans.clan"))
             {
                 var id = tab.Split(':')[1];
-                builder.AddTitle("КЛАНЫ")
+                builder.SetTitle("КЛАНЫ")
                     .SetText(
                         "@@\n<color=#88ff88ff>Прием в клан открыт.</color> Условия для подачи заявки:\n\n<color=#88ff88ff>Подать заявку может кто угодно</color>\n");
                 if (p.clanid == 0)
@@ -445,7 +445,7 @@ namespace StrangeServerCSharp
             }
             else if (tab.StartsWith("!!" + winid))
             {
-                builder.AddTitle("КЛАНЫ")
+                builder.SetTitle("КЛАНЫ")
                     .AddClanList()
                     .SetText("@@Кланы шахт. Кликните на клан для подробной информации\n");
                 foreach (var cl in BDClass.THIS.clans.Where(clan => !string.IsNullOrEmpty(clan.owner)))
@@ -591,7 +591,7 @@ namespace StrangeServerCSharp
             l = l.Concat(RichListGenerator
                 .Fill("Заряд", cryinside, crymax, 5, "fill:b_100", "fill:b_1000", "fill:b_max").ToList()).ToArray();
             var builder = new HorbBuilder()
-                .AddTitle("ПУФКА")
+                .SetTitle("ПУФКА")
                 .AddButton("ВЫХОД", "exit")
                 .SetRichList(l)
                 .Send(this.winid + "." + tab, p);
@@ -849,7 +849,7 @@ namespace StrangeServerCSharp
 
             if (tab == this.winid)
             {
-                builder.AddTitle("РЕСП")
+                builder.SetTitle("РЕСП")
                     .SetText(
                         $"@@Респ - это место, где будет появляться ваш робот\nпосле уничтожения (HP = 0)\n\n{resped(p)}");
                 if (p.resp != this)
@@ -872,7 +872,7 @@ namespace StrangeServerCSharp
                 l = l.Concat(RichListGenerator
                     .Fill("Заряд", cryinside, crymax, 1, "fill:b_100", "fill:b_1000", "fill:b_max").ToList()).ToArray();
                 l = l.Concat(RichListGenerator.UInt("Стоимость", "cost", respcost).ToList()).ToArray();
-                builder.AddTitle("хуй")
+                builder.SetTitle("хуй")
                     .AddButton("СОХРАНИТЬ", "save:%R%")
                     .AddButton("ВЫЙТИ", "exit")
                     .SetRichList(l);

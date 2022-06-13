@@ -80,7 +80,7 @@
         public HorbBuilder BuildBox()
         {
             return new HorbBuilder()
-                .AddTitle("Создание бокса")
+                .SetTitle("Создание бокса")
                 .AddTextLines("\nИспользуйте полосы прокрутки, чтобы выбрать сколько положить в бокс",
                     "ВНИМАНИЕ! При создании бокса теряется нихуя кристаллов\n")
                 .AddCrysLeft("  останется")

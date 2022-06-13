@@ -17,7 +17,7 @@ namespace StrangeServerCSharp
             return "horb:" + JsonConvert.SerializeObject(_horb, Formatting.None);
         }
 
-        public HorbBuilder AddTitle(string title)
+        public HorbBuilder SetTitle(string title)
         {
             _horb.title = title;
             return this;
@@ -157,6 +157,12 @@ namespace StrangeServerCSharp
             return this;
         }
 
+        public HorbBuilder AddCss(string css)
+        {
+            _horb.css = css;
+            return this;
+        }
+
         public HorbBuilder AddCss(float ch = 0, float w = 0, float h = 0, string invb = "misc")
         {
             var c = new css();
@@ -201,6 +207,12 @@ namespace StrangeServerCSharp
         public HorbBuilder SetRichList(params string[] richList)
         {
             _horb.richList = richList;
+            return this;
+        }
+
+        public HorbBuilder SetNoScroll()
+        {
+            _horb.rich_no_scroll = true;
             return this;
         }
 

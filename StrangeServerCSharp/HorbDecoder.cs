@@ -65,25 +65,100 @@ namespace StrangeServerCSharp
                 {
                     Resp((string)button, p);
                 }
-                else if (p.win == "proglist")
+                else if (p.win == "prog")
                 {
-                    var cmd = ((string)button).Split(":");
-                    if (cmd[0] == "open")
-                    {
-                        p.connection.Send("Gu", "");
-                        p.win = "prog" + cmd[1];
-                        p.connection.Send("#P", JsonConvert.SerializeObject(new
-                        {
-                            id = cmd[1],
-                            title = "shitfuck",
-                            source = "$wbdbsbab"
-                        }));
-                    }
+                    Prog((string)button, p);
                 }
                 if (button != null && (string)button == "exit")
                 {
                     Exit((string)button, p);
                 }
+            }
+        }
+
+        public static void Prog(string text, Player p)
+        {
+            if (text.StartsWith("open") )
+            {
+                var id = int.Parse(text.Split(":").Last());
+                var prog = p.Progs.FirstOrDefault(x => x.id == id);
+                p.connection.Send("Gu", "");
+                p.win = null;
+                p.connection.Send("#P", JsonConvert.SerializeObject(prog));
+            }
+            else if (text == "create")
+            {
+                new HorbBuilder()
+                    .SetTitle("ПРОГРАММАТОР")
+                    .AddButton("СОЗДАТЬ ПРОГРАММУ", "create2:%I%")
+                    .AddButton("ВЫЙТИ", "exit")
+                    .SetText("Введите название вашей программы\n")
+                    .AddIConsolePlace("Название программы...")
+                    .AddTab("КАТАЛОГ", "cat")
+                    .AddTab("СОБСТВЕННЫЕ ПРОГРАММЫ", "")
+                    .AddCss("fixScroll=prg")
+                    .Send("prog", p);
+            }
+            else if (text.StartsWith("create2"))
+            {
+                var title = text.Split(":").Last();
+                int id;
+                if (!p.Progs.Any())
+                {
+                    id = 1;
+                }
+                else
+                {
+                    id = p.Progs.Count() + 1;
+                }
+
+                var prog = new Prog
+                {
+                    id = id,
+                    title = title,
+                    source = ""
+                };
+                p.Progs.Add(prog);
+                p.connection.Send("Gu", "");
+                p.win = null;
+                p.connection.Send("#P", JsonConvert.SerializeObject(prog));
+            }
+            else if (text == "cat")
+            {
+                new HorbBuilder()
+                    .SetTitle("ПРОГРАММАТОР")
+                    .AddTab("КАТАЛОГ", "")
+                    .AddTab("СОБСТВЕННЫЕ ПРОГРАММЫ", "prog")
+                    .AddButton("ВЫЙТИ", "exit")
+                    .SetText("")
+                    .SetRichList("ПРЯМАЯ ДОБЫЧА&ЧИСТКА ПЕСКА&КАРЬЕР",
+                        "3card",
+                        "<color=#aaffaaff>ОТКРЫТЬ</color>&<color=#aaffaaff>ОТКРЫТЬ</color>&<color=#aaffaaff>ОТКРЫТЬ</color>",
+                        "open:st&open:sn&open:cr",
+                        "http://minesgame.ru/img/p_st.png%180%100&http://minesgame.ru/img/p_sn.png%180%100&http://minesgame.ru/img/p_cr.png%180%100",
+                        "ТРАМВАЙ&ОТ СКАЛЫ ДО СКАЛЫ&ОКОЛОСКАЛ",
+                        "3card",
+                        "<color=#aaffaaff>ОТКРЫТЬ</color>&<color=#aaffaaff>ОТКРЫТЬ</color>&<color=#aaffaaff>ОТКРЫТЬ</color>",
+                        "open:tr&open:ss&open:os",
+                        "http://minesgame.ru/img/p_tr.png%180%100&http://minesgame.ru/img/p_ss.png%180%100&http://minesgame.ru/img/p_os.png%180%100")
+                    .AddCss("fixScroll=prg")
+                    .SetNoScroll()
+                    .Send("prog", p);
+            }
+            else if (text == "prog")
+            {
+                var builder = new HorbBuilder()
+                    .SetTitle("ПРОГРАММАТОР")
+                    .AddButton("СОЗДАТЬ ПРОГРАММУ", "create")
+                    .AddButton("ВЫЙТИ", "exit")
+                    .AddTab("КАТАЛОГ", "cat")
+                    .AddTab("СОБСТВЕННЫЕ ПРОГРАММЫ", "")
+                    .AddCss("fixScroll=prg");
+                foreach (var prog in p.Progs)
+                {
+                    builder.AddListLine($"#{prog.id}. {prog.title}", "ОТКРЫТЬ", "open:" + prog.id);
+                }
+                builder.Send("prog", p);
             }
         }
 

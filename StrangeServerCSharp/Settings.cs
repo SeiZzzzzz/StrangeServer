@@ -36,7 +36,7 @@ namespace StrangeServerCSharp
             var builder = new HorbBuilder();
             if (tab == winid)
             {
-                builder.AddTitle("НАСТРОЙКИ")
+                builder.SetTitle("НАСТРОЙКИ")
                     .AddButton("СОХРАНИТЬ", "change_settings:%R%");
                 if (p.clanid == 0)
                 {
@@ -64,7 +64,7 @@ namespace StrangeServerCSharp
             }
             else if (tab == "!!settings.create_сlan")
             {
-                builder.AddTitle("СОЗДАНИЕ НОВОГО КЛАНА")
+                builder.SetTitle("СОЗДАНИЕ НОВОГО КЛАНА")
                     .SetText(
                         "@@\nУра! Вы собираетесь создать новый клан. После создания клана вы сможете\nвыполнять клановые квесты, создавать свои фермы, вести войны с другими\nкланами, защищать и отбивать территории, и многое другое.\n\nСоздание клана - ответственное действие, значок и название клана нельзя\nбудет изменить позже. Поэтому внимательно подумайте над тем, как будет\nзвучать и выглядеть ваш клан в игре.\n\nСоздание клана требует залога в 1000 кредитов.\n")
                     .AddButton("ВЫБРАТЬ ЗНАЧОК КЛАНА", "@create_сlan2")
@@ -72,7 +72,7 @@ namespace StrangeServerCSharp
             }
             else if (tab == "!!settings.create_сlan2")
             {
-                builder.AddTitle("ВЫБОР ЗНАЧКА КЛАНА")
+                builder.SetTitle("ВЫБОР ЗНАЧКА КЛАНА")
                     .SetText(
                         "@@Выберите значок клана. Всего значков больше сотни. Для удобства мы\nпоказываем их небольшими порциями. Нажмите ДРУГИЕ, чтобы посмотреть еще.\nДля выбора значка - кликните на него.\n\nВнимание! Значок клана нельзя будет изменить после создания.\n")
                     .SetInv(string.Join(":", Clan.GetAvlClanIcon().Select(ic => 200 + ic.id + ":0")))
@@ -82,7 +82,7 @@ namespace StrangeServerCSharp
             else if (tab.StartsWith("!!settings.create_сlan3"))
             {
                 var id = int.Parse(tab.Split(':')[1]);
-                builder.AddTitle("СОЗДАНИЯ АББРЕВИАТУРЫ")
+                builder.SetTitle("СОЗДАНИЯ АББРЕВИАТУРЫ")
                     .SetText(
                         "@@\nВыберите краткое имя клана, заглавными латинскими буквами.\n1-3 буквы. Оно используется в списках, командах консоли и пр.\n\nНапример, Хр@нители - HRA, Герои Меча - GRM\nВыберите сокращение, по которому легко узнать ваш клан.\n")
                     .AddButton("ДАЛЕЕ", $"create_сlan4:{id}#{tab.Split(':')[2]}#%I%")
@@ -93,7 +93,7 @@ namespace StrangeServerCSharp
             else if (tab.StartsWith("!!settings.create_сlan4"))
             {
                 var id = int.Parse(tab.Split(':')[1].Split('#')[0]);
-                builder.AddTitle("ЗАВЕРШЕНИЕ СОЗДАНИЯ КЛАНА")
+                builder.SetTitle("ЗАВЕРШЕНИЕ СОЗДАНИЯ КЛАНА")
                     .SetText(
                         "@@\nВсе готово для создания клана. Остался последний этап.\n\n<color=#ff8888ff>Условия:</color>\n1. При создании спишется залог 1000 кредитов.\n2. При удалении клана 90% залога возвращается.\n3. При неактивности игроков в течение 2 месяцев клан удаляется.\n4. Мультоводство в игре запрещено. Использование нескольких\nаккаунтов одним человеком может повлечь штраф и санкции вплоть\nдо бана аккаунтов и удаления клана.\n")
                     .AddButton("<color=#ff8888ff>ПРИНИМАЮ УСЛОВИЯ</color>",
@@ -103,13 +103,13 @@ namespace StrangeServerCSharp
             }
             else if (tab == "!!settings.create_сlan5")
             {
-                builder.AddTitle("КЛАН СОЗДАН")
+                builder.SetTitle("КЛАН СОЗДАН")
                     .AddButton("ВЫХОД", "exit");
             }
             else if (tab.StartsWith("!!settings.choose"))
             {
                 var id = int.Parse(tab.Split(':')[1]) - 200;
-                builder.AddTitle("ВЫБОР НАЗВАНИЯ КЛАНА")
+                builder.SetTitle("ВЫБОР НАЗВАНИЯ КЛАНА")
                     .SetText(
                         "@@\nВыберите название клана.\nВ игре есть модерация, оскорбительные кланы могут быть удалены!\n\nВнимание! Название клана нельзя будет изменить после создания.\n")
                     .AddButton("ПРОДОЛЖИТЬ", $"create_сlan3:{id.ToString()}:%I%")

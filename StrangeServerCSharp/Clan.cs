@@ -69,7 +69,7 @@ namespace StrangeServerCSharp
                 }
 
                 var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
-                builder.AddTitle(clan.name)
+                builder.SetTitle(clan.name)
                     .AddCard("c", p.clanid.ToString(),
                         $"<color=white>Winx </color>\nУчастники: <color=white> {1 + clan.GetMemberList().Count} </color> ")
                     .AddTab("ОБЗОР", "");
@@ -87,7 +87,7 @@ namespace StrangeServerCSharp
                 }
 
                 var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
-                builder.AddTitle(clan.name);
+                builder.SetTitle(clan.name);
                 var num = 0;
                 builder.AddTab("ОБЗОР", "clan");
                 builder.AddTab("СПИСОК", "list");
@@ -111,7 +111,7 @@ namespace StrangeServerCSharp
                 }
 
                 var clan = BDClass.THIS.clans.First(clan => clan.id == p.clanid);
-                builder.AddTitle(clan.name);
+                builder.SetTitle(clan.name);
                 builder.AddClanList();
                 var num = 0;
                 builder.AddTab("ОБЗОР", "clan");

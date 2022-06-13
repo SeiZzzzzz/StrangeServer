@@ -30,6 +30,7 @@ namespace StrangeServerCSharp
         public Resp resp { get; set; }
         public int clanid { get; set; }
         public Settings settings { get; set; }
+        public IList<Prog> Progs { get; set; }
         public int dir;
         public int skin;
         public int tail;
@@ -58,6 +59,7 @@ namespace StrangeServerCSharp
 
         public Player()
         {
+            Progs = new List<Prog>();
             inventory = new Inventory(this);
             crys = new BasketCrys(this);
             this.hp = maxhp;
@@ -763,7 +765,7 @@ namespace StrangeServerCSharp
                     cpack = pack;
                 }
 
-                if (win.StartsWith("!!"))
+                if (!string.IsNullOrEmpty(win) && win.StartsWith("!!"))
                 {
                     if (win.StartsWith("!!settings"))
                     {
@@ -774,7 +776,7 @@ namespace StrangeServerCSharp
                     return;
                 }
 
-                if (win != "" && (World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null))
+                if (!string.IsNullOrEmpty(win) && World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width] != null)
                 {
                     World.packmap[(uint)this.pos.X + (uint)this.pos.Y * World.width].Open(this, this.win);
                     this.connection.Send("@T", $"{this.pos.X}:{this.pos.Y}");

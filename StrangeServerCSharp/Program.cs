@@ -254,7 +254,7 @@ namespace StrangeServerCSharp
                         "{\"width\":" + XServer.width + ",\"height\":" + XServer.height +
                         ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
                     new HorbBuilder()
-                        .AddTitle("НОВЫЙ ИГРОК")
+                        .SetTitle("НОВЫЙ ИГРОК")
                         .AddTextLine("Ник.")
                         .AddIConsole()
                         .AddIConsolePlace("")
@@ -271,7 +271,7 @@ namespace StrangeServerCSharp
                         "{\"width\":" + XServer.width + ",\"height\":" + XServer.height +
                         ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
                     new HorbBuilder()
-                        .AddTitle("НОВЫЙ ИГРОК")
+                        .SetTitle("НОВЫЙ ИГРОК")
                         .AddTextLine("пароль")
                         .AddIConsole()
                         .AddIConsolePlace("я хуй")
@@ -288,7 +288,7 @@ namespace StrangeServerCSharp
                         "{\"width\":" + XServer.width + ",\"height\":" + XServer.height +
                         ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
                     new HorbBuilder()
-                        .AddTitle("АВТОРИЗАЦИЯ")
+                        .SetTitle("АВТОРИЗАЦИЯ")
                         .AddTextLine("ник нужен ебать")
                         .AddIConsole()
                         .AddIConsolePlace("")
@@ -305,7 +305,7 @@ namespace StrangeServerCSharp
                         "{\"width\":" + XServer.width + ",\"height\":" + XServer.height +
                         ",\"name\":\"ladno\",\"v\":3410,\"version\":\"COCK\",\"update_url\":\"http://pi.door/\",\"update_desc\":\"ok\"}");
                     new HorbBuilder()
-                        .AddTitle("АВТОРИЗАЦИЯ")
+                        .SetTitle("АВТОРИЗАЦИЯ")
                         .AddTextLine("пароль нужен ебать")
                         .AddIConsole()
                         .AddIConsolePlace("пароль блядота")
@@ -632,11 +632,23 @@ namespace StrangeServerCSharp
                     var y = (uint)(this.player.pos.Y + (this.player.dir == 0 ? 1 : this.player.dir == 2 ? -1 : 0));
                     player.inventory.Use(x, y);
                 }
+                else if (ty.eventType == "Pope")
+                {
+                    HorbDecoder.Prog("prog", player);
+                }
                 else if (ty.eventType == "pRST")
                 {
-                    new HorbBuilder()
-                        .AddListLine("#1", "gay", "open:1")
-                        .Send("proglist", player);
+                }
+                else if (ty.eventType == "PROG")
+                {
+                    var length = BitConverter.ToInt32(ty.data.Take(sizeof(int)).ToArray());
+                    if (length != 0)
+                    {
+                        var id = BitConverter.ToInt32(ty.data.Skip(sizeof(int)).Take(sizeof(int)).ToArray());
+                        var source = Encoding.UTF8.GetString(ty.data.Skip(sizeof(int) * 2 + length).ToArray());
+                        var prog = player.Progs.FirstOrDefault(x => x.id == id);
+                        prog.source = source;
+                    }
                 }
             }
         }
