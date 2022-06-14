@@ -552,7 +552,6 @@ namespace StrangeServerCSharp
                 Box.BuildBox(x, y, new long[] { 0, 0, 0, 0, 0, cryinside }, null);
             }
             catch (Exception e) { }
-            using var db = new BDClass();
             db.guns.Remove(this);
             db.SaveChanges();
             this.UpdatePackVis();
@@ -567,7 +566,7 @@ namespace StrangeServerCSharp
 
         public override void Update(string type)
         {
-            await Task.Run(() => {
+            
                 if (type == "gun")
                 {
                     if (cryinside > 0)
@@ -579,7 +578,7 @@ namespace StrangeServerCSharp
                         World.THIS.OnGunDel(x, y, this.cid);
                     }
                 }
-            });
+           
         }
 
         public bool OnShot(int cost)
@@ -766,17 +765,16 @@ namespace StrangeServerCSharp
             World.THIS.SetCell(x + 1, y - 1, 32);
             World.THIS.SetCell(x + 1, y + 2, 32);
             World.THIS.SetCell(x - 1, y + 2, 32);
+            using var db = new BDClass();
             try
             {
                 Box.BuildBox(x, y, new long[] { 0, cryinside, 0, 0, 0, 0 }, null);
-                using var db = new BDClass();
                 foreach (var p in db.players.Where(p => p.resp == this))
                 {
                     p.resp = db.resps.First();
                 }
             }
             catch (Exception e) { }
-            using var db = new BDClass();
             db.resps.Remove(this);
             db.SaveChanges();
             this.UpdatePackVis();

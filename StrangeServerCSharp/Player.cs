@@ -490,9 +490,12 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var id in ch.bots)
+                        foreach (var id in ch.bots.Keys)
                         {
-                            player.connection.AddFX(fx, fxx, fxy);
+                            if (XServer.players.ContainsKey(id))
+                            {
+                                XServer.players[id].connection.AddFX(fx, fxx, fxy);
+                            }
                         }
                     }
                 }
@@ -607,7 +610,7 @@ namespace StrangeServerCSharp
             }
             else
             {
-                hp += healHp;
+                hp += healhp;
                 SendDFToBots(5, 0, 0, 0, 0);
                 SendHp();
             }

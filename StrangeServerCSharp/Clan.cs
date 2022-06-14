@@ -138,7 +138,7 @@ namespace StrangeServerCSharp
                 }
                 catch (Exception ex)
                 {
-                    c.AddButton("ИСКЛЮЧИТЬ ИЗ КЛАНА", "listrow_kick:" + player.id);
+                    builder.AddButton("ИСКЛЮЧИТЬ ИЗ КЛАНА", "listrow_kick:" + player.id);
                 }
 
                 if (player == null)
