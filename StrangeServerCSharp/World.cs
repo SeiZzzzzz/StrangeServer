@@ -470,15 +470,18 @@ namespace StrangeServerCSharp
                     {
                         foreach (var p in packlist.ToList())
                         {
-                            var g = p as Gun;
-                            if (g.cryinside <= 0)
+                            if (p.type == 'G')
                             {
-                                World.THIS.OnGunDel(p.x, p.y, p.cid);
-                                g.cryinside = 0;
-                            }
-                            else
-                            {
-                                p.Update("gun");
+                                var g = p as Gun;
+                                if (g.cryinside <= 0)
+                                {
+                                    World.THIS.OnGunDel(p.x, p.y, p.cid);
+                                    g.cryinside = 0;
+                                }
+                                else
+                                {
+                                    p.Update("gun");
+                                }
                             }
                         }
                         new BDClass().SaveChanges();

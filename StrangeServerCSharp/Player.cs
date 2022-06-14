@@ -258,6 +258,11 @@ namespace StrangeServerCSharp
         public void Death()
         {
             HorbDecoder.Exit("exit", this);
+            using var db = new BDClass();
+            if (resp == null)
+            {
+                this.resp = db.resps.FirstOrDefault();
+            }
             this.resp.OnDeath(this);
             var rx = resp.x + 2;
             var ry = resp.y;
@@ -412,13 +417,16 @@ namespace StrangeServerCSharp
             {
                 for (int i = 0; i <= vchunks.Count;i++ )
                 {
-                    if (lvchunks.Contains(vchunks[i]))
+                    if (vchunks.Count > i)
                     {
-                        lvchunks.Remove(vchunks[i]);
-                        if (vchunks.Count > i)
+                        if (lvchunks.Contains(vchunks[i]))
+
                         {
-                            vchunks.Remove(vchunks[i]);
+                            lvchunks.Remove(vchunks[i]);
                         }
+                       
+                            vchunks.Remove(vchunks[i]);
+                        
                     }
                 }
                 foreach (var f in lvchunks)
