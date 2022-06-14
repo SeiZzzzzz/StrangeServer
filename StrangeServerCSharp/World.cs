@@ -1,6 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace StrangeServerCSharp
 {
     public class World
@@ -16,6 +21,7 @@ namespace StrangeServerCSharp
         public static JObject cellspool = null;
         public static Cell[] cells;
         public static Cell[] cellps = new Cell[255];
+
         public List<int> crys = new List<int>()
         {
             107,
@@ -25,6 +31,7 @@ namespace StrangeServerCSharp
             111,
             112
         };
+
         public List<int> xcry = new List<int>()
         {
             71,
@@ -33,6 +40,7 @@ namespace StrangeServerCSharp
             74,
             75
         };
+
         public List<int> road = new List<int>()
         {
             32,
@@ -41,19 +49,22 @@ namespace StrangeServerCSharp
             36,
             39
         };
+
         public List<int> pack = new List<int>()
         {
             38,
             37,
             106,
         };
+
         public static void InitCell(string name)
         {
             if (cellspool[name] == null)
             {
                 return;
             }
-            JsonSerializer serializer = new JsonSerializer();
+
+            var serializer = new JsonSerializer();
             cellps[int.Parse(name)] = (Cell)serializer.Deserialize(new JTokenReader(cellspool[name]), typeof(Cell));
         }
 
@@ -79,14 +90,17 @@ namespace StrangeServerCSharp
             public int fall_damage { get; set; }
             public int HP { get; set; }
         }
+
         public bool ValidCoord(uint x, uint y)
         {
             if ((x >= 0 && y >= 0) && (x < width && y < height))
             {
                 return true;
             }
+
             return false;
         }
+
         public bool ValidCoordForPlace(uint x, uint y)
         {
             if ((x >= 0 && y >= 0) && (x < width && y < height))
@@ -107,10 +121,13 @@ namespace StrangeServerCSharp
                 {
                     return cells[x + y * height].HP > 0;
                 }
+
                 return true;
             }
+
             return false;
         }
+
         public static void SendPack(char type, uint px, uint py, int cid, int off)
         {
             var xd = (int)Math.Floor((decimal)px / 32);
@@ -119,7 +136,8 @@ namespace StrangeServerCSharp
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) && ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
+                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) &&
+                        ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (xd + xxx);
                         var y = (yd + yyy);
@@ -134,6 +152,7 @@ namespace StrangeServerCSharp
                 }
             }
         }
+
         public void SendDFToBotsGlobal(int fx, uint fxx, uint fxy, int dir, int bid = 0, int col = 0)
         {
             var xd = (int)Math.Floor((decimal)fxx / 32);
@@ -142,7 +161,8 @@ namespace StrangeServerCSharp
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) && ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
+                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) &&
+                        ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (xd + xxx);
                         var y = (yd + yyy);
@@ -152,20 +172,21 @@ namespace StrangeServerCSharp
                         {
                             var player = XServer.players[id.Key];
                             player.connection.AddDFX(fx, dir, fxx, fxy, bid, col);
-
                         }
                     }
                 }
             }
         }
+
         public async void AsyncAction(int secdelay, Action act)
         {
-            await Task.Run(delegate ()
+            await Task.Run(delegate()
             {
                 System.Threading.Thread.Sleep(secdelay * 100);
                 act();
             });
         }
+
         public static void ClearPack(uint px, uint py)
         {
             var xd = (int)Math.Floor((decimal)px / 32);
@@ -174,7 +195,8 @@ namespace StrangeServerCSharp
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) && ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
+                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) &&
+                        ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (xd + xxx);
                         var y = (yd + yyy);
@@ -184,13 +206,12 @@ namespace StrangeServerCSharp
                         {
                             var player = XServer.players[id.Key];
                             player.connection.ClearPack(px, py);
-
-
                         }
                     }
                 }
             }
         }
+
         public void Boom(uint x, uint y)
         {
             SendPack('B', x, y, 0, 0);
@@ -231,13 +252,15 @@ namespace StrangeServerCSharp
                  canboom[x + y * height] = false;
              });
         }
+
         public void OnGunBuild(uint x, uint y, int cid)
         {
-            for (int _x = -20; _x < 20; _x++)
+            for (var _x = -20; _x < 20; _x++)
             {
-                for (int _y = -20; _y < 20; _y++)
+                for (var _y = -20; _y < 20; _y++)
                 {
-                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
+                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
+                            new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
                     {
                         if (ValidCoord((uint)(x + _x), (uint)(y + _y)))
                         {
@@ -245,6 +268,7 @@ namespace StrangeServerCSharp
                             {
                                 ongun[(uint)(x + _x) + (uint)(y + _y) * World.height] = new List<int>();
                             }
+
                             if (!ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Contains(cid))
                             {
                                 ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Add(cid);
@@ -254,13 +278,15 @@ namespace StrangeServerCSharp
                 }
             }
         }
-        public void OnGunDel (uint x, uint y, int cid)
+
+        public void OnGunDel(uint x, uint y, int cid)
         {
-            for (int _x = -20; _x < 20; _x++)
+            for (var _x = -20; _x < 20; _x++)
             {
-                for (int _y = -20; _y < 20; _y++)
+                for (var _y = -20; _y < 20; _y++)
                 {
-                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
+                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
+                            new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
                     {
                         if (ValidCoord((uint)(x + _x), (uint)(y + _y)))
                         {
@@ -268,27 +294,32 @@ namespace StrangeServerCSharp
                             {
                                 ongun[(uint)(x + _x) + (uint)(y + _y) * World.height] = new List<int>();
                             }
+
                             if (ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Contains(cid))
                             {
-                                ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Remove(cid);
+                               ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Remove(cid);
                             }
                         }
                     }
                 }
             }
         }
+
         public static void GUN(uint x, uint y, int cid, Gun g)
         {
-            if (g.off == 0)
+            if (g.off == 0 && g.cryinside == 0)
             {
                 return;
             }
+            else { g.off = 1; }
+
             World.THIS.OnGunBuild(x, y, cid);
-            for (int _x = -21; _x < 21; _x++)
+            for (var _x = -21; _x < 21; _x++)
             {
-                for (int _y = -21; _y < 21; _y++)
+                for (var _y = -21; _y < 21; _y++)
                 {
-                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
+                    if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
+                            new System.Numerics.Vector2((x + _x), (y + _y))) <= 20f)
                     {
                         if (World.THIS.ValidCoord((uint)(x + _x), (uint)(y + _y)))
                         {
@@ -308,18 +339,25 @@ namespace StrangeServerCSharp
                 }
             }
         }
+
         public void Raz(uint x, uint y)
         {
             SendPack('B', x, y, 0, 2);
             canboom[x + y * height] = true;
             AsyncAction(75, () =>
             {
-                for (int _x = -14; _x < 14; _x++)
+                for (var _x = -14; _x < 14; _x++)
                 {
-                    for (int _y = -14; _y < 14; _y++)
+                    for (var _y = -14; _y < 14; _y++)
                     {
-                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 9.5f)
+                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
+                                new System.Numerics.Vector2((x + _x), (y + _y))) <= 9.5f)
                         {
+                            if (packmap[(x + _x) + (y + _y) * height] != null && packmap[(x + _x) + (y + _y) * height].type == 'G')
+                            {
+                                (packmap[(x + _x) + (y + _y) * height] as Gun).OnShot(100);
+                            }
+
                             foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
                             {
                                 XServer.players[id].Hurt(500);
@@ -327,26 +365,30 @@ namespace StrangeServerCSharp
                         }
                     }
                 }
+
                 SendDFToBotsGlobal(1, x, y, 10, 0, 2);
                 ClearPack(x, y);
                 canboom[x + y * height] = false;
             });
         }
+
         public void Prot(uint x, uint y)
         {
             SendPack('B', x, y, 0, 1);
             canboom[x + y * height] = true;
             AsyncAction(10, () =>
             {
-                for (int _x = -1; _x < 2; _x++)
+                for (var _x = -1; _x < 2; _x++)
                 {
-                    for (int _y = -1; _y < 2; _y++)
+                    for (var _y = -1; _y < 2; _y++)
                     {
                         foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
                         {
                             XServer.players[id].Hurt(5);
                         }
-                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 2f)
+
+                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
+                                new System.Numerics.Vector2((x + _x), (y + _y))) <= 2f)
                         {
                             if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_proton_percent))
                             {
@@ -355,25 +397,30 @@ namespace StrangeServerCSharp
                         }
                     }
                 }
+
                 SendDFToBotsGlobal(1, x, y, 1, 0, 1);
                 ClearPack(x, y);
                 canboom[x + y * height] = false;
             });
         }
+
         public bool isCrys(int cell)
         {
             return crys.Contains(cell);
         }
+
         public Phys phys;
         public static Box[] boxmap;
         public static Building[] packmap;
+
         public World(int width, int height, byte[] map, byte[] roadmap)
         {
             cellspool = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText("MapBlocks.json"));
-            for (int i = 0; i < 255; i++)
+            for (var i = 0; i < 255; i++)
             {
                 InitCell(i.ToString());
             }
+
             World.map = map;
             World.roadmap = roadmap;
             World.width = width;
@@ -393,9 +440,11 @@ namespace StrangeServerCSharp
             Clan.InitClans();
             GunUPD();
         }
+
         public static bool[] canboom;
         public static List<int>[] ongun;
         public static PeriodicTimer gunupdtimer = null;
+
         public static async void WorldUPD()
         {
             wupdtimer = new PeriodicTimer(TimeSpan.FromSeconds(3));
@@ -405,24 +454,42 @@ namespace StrangeServerCSharp
                 THIS.UpdateWorld();
             }
         }
+
         public static List<Building> packlist = new List<Building>();
         public static async void GunUPD()
         {
-            gunupdtimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-
-            while (await gunupdtimer.WaitForNextTickAsync())
-            {
-                try
+            bool tick = false;
+                gunupdtimer = new PeriodicTimer(TimeSpan.FromMilliseconds(500));
+                while (await gunupdtimer.WaitForNextTickAsync())
                 {
-                    var packs = packlist;
-                    foreach (var p in packs)
+                if (!tick)
+                {
+                    tick = true;
+                    try
                     {
-                        p.Update("gun");
+                        foreach (var p in BDClass.THIS.guns.ToList())
+                        {
+                            if (p.cryinside <= 0)
+                            {
+                                World.THIS.OnGunDel(p.x, p.y, p.cid);
+                                p.cryinside = 0;
+                            }
+                            else
+                            {
+                                p.Update("gun");
+                            }
+                        }
+                        BDClass.THIS.SaveChanges();
                     }
+                    catch (Exception ex)
+                    {
+                        tick = false;
+                    }
+                    tick = false;
                 }
-                catch (Exception ex) { }
-            }
+                }
         }
+
         public static async void c117UPD() //кс
         {
             cspdtimer = new PeriodicTimer(TimeSpan.FromSeconds(60));
@@ -432,6 +499,7 @@ namespace StrangeServerCSharp
                 THIS.Updc119();
             }
         }
+
         public void Updc119()
         {
             for (uint y = 0; y < 1000; y++)
@@ -445,10 +513,12 @@ namespace StrangeServerCSharp
                 }
             }
         }
+
         public System.Numerics.Vector2 GetChunkPosByCoords(uint x, uint y)
         {
             return new System.Numerics.Vector2((uint)Math.Floor((decimal)x / 32), (uint)Math.Floor((decimal)y / 32));
         }
+
         public void UpdateWorld()
         {
             for (uint y = 0; y < height; y++)
@@ -459,6 +529,7 @@ namespace StrangeServerCSharp
                 }
             }
         }
+
         public static Stack<int> ContPlayers(uint bx, uint by)
         {
             var xd = (int)Math.Floor((decimal)bx / 32);
@@ -468,88 +539,101 @@ namespace StrangeServerCSharp
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
                 {
-                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) && ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
+                    if (((xd + xxx) >= 0 && (yd + yyy) >= 0) &&
+                        ((xd + xxx) < XServer.THIS.chunkscx && (yd + yyy) < XServer.THIS.chunkscy))
                     {
                         var x = (xd + xxx);
                         var y = (yd + yyy);
                         var ch = Chunk.chunks[x, y];
-                            foreach (var id in ch.bots.Keys.ToList())
+                        foreach (var id in ch.bots.Keys.ToList())
+                        {
+                            if (XServer.players.ContainsKey(id))
                             {
-                                if (XServer.players.ContainsKey(id))
+                                var player = XServer.players[id];
+
+                                if (player.pos.X == bx && player.pos.Y == by)
                                 {
-                                    var player = XServer.players[id];
-
-                                    if (player.pos.X == bx && player.pos.Y == by)
-                                    {
-                                        st.Push(id);
-                                    }
+                                    st.Push(id);
                                 }
-
                             }
+                        }
                     }
                 }
             }
+
             return st;
         }
+
         public void DestroyCell(uint x, uint y)
         {
             cells[x + y * height] = cellps[roadmap[x + y * height]].CloneCell();
             World.map[x + y * height] = roadmap[x + y * height];
-            System.Numerics.Vector2 chp = GetChunkPosByCoords(x, y);
+            var chp = GetChunkPosByCoords(x, y);
             Chunk.chunks[(int)chp.X, (int)chp.Y].Update();
         }
+
         public void DestroyWithRoadCell(uint x, uint y)
         {
-            byte r = roadmap[x + y * height];
+            var r = roadmap[x + y * height];
             if (r == 35)
             {
                 if (GetCellConst(x, y).HP == -1)
                 {
                     return;
                 }
+
                 roadmap[x + y * height] = 32;
             }
+
             cells[x + y * height] = cellps[roadmap[x + y * height]].CloneCell();
             World.map[x + y * height] = roadmap[x + y * height];
-            System.Numerics.Vector2 chp = GetChunkPosByCoords(x, y);
+            var chp = GetChunkPosByCoords(x, y);
             Chunk.chunks[(int)chp.X, (int)chp.Y].Update();
         }
+
         public bool isRoad(byte cell)
         {
             return road.Contains(cell);
         }
+
         public bool isPack(byte cell)
         {
             return pack.Contains(cell);
         }
+
         public void SetCell(uint x, uint y, byte cell, int hp = -1)
         {
             if (cell == 0)
             {
                 return;
             }
+
             if (cellps[(int)cell] == null)
             {
                 return;
             }
+
             var c = cellps[(int)cell].CloneCell();
             if (isRoad(cell))
             {
                 cells[x + y * height] = c;
                 roadmap[x + y * height] = cell;
                 World.map[x + y * height] = cell;
-                System.Numerics.Vector2 v = GetChunkPosByCoords(x, y);
+                var v = GetChunkPosByCoords(x, y);
                 Chunk.chunks[(int)v.X, (int)v.Y].Update();
                 return;
             }
+
             if (cells[x + y * height].is_empty)
             {
                 roadmap[x + y * height] = World.map[x + y * height];
             }
+
             if (hp != -1)
             {
                 c.HP = hp;
             }
+
             cells[x + y * height] = c;
             World.map[x + y * height] = cell;
             var h = ContPlayers(x, y);
@@ -557,40 +641,51 @@ namespace StrangeServerCSharp
             {
                 XServer.players[id].Hurt(c.fall_damage);
             }
+
             if (cell == 90)
             {
                 try
                 {
                     Box.CollectBox(x, y, XServer.players[h.First()]);
                 }
-                catch (Exception e) { }
+                catch (Exception e)
+                {
+                }
             }
-            System.Numerics.Vector2 chp = GetChunkPosByCoords(x, y);
+
+            var chp = GetChunkPosByCoords(x, y);
             Chunk.chunks[(int)chp.X, (int)chp.Y].Update();
         }
+
         public byte GetCell(uint x, uint y)
         {
-            byte cell = World.map[x + y * height];
+            var cell = World.map[x + y * height];
             if (cellps[cell].is_empty)
             {
                 return roadmap[x + y * height];
             }
+
             return cell;
         }
-        public bool isdest(uint x,uint y)
+
+        public bool isdest(uint x, uint y)
         {
             return World.cells[x + y * height].HP != -1;
         }
+
         public Cell GetCellConst(uint x, uint y)
         {
             if (ValidCoord(x, y))
             {
                 return World.cells[x + y * height];
             }
+
             return null;
         }
+
         public static long[] costs = new long[] { 10, 25, 20, 25, 21, 50 };
         public static long[] costsbuy = new long[] { 10, 25, 20, 25, 21, 50 };
+
         public void CreateChunks()
         {
             for (uint chx = 0; chx < XServer.THIS.chunkscx; chx++)
@@ -604,7 +699,7 @@ namespace StrangeServerCSharp
                         {
                             if (Chunk.chunks[chx, chy] != null)
                             {
-                                byte cell = GetCell(((chx * 32) + x), (((chy * 32) + y)));
+                                var cell = GetCell(((chx * 32) + x), (((chy * 32) + y)));
                                 Chunk.chunks[chx, chy].cells[x + y * 32] = cell;
                                 cells[((chx * 32) + x) + ((chy * 32) + y) * height] = cellps[(int)cell].CloneCell();
                             }

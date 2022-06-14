@@ -3,27 +3,39 @@
     public class Phys
     {
         public static Phys THIS;
-        public Phys() { THIS = this; makedirt = new bool[World.width * World.height]; }
+
+        public Phys()
+        {
+            THIS = this;
+            makedirt = new bool[World.width * World.height];
+        }
+
         public const float TPS = 3f;
         public Random rand = new Random();
         public static long lastTick = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         public bool[] makedirt;
+
         public static async void Start()
         {
-            await Task.Run(delegate ()
+            await Task.Run(delegate()
             {
-                for (; ; )
+                for (;;)
                 {
-                    int ticksToProcess = (int)((DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastTick) / 1000f * TPS);
+                    var ticksToProcess = (int)((DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastTick) / 1000f * TPS);
                     if (ticksToProcess > 0)
                     {
+                        while (ticksToProcess-- > 0)
+                        {
+                            Update();
+                            Thread.Sleep(10);
+                        }
 
-                        while (ticksToProcess-- > 0) { Update(); Thread.Sleep(10); }
                         lastTick = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     }
                 }
             });
         }
+
         public static void Update()
         {
             for (uint y = 0; y < World.height; y++)
@@ -42,13 +54,12 @@
                 }
             }
         }
+
         public void TryToActivatec117(uint x, uint y)
         {
             if (v(x + 1, y) && rand.NextDouble() < 0.01)
             {
-
                 World.THIS.SetCell(x + 1, y, 107, 10);
-
             }
             else if (v(x - 1, y) && rand.NextDouble() < 0.01)
             {
@@ -56,17 +67,14 @@
             }
             else if (v(x, y + 1) && rand.NextDouble() < 0.01)
             {
-
                 World.THIS.SetCell(x, y + 1, 107, 10);
-
             }
             else if (v(x, y - 1) && rand.NextDouble() < 0.01)
             {
-
                 World.THIS.SetCell(x, y - 1, 107, 10);
-
             }
         }
+
         public void TryToActivate(uint x, uint y, byte cell)
         {
             if (World.cellps[cell].is_alive)
@@ -74,6 +82,7 @@
                 Alive(x, y, cell);
             }
         }
+
         public List<int> alive = new List<int>()
         {
             50,
@@ -84,6 +93,7 @@
             55,
             116
         };
+
         public void CheckStruct(uint x, uint y, byte cell)
         {
             if (cell == 116) //синь
@@ -96,9 +106,9 @@
             {
                 if (isStruct(x, y, cell))
                 {
-                    for (int cx = -1; cx <= 1; cx++)
+                    for (var cx = -1; cx <= 1; cx++)
                     {
-                        for (int cy = -1; cy <= 1; cy++)
+                        for (var cy = -1; cy <= 1; cy++)
                         {
                             World.THIS.SetCell((uint)(x + cx), (uint)(y + cy), 91);
                         }
@@ -119,6 +129,7 @@
             {
             }
         }
+
         public void Alive(uint x, uint y, byte cell)
         {
             CheckStruct(x, y, cell);
@@ -126,10 +137,8 @@
             {
                 if (v(x + 1, y) && rand.Next(0, 100) < 20)
                 {
-
                     World.THIS.SetCell(x + 1, y, 116);
                     World.THIS.SetCell(x, y, 109, 21);
-
                 }
                 else if (v(x - 1, y) && rand.Next(0, 100) < 20)
                 {
@@ -138,122 +147,115 @@
                 }
                 else if (v(x, y + 1) && rand.Next(0, 100) < 20)
                 {
-
                     World.THIS.SetCell(x, y + 1, 116);
                     World.THIS.SetCell(x, y, 109, 21);
-
                 }
                 else if (v(x, y - 1) && rand.Next(0, 100) < 20)
                 {
-
                     World.THIS.SetCell(x, y - 1, 116);
                     World.THIS.SetCell(x, y, 109, 21);
-
                 }
             }
             else if (cell == 50) //голь
             {
                 if (v(x + 1, y))
                 {
-
                     World.THIS.SetCell(x + 1, y, 112);
-
                 }
+
                 if (v(x - 1, y))
                 {
                     World.THIS.SetCell(x - 1, y, 112);
                 }
+
                 if (v(x, y + 1))
                 {
-
                     World.THIS.SetCell(x, y + 1, 112);
-
                 }
+
                 if (v(x, y - 1))
                 {
-
                     World.THIS.SetCell(x, y - 1, 112);
-
                 }
             }
             else if (cell == 51) //крась
             {
-                bool plod = false;
-                for (int cx = -1; cx <= 1; cx++)
+                var plod = false;
+                for (var cx = -1; cx <= 1; cx++)
                 {
-                    for (int cy = -1; cy <= 1; cy++)
+                    for (var cy = -1; cy <= 1; cy++)
                     {
                         if (isChs((uint)(x + cx), (uint)(y + cy)))
                         {
-                            plod = true; break;
+                            plod = true;
+                            break;
                         }
                     }
                 }
+
                 if (!plod)
                 {
                     return;
                 }
+
                 if (v(x + 1, y))
                 {
-
                     World.THIS.SetCell(x + 1, y, 108, 4);
-
                 }
+
                 if (v(x - 1, y))
                 {
                     World.THIS.SetCell(x - 1, y, 108, 4);
                 }
+
                 if (v(x, y + 1))
                 {
-
                     World.THIS.SetCell(x, y + 1, 108, 4);
-
                 }
+
                 if (v(x, y - 1))
                 {
-
                     World.THIS.SetCell(x, y - 1, 108, 4);
-
                 }
             }
             else if (cell == 52) //фиоль
             {
-                bool plod = false;
-                for (int cx = -1; cx <= 1; cx++)
+                var plod = false;
+                for (var cx = -1; cx <= 1; cx++)
                 {
-                    for (int cy = -1; cy <= 1; cy++)
+                    for (var cy = -1; cy <= 1; cy++)
                     {
                         if (isChs((uint)(x + cx), (uint)(y + cy)))
                         {
-                            plod = true; break;
+                            plod = true;
+                            break;
                         }
                     }
                 }
+
                 if (!plod)
                 {
                     return;
                 }
+
                 if (v(x + 1, y))
                 {
-
                     World.THIS.SetCell(x + 1, y, 110);
-
                 }
+
                 if (v(x - 1, y))
                 {
                     World.THIS.SetCell(x - 1, y, 110);
                 }
+
                 if (v(x, y + 1))
                 {
-
                     World.THIS.SetCell(x, y + 1, 110);
-
                 }
+
                 if (v(x, y - 1))
                 {
-
                     World.THIS.SetCell(x, y - 1, 110);
-
                 }
             }
             else if (cell == 53) //чурка
@@ -268,31 +270,34 @@
             {
                 if (v(x + 1, y))
                 {
-                    byte al = GetRandomAlive();
+                    var al = GetRandomAlive();
                     if (al != 0)
                     {
                         World.THIS.SetCell(x + 1, y, al);
                     }
                 }
+
                 if (v(x - 1, y))
                 {
-                    byte al = GetRandomAlive();
+                    var al = GetRandomAlive();
                     if (al != 0)
                     {
                         World.THIS.SetCell(x - 1, y, al);
                     }
                 }
+
                 if (v(x, y + 1))
                 {
-                    byte al = GetRandomAlive();
+                    var al = GetRandomAlive();
                     if (al != 0)
                     {
                         World.THIS.SetCell(x, y + 1, al);
                     }
                 }
+
                 if (v(x, y - 1))
                 {
-                    byte al = GetRandomAlive();
+                    var al = GetRandomAlive();
                     if (al != 0)
                     {
                         World.THIS.SetCell(x, y - 1, al);
@@ -300,12 +305,13 @@
                 }
             }
         }
+
         public byte GetRandomAlive()
         {
             byte cell = 0;
 
 
-            if (rand.Next(0, 100) < 5)
+            if (rand.Next(0, 100) < 0.0001f)
             {
                 cell = 55;
             }
@@ -333,19 +339,22 @@
             {
                 cell = 116;
             }
+
             return cell;
         }
+
         public bool isCherk(uint x, uint y)
         {
             if (!World.THIS.ValidCoord(x, y))
             {
                 return false;
             }
+
             return GetPres(x, y).id == 53;
         }
+
         public int ClearForFall(uint x, uint y)
         {
-
             if (vf((uint)(x), (y + 1)) && !THIS.makedirt[x + (y + 1) * World.height])
             {
                 return 1;
@@ -364,38 +373,44 @@
 
             return 0;
         }
+
         public bool isChs(uint x, uint y)
         {
             if (!World.THIS.ValidCoord(x, y))
             {
                 return false;
             }
+
             return GetPres(x, y).id == 114 || GetPres(x, y).id == 115;
         }
+
         public bool isStruct(uint x, uint y, byte cell)
         {
-            for (int cx = -1; cx <= 1; cx++)
+            for (var cx = -1; cx <= 1; cx++)
             {
-                for (int cy = -1; cy <= 1; cy++)
+                for (var cy = -1; cy <= 1; cy++)
                 {
                     if (!World.THIS.ValidCoord((uint)(x + cx), (uint)(y + cy)))
                     {
                         return false;
                     }
+
                     if (GetPres((uint)(x + cx), (uint)(y + cy)).id != cell)
                     {
                         return false;
                     }
                 }
             }
+
             return true;
         }
+
         public bool isStructCher(uint x, uint y)
         {
-            int c = 0;
-            for (int cx = -1; cx <= 1; cx++)
+            var c = 0;
+            for (var cx = -1; cx <= 1; cx++)
             {
-                for (int cy = -1; cy <= 1; cy++)
+                for (var cy = -1; cy <= 1; cy++)
                 {
                     if (World.THIS.ValidCoord((uint)(x + cx), (uint)(y + cy)))
                     {
@@ -406,12 +421,15 @@
                     }
                 }
             }
+
             if (c > 6)
             {
                 return true;
             }
+
             return false;
         }
+
         public bool v(uint x, uint y)
         {
             if (World.ContPlayers(x, y).Count > 0)
@@ -422,24 +440,30 @@
             {
                 return false;
             }
+
             return GetPres(x, y).is_empty;
         }
+
         public bool vf(uint x, uint y)
         {
             if (!World.THIS.ValidForB(x, y))
             {
                 return false;
             }
+
             if (GetPres(x, y).id == 39)
             {
                 return false;
             }
+
             return GetPres(x, y).is_empty;
         }
+
         public World.Cell GetPres(uint x, uint y)
         {
             return World.cellps[World.THIS.GetCell(x, y)];
         }
+
         public void Fall(uint x, uint y, byte cell)
         {
             var canf = ClearForFall(x, y);
@@ -461,10 +485,9 @@
                     THIS.makedirt[(x + 1) + (y + 1) * World.height] = true;
                     World.THIS.SetCell((uint)(x + 1), y + 1, cell);
                 }
-
             }
-
         }
+
         public byte randcell()
         {
             var r = rand.Next(0, 100);
@@ -480,17 +503,14 @@
             {
                 return 0;
             }
-
-
-
         }
+
         public void PlodBel(uint x, uint y)
         {
-
             var canplod = false;
-            for (int bx = -1; bx <= 1; bx++)
+            for (var bx = -1; bx <= 1; bx++)
             {
-                for (int by = -1; by <= 1; by++)
+                for (var by = -1; by <= 1; by++)
                 {
                     if (v((uint)(x + bx), (uint)(y + by)) && (y + by) != y - 1)
                     {
@@ -498,15 +518,18 @@
                     }
                 }
             }
+
             if (!canplod)
             {
                 return;
             }
+
             var r = rand.Next(0, 100) < 20;
             if (!World.THIS.ValidCoord(x, y - 1))
             {
                 return;
             }
+
             if (World.THIS.GetCell(x, y - 1) == 91)
             {
                 if (r)
@@ -518,9 +541,10 @@
             {
                 return;
             }
-            for (int bx = -1; bx <= 1; bx++)
+
+            for (var bx = -1; bx <= 1; bx++)
             {
-                for (int by = -1; by <= 1; by++)
+                for (var by = -1; by <= 1; by++)
                 {
                     if (v((uint)(x + bx), (uint)(y + by)) && (y + by) != y - 1)
                     {
@@ -529,6 +553,7 @@
                 }
             }
         }
+
         public void PlodChurk(uint x, uint y)
         {
             if (isCherk(x, y + 1))
@@ -537,6 +562,7 @@
                 {
                     World.THIS.SetCell(x, y + 2, randcell());
                 }
+
                 if (v(x, y - 1))
                 {
                     World.THIS.SetCell(x, y - 1, randcell());
@@ -548,6 +574,7 @@
                 {
                     World.THIS.SetCell(x, y - 2, randcell());
                 }
+
                 if (v(x, y + 1))
                 {
                     World.THIS.SetCell(x, y + 1, randcell());
@@ -559,6 +586,7 @@
                 {
                     World.THIS.SetCell(x + 2, y, randcell());
                 }
+
                 if (v(x - 1, y))
                 {
                     World.THIS.SetCell(x - 1, y, randcell());
@@ -570,6 +598,7 @@
                 {
                     World.THIS.SetCell(x - 2, y, randcell());
                 }
+
                 if (v(x + 1, y))
                 {
                     World.THIS.SetCell(x + 1, y, randcell());
