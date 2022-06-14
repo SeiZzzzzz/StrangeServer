@@ -17,20 +17,17 @@ namespace StrangeServerCSharp
 
         public BDClass()
         {
-            if (THIS == null)
-            {
-                Console.WriteLine(Database.EnsureCreated());
-                THIS = this;
-            }
+            Database.EnsureCreated();
         }
 
         public static bool NickAvl(string nick)
         {
+            using var db = new BDClass();
             try
             {
-                Console.WriteLine(THIS.players.Count(p => p.name == nick));
+                Console.WriteLine(db.players.Count(p => p.name == nick));
 
-                return THIS.players.Count(p => p.name == nick) > 0;
+                return db.players.Count(p => p.name == nick) > 0;
             }
             catch (Exception)
             {
@@ -40,10 +37,11 @@ namespace StrangeServerCSharp
 
         public Player CreatePlayer(string name, string passwd)
         {
+            using var db = new BDClass();
             var player = new Player { pos = new System.Numerics.Vector2(351, 22) };
             try
             {
-                player.resp = BDClass.THIS.resps.First();
+                player.resp = db.resps.First();
             }
             catch (Exception)
             {
@@ -51,17 +49,17 @@ namespace StrangeServerCSharp
                 player.resp.ownerid = 0;
                 player.resp.Rebild();
                 player.settings = new Settings();
-                BDClass.THIS.settings.Add(player.settings);
+                db.settings.Add(player.settings);
             }
 
             player.name = name;
             player.settings = new Settings();
             player.passwd = passwd;
-            BDClass.THIS.settings.Add(player.settings);
-            THIS.players.Add(player);
+            db.settings.Add(player.settings);
+            db.players.Add(player);
             try
             {
-                THIS.SaveChanges();
+                db.SaveChanges();
             }
             catch (Exception)
             {
@@ -71,21 +69,20 @@ namespace StrangeServerCSharp
             return player;
         }
 
-        public static BDClass THIS = null;
-
         public static void Save()
         {
+            using var db = new BDClass();
             foreach (var box in World.boxmap)
             {
                 if (box != null)
                 {
-                    THIS.boxes.Add(box);
+                    db.boxes.Add(box);
                 }
             }
 
             try
             {
-                THIS.SaveChanges();
+                db.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -99,14 +96,25 @@ namespace StrangeServerCSharp
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;MultipleActiveResultSets=true;Database=X;Trusted_Connection=True;");
+            var dbType = Config.THIS.DBType;
+            switch (dbType)
+            {
+                case "sqlite":
+                    optionsBuilder.UseSqlite("Data Source=mines.db");
+                    break;
+                case "localdb":
+                default:
+                    optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;MultipleActiveResultSets=true;Database=X;Trusted_Connection=True;");
+                    break;
+            }
         }
 
         public static void Load()
         {
+            using var db = new BDClass();
             try
             {
-                foreach (var i in THIS.markets.ToList())
+                foreach (var i in db.markets.ToList())
                 {
                     i.Rebild();
                     World.packmap[i.x + i.y * World.height] = i;
@@ -114,7 +122,7 @@ namespace StrangeServerCSharp
                     Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
                 }
 
-                foreach (var i in THIS.resps.ToList())
+                foreach (var i in db.resps.ToList())
                 {
                     i.Rebild();
                     World.packmap[i.x + i.y * World.height] = i;
@@ -122,7 +130,7 @@ namespace StrangeServerCSharp
                     Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
                 }
 
-                foreach (var i in THIS.guns.ToList())
+                foreach (var i in db.guns.ToList())
                 {
                     i.Rebild();
                     World.packmap[i.x + i.y * World.height] = i;
@@ -130,8 +138,8 @@ namespace StrangeServerCSharp
                     Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(i.x, i.y);
                 }
 
-                World.packlist = THIS.packs.ToList();
-                foreach (var i in THIS.boxes.ToList())
+                World.packlist = db.packs.ToList();
+                foreach (var i in db.boxes.ToList())
                 {
                     World.boxmap[i.x + i.y * World.height] = i;
                 }

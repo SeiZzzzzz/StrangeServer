@@ -468,9 +468,8 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var id in ch.bots)
+                        foreach (var player in ch.bots.Select(id => XServer.players[id.Key]))
                         {
-                            var player = XServer.players[id.Key];
                             player.connection.AddDFX(fx, dir, fxx, fxy, this.id, col);
                         }
                     }
@@ -493,7 +492,6 @@ namespace StrangeServerCSharp
 
                         foreach (var id in ch.bots)
                         {
-                            var player = XServer.players[id.Key];
                             player.connection.AddFX(fx, fxx, fxy);
                         }
                     }
@@ -529,6 +527,7 @@ namespace StrangeServerCSharp
             return false;
 
         }
+
         public void Build(uint x, uint y, string type)
         {
             if (!World.THIS.ValidForB(x, y))
@@ -608,7 +607,7 @@ namespace StrangeServerCSharp
             }
             else
             {
-                hp += healhp;
+                hp += healHp;
                 SendDFToBots(5, 0, 0, 0, 0);
                 SendHp();
             }
@@ -728,7 +727,8 @@ namespace StrangeServerCSharp
         {
             this.name = text;
             this.connection.SendNick(id, name);
-            BDClass.THIS.SaveChanges();
+            using var db = new BDClass();
+            db.SaveChanges();
         }
 
         public void SendLocalMsg(byte[] msg)

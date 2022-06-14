@@ -122,8 +122,9 @@ namespace StrangeServerCSharp
             World.THIS.SetCell(x + 1, y + 2, 32);
             World.THIS.SetCell(x + 2, y + 1, 32);
             World.THIS.SetCell(x + 2, y + 2, 32);
-            BDClass.THIS.markets.Remove(this);
-            BDClass.THIS.SaveChanges();
+            using var db = new BDClass();
+            db.markets.Remove(this);
+            db.SaveChanges();
             this.UpdatePackVis();
             World.ClearPack(x, y);
         }
@@ -347,13 +348,13 @@ namespace StrangeServerCSharp
 
         public override void Open(Player p, string tab)
         {
-            using var db = new BDClass();
             var builder = new HorbBuilder();
             if (p.win == "")
             {
                 return;
             }
 
+            using var db = new BDClass();
             if (tab == this.winid)
             {
                 var cry = p.crys.cry;
@@ -485,7 +486,8 @@ namespace StrangeServerCSharp
                 Clan clan = null;
                 try
                 {
-                    clan = BDClass.THIS.clans.First(c => c.id.ToString() == id);
+                    using var db = new BDClass();
+                    clan = db.clans.First(c => c.id.ToString() == id);
                 }
                 catch (Exception)
                 {
@@ -505,7 +507,8 @@ namespace StrangeServerCSharp
                 builder.SetTitle("КЛАНЫ")
                     .AddClanList()
                     .SetText("@@Кланы шахт. Кликните на клан для подробной информации\n");
-                foreach (var cl in BDClass.THIS.clans.Where(clan => !string.IsNullOrEmpty(clan.owner)))
+                using var db = new BDClass();
+                foreach (var cl in db.clans.Where(clan => !string.IsNullOrEmpty(clan.owner)))
                 {
                     builder.AddClanListLine(cl.id.ToString(), $"<color=white>{cl.name}</color>  [{cl.abr}]",
                         "<color=#88ff88ff>прием открыт</color>", "clan:" + cl.id);
@@ -549,6 +552,7 @@ namespace StrangeServerCSharp
                 Box.BuildBox(x, y, new long[] { 0, 0, 0, 0, 0, cryinside }, null);
             }
             catch (Exception e) { }
+            using var db = new BDClass();
             db.guns.Remove(this);
             db.SaveChanges();
             this.UpdatePackVis();
@@ -561,7 +565,7 @@ namespace StrangeServerCSharp
             return p.clanid == cid;
         }
 
-        public override async void Update(string type)
+        public override void Update(string type)
         {
             await Task.Run(() => {
                 if (type == "gun")
@@ -684,12 +688,9 @@ namespace StrangeServerCSharp
             var g = new Gun() { cid = p.clanid, ownerid = p.id, x = x, y = y };
             var v = World.THIS.GetChunkPosByCoords(x, y);
             Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
-            BDClass.THIS.guns.Add(g);
-            try
-            {
-                BDClass.THIS.SaveChanges();
-            }
-            catch (Exception ex) { }
+            using var db = new BDClass();
+            db.guns.Add(g);
+            db.SaveChanges();
             return g;
         }
 
@@ -768,17 +769,16 @@ namespace StrangeServerCSharp
             try
             {
                 Box.BuildBox(x, y, new long[] { 0, cryinside, 0, 0, 0, 0 }, null);
-            foreach (var p in BDClass.THIS.players.Where(p => p.resp == this))
+                using var db = new BDClass();
+                foreach (var p in db.players.Where(p => p.resp == this))
                 {
-                    p.resp = BDClass.THIS.resps.First();
+                    p.resp = db.resps.First();
                 }
             }
             catch (Exception e) { }
-
-            BDClass.THIS.players.Where(p => p.resp == this);
-           
-            BDClass.THIS.resps.Remove(this);
-            BDClass.THIS.SaveChanges();
+            using var db = new BDClass();
+            db.resps.Remove(this);
+            db.SaveChanges();
             this.UpdatePackVis();
             World.ClearPack(x, y);
         }
@@ -858,7 +858,8 @@ namespace StrangeServerCSharp
             {
                 if (cryinside == 0)
                 {
-                    p.resp = BDClass.THIS.resps.First();
+                    using var db = new BDClass();
+                    p.resp = db.resps.First();
                     off = 0;
                     UpdatePackVis();
                     return;
@@ -963,6 +964,7 @@ namespace StrangeServerCSharp
 
         public override void Open(Player p, string tab)
         {
+            
             var builder = new HorbBuilder();
             if (this.cryinside == 0 && ownerid != p.id)
             {
@@ -982,9 +984,10 @@ namespace StrangeServerCSharp
                 builder.AddButton("ВЫХОД", "exit");
                 if (ownerid > 0)
                 {
+                    var db = new BDClass();
                     try
                     {
-                        if (p == BDClass.THIS.players.First(p => p.id == ownerid))
+                        if (p == db.players.First(p => p.id == ownerid))
                         {
                              builder.Admin();
                         }
