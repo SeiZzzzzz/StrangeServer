@@ -256,6 +256,11 @@ namespace StrangeServerCSharp
         public void Death()
         {
             HorbDecoder.Exit("exit", this);
+            using var db = new BDClass();
+            if (resp == null)
+            {
+                this.resp = db.resps.FirstOrDefault();
+            }
             this.resp.OnDeath(this);
             var rx = resp.x + 2;
             var ry = resp.y;
@@ -432,9 +437,8 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var id in ch.bots)
+                        foreach (var player in ch.bots.Select(id => XServer.players[id.Key]))
                         {
-                            var player = XServer.players[id.Key];
                             player.connection.AddDFX(fx, dir, fxx, fxy, this.id, col);
                         }
                     }
