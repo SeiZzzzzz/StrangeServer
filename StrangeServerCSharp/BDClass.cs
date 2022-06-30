@@ -18,6 +18,10 @@ namespace StrangeServerCSharp
         public BDClass()
         {
             Database.EnsureCreated();
+            if (THIS == null)
+            {
+                THIS = this;
+            }
         }
 
         public static bool NickAvl(string nick)
@@ -34,7 +38,7 @@ namespace StrangeServerCSharp
                 return false;
             }
         }
-
+        public static BDClass THIS;
         public Player CreatePlayer(string name, string passwd)
         {
             using var db = new BDClass();

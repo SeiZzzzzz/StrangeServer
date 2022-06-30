@@ -109,6 +109,7 @@
                     using var db = new BDClass();
                     World.packmap[xp + yp * World.width] = m;
                     db.resps.Add(m);
+                    db.SaveChanges();
                     items[sel].count--;
                     this.SendInv();
                     Building.AddPack();
@@ -128,6 +129,7 @@
                     using var db = new BDClass();
                     World.packmap[xp + yp * World.width] = m;
                     db.markets.Add(m);
+                    db.SaveChanges();
                     items[sel].count--;
                     this.SendInv();
                     Building.AddPack();

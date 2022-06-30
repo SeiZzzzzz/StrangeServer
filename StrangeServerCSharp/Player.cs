@@ -143,6 +143,7 @@ namespace StrangeServerCSharp
 
         public void SendMoney()
         {
+
             if (this.money < 0)
             {
                 this.money = long.MaxValue;
@@ -417,7 +418,14 @@ namespace StrangeServerCSharp
                             foreach (var p in ch.packs.Keys)
                             {
                                 var pc = World.packmap[(uint)(p.X + p.Y * World.height)];
+                            if (pc != null)
+                            {
                                 this.connection.AddPack(pc.GetShpack);
+                            }
+                            else
+                            {
+                                ch.packs.Remove(p);
+                            }
                             }
                     }
                 }

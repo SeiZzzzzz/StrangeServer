@@ -61,7 +61,6 @@ namespace StrangeServerCSharp
         public static World world = null;
         public static XServer THIS;
         public static Dictionary<int, Player> players = new Dictionary<int, Player>();
-        public BDClass db = new BDClass();
         public IList<Session> PlayerSessions { get; set; }
         public XServer(IPAddress address, int port) : base(address, port)
         {
@@ -193,7 +192,8 @@ namespace StrangeServerCSharp
                 this.player.ForceRemove();
                 this.player.Death();
             });
-            XServer.THIS.db.SaveChanges();
+            using var db = new BDClass();
+            db.SaveChanges();
             XServer.players.Remove(this.player.id);
             online = 1;
             foreach (var player in XServer.players)
@@ -242,8 +242,8 @@ namespace StrangeServerCSharp
                         {
                             Send("AH", "BAD");
                         }
-
-                        var p = XServer.THIS.db.players.First(p => p.id == id);
+                        using var db = new BDClass();
+                        var p = db.players.First(p => p.id == id);
                         if (CalculateMD5Hash(p.hash + this.sid) == datax[2])
                         {
                             this.player = p;
@@ -334,7 +334,8 @@ namespace StrangeServerCSharp
                 {
                     try
                     {
-                        var p = XServer.THIS.db.players.First(p => p.name == auname);
+                        using var db = new BDClass();
+                        var p = db.players.First(p => p.name == auname);
                         if (p.passwd == aupasswd)
                         {
                             autosed = false;

@@ -773,6 +773,7 @@ namespace StrangeServerCSharp
                 {
                     p.resp = db.resps.First();
                 }
+                db.SaveChanges();
             }
             catch (Exception e) { }
             db.resps.Remove(this);
@@ -844,10 +845,9 @@ namespace StrangeServerCSharp
             rb(x, y);
             var v = World.THIS.GetChunkPosByCoords(x, y);
             Chunk.chunks[(uint)v.X, (uint)v.Y].AddPack(x, y);
-            return new Resp()
-            {
-                ownerid = owner.id, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1, crymax = 1000
-            };
+            World.packmap[(int)(x + y * World.height)] = new Resp()
+            { ownerid = owner.id, x = x, y = y, type = 'R', respcost = 20, cryinside = 100, off = 1 };
+            return (Resp)World.packmap[(int)(x + y * World.height)];
         }
 
         public void OnDeath(Player p)
@@ -978,14 +978,12 @@ namespace StrangeServerCSharp
                 {
                     builder.AddButton("ПРИВЯЗАТЬ", "bind");
                 }
-
                 builder.AddButton("ВЫХОД", "exit");
                 if (ownerid > 0)
                 {
-                    var db = new BDClass();
                     try
                     {
-                        if (p == db.players.First(p => p.id == ownerid))
+                        if (p.id == ownerid)
                         {
                              builder.Admin();
                         }
