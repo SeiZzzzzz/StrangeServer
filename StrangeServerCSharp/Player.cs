@@ -104,8 +104,6 @@ namespace StrangeServerCSharp
 
             hash = GenerateHash();
         }
-        public List<Chunk> vchunks = new List<Chunk>();
-        public List<Chunk> lvchunks = new List<Chunk>();
         public void SendClan()
         {
             if (this.connection == null)
@@ -258,11 +256,6 @@ namespace StrangeServerCSharp
         public void Death()
         {
             HorbDecoder.Exit("exit", this);
-            using var db = new BDClass();
-            if (resp == null)
-            {
-                this.resp = db.resps.FirstOrDefault();
-            }
             this.resp.OnDeath(this);
             var rx = resp.x + 2;
             var ry = resp.y;
@@ -358,11 +351,16 @@ namespace StrangeServerCSharp
         {
             try
             {
-                timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
+                timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
 
                 while (await timer.WaitForNextTickAsync())
                 {
                     GimmeBots();
+                    if (DateTime.Now > laststime)
+                    {
+                        GimmePacks();
+                        laststime = DateTime.Now  + TimeSpan.FromMilliseconds(1000);
+                    }
                 }
             }
             catch (Exception ex)
@@ -396,9 +394,11 @@ namespace StrangeServerCSharp
             }
         }
         public List<Building> lpacks = new List<Building>();
+        public List<Chunk> vchunks = new List<Chunk>();
+        public List<Chunk> lvchunks = new List<Chunk>();
+        public DateTime laststime = DateTime.Now;
         public void GimmePacks()
         {
-            vchunks.Clear();
             for (var xxx = -2; xxx <= 2; xxx++)
             {
                 for (var yyy = -2; yyy <= 2; yyy++)
@@ -409,58 +409,14 @@ namespace StrangeServerCSharp
                         var x = (this.chunkx + xxx);
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
-                        vchunks.Add(ch);
+                            foreach (var p in ch.packs.Keys)
+                            {
+                                var pc = World.packmap[(uint)(p.X + p.Y * World.height)];
+                                this.connection.AddPack(pc.GetShpack);
+                            }
                     }
                 }
             }
-            if (vchunks.Count == 25)
-            {
-                for (int i = 0; i <= vchunks.Count;i++ )
-                {
-                    if (vchunks.Count > i)
-                    {
-                        if (lvchunks.Contains(vchunks[i]))
-
-                        {
-                            lvchunks.Remove(vchunks[i]);
-                        }
-                       
-                            vchunks.Remove(vchunks[i]);
-                        
-                    }
-                }
-                foreach (var f in lvchunks)
-                {
-                    foreach (var v in f.packs)
-                    {
-                        var pack = World.packmap[(uint)v.Key.X + (uint)v.Key.Y * World.height];
-                        if (pack != null)
-                        {
-                            if (lpacks.Contains(pack))
-                            {
-                                lpacks.Remove(pack);
-                                this.connection.ClearPack(pack.x, pack.y);
-                            }
-                        }
-                    }
-                }
-                foreach (var f in vchunks)
-                {
-                    foreach (var v in f.packs)
-                    {
-                        var pack = World.packmap[(uint)v.Key.X + (uint)v.Key.Y * World.height];
-                        if (pack != null)
-                        {
-                            if (!lpacks.Contains(pack))
-                            {
-                                lpacks.Add(pack);
-                                this.connection.AddPack(pack.GetShpack);
-                            }
-                        }
-                    }
-                }
-            }
-            lvchunks = vchunks;
         }
 
         public void SendDFToBots(int fx, uint fxx, uint fxy, int dir, int col = 0)
@@ -476,8 +432,9 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var player in ch.bots.Select(id => XServer.players[id.Key]))
+                        foreach (var id in ch.bots)
                         {
+                            var player = XServer.players[id.Key];
                             player.connection.AddDFX(fx, dir, fxx, fxy, this.id, col);
                         }
                     }
@@ -498,12 +455,10 @@ namespace StrangeServerCSharp
                         var y = (this.chunky + yyy);
                         var ch = Chunk.chunks[x, y];
 
-                        foreach (var id in ch.bots.Keys)
+                        foreach (var id in ch.bots)
                         {
-                            if (XServer.players.ContainsKey(id))
-                            {
-                                XServer.players[id].connection.AddFX(fx, fxx, fxy);
-                            }
+                            var player = XServer.players[id.Key];
+                            player.connection.AddFX(fx, fxx, fxy);
                         }
                     }
                 }
@@ -538,7 +493,6 @@ namespace StrangeServerCSharp
             return false;
 
         }
-
         public void Build(uint x, uint y, string type)
         {
             if (!World.THIS.ValidForB(x, y))
