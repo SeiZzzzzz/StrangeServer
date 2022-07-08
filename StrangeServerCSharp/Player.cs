@@ -895,5 +895,29 @@ namespace StrangeServerCSharp
 
             TryToGetChunks();
         }
+
+        public void Beep()
+        {
+            this.connection.Send("BB", "");
+        }
+
+        public void SwitchProg()
+        {
+            connection.Send("@P", "");
+            if (ProgData != null && !ProgData.IsActive)
+            {
+                ProgData.IsActive = false;
+                tail = 1;
+                win = "";
+                cpack = null;
+            }
+            else if (ProgData != null)
+            {
+                tail = 0;
+                ProgData.IsActive = false;
+                win = "";
+                cpack = null;
+            }
+        }
     }
 }

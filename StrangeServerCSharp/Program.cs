@@ -660,22 +660,7 @@ namespace StrangeServerCSharp
                 }
                 else if (ty.eventType == "pRST")
                 {
-                    Send("@P", "");
-                    if (player.ProgData != null && !player.ProgData.IsActive)
-                    {
-                        player.ProgData.IsActive = false;
-                        player.tail = 1;
-                        player.win = "";
-                        player.cpack = null;
-                    }
-                    else if (player.ProgData != null)
-                    {
-                        player.tail = 0;
-                        player.ProgData.IsActive = false;
-                        player.win = "";
-                        player.cpack = null;
-                    }
-                    
+                   player.SwitchProg();
                 }
                 else if (ty.eventType == "PROG")
                 {

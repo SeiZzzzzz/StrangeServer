@@ -30,8 +30,8 @@ namespace StrangeServerCSharp
 
                     if (player.ProgData.X == 16)
                     {
-                        player.ProgData.X = 0;
-                        player.ProgData.Y = 0;
+                        player.ProgData.X = player.ProgData.StartX;
+                        player.ProgData.Y = player.ProgData.StartY;
                     }
 
                     var action = player.ProgData.ActionMatrix[player.ProgData.Y, player.ProgData.X];
@@ -152,10 +152,171 @@ namespace StrangeServerCSharp
                                 player.ProgData.ConditionMode = ActionType.Or;
                                 break;
                             case ActionType.IsHpLower100:
-                                player.ProgData.Condition = player.hp < player.maxhp;
+                                player.ProgData.SetCondition(player.hp < player.maxhp);
                                 break;
                             case ActionType.IsHpLower50:
-                                player.ProgData.Condition = player.hp < player.maxhp / 2;
+                                player.ProgData.SetCondition(player.hp < player.maxhp / 2);
+                                break;
+                            case ActionType.IsGreenBlock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsGreenBlock);
+                                break;
+                            case ActionType.IsYellowBlock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsYellowBlock);
+                                break;
+                            case ActionType.IsRedBlock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsRedBlock);
+                                break;
+                            case ActionType.IsSupport:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsSupport);
+                                break;
+                            case ActionType.IsQuadBlock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsQuadBlock);
+                                break;
+                            case ActionType.IsRoad:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsRoad);
+                                break;
+                            case ActionType.IsBox:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsBox);
+                                break;
+                            case ActionType.IsEmpty:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsEmpty);
+                                break;
+                            case ActionType.IsNotEmpty:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsNotEmpty);
+                                break;
+                            case ActionType.IsFalling:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsFalling);
+                                break;
+                            case ActionType.IsCrystal:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsCrystal);
+                                break;
+                            case ActionType.IsLivingCrystal:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsLivingCrystal);
+                                break;
+                            case ActionType.IsBoulder:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsBoulder);
+                                break;
+                            case ActionType.IsSand:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsSand);
+                                break;
+                            case ActionType.IsBreakableRock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsBreakableRock);
+                                break;
+                            case ActionType.IsUnbreakable:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsUnbreakable);
+                                break;
+                            case ActionType.IsAcid:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsAcid);
+                                break;
+                            case ActionType.IsRedRock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsRedRock);
+                                break;
+                            case ActionType.IsBlackRock:
+                                player.ProgData.SetCheckCondition(player, World.THIS.IsBlackRock);
+                                break;
+                            case ActionType.CheckUp:
+                                player.ProgData.CheckX = 0;
+                                player.ProgData.CheckY = -1;
+                                break;
+                            case ActionType.CheckLeft:
+                                player.ProgData.CheckX = -1;
+                                player.ProgData.CheckY = 0;
+                                break;
+                            case ActionType.CheckDown:
+                                player.ProgData.CheckX = 0;
+                                player.ProgData.CheckY = 1;
+                                break;
+                            case ActionType.CheckRight:
+                                player.ProgData.CheckX = 1;
+                                player.ProgData.CheckY = 0;
+                                break;
+                            case ActionType.CheckUpLeft:
+                                player.ProgData.CheckX = 1;
+                                player.ProgData.CheckY = -1;
+                                break;
+                            case ActionType.CheckUpRight:
+                                player.ProgData.CheckX = -1;
+                                player.ProgData.CheckY = -1;
+                                break;
+                            case ActionType.CheckDownLeft:
+                                player.ProgData.CheckX = 1;
+                                player.ProgData.CheckY = 1;
+                                break;
+                            case ActionType.CheckDownRight:
+                                player.ProgData.CheckX = -1;
+                                player.ProgData.CheckY = 1;
+                                break;
+                            case ActionType.CheckForward:
+                                player.ProgData.CheckX = player.dir switch
+                                {
+                                    1 => -1,
+                                    3 => 1,
+                                    _ => 0
+                                };
+                                player.ProgData.CheckY = player.dir switch
+                                {
+                                    0 => 1,
+                                    2 => -1,
+                                    _ => 0
+                                };
+                                break;
+                            case ActionType.CheckLeftRelative:
+                                player.ProgData.CheckX = player.dir switch
+                                {
+                                    0 => -1,
+                                    2 => 1,
+                                    _ => 0
+                                };
+                                player.ProgData.CheckY = player.dir switch
+                                {
+                                    1 => 1,
+                                    3 => -1,
+                                    _ => 0
+                                };
+                                break;
+                            case ActionType.CheckRightRelative:
+                                player.ProgData.CheckX = player.dir switch
+                                {
+                                    0 => 1,
+                                    2 => -1,
+                                    _ => 0
+                                };
+                                player.ProgData.CheckY = player.dir switch
+                                {
+                                    1 => -1,
+                                    3 => 1,
+                                    _ => 0
+                                };
+                                break;
+                            case ActionType.ShiftUp:
+                                player.ProgData.CheckY--;
+                                break;
+                            case ActionType.ShiftLeft:
+                                player.ProgData.CheckX--;
+                                break;
+                            case ActionType.ShiftDown:
+                                player.ProgData.CheckY++;
+                                break;
+                            case ActionType.ShiftRight:
+                                player.ProgData.CheckX++;
+                                break;
+                            case ActionType.ShiftForward:
+                                player.ProgData.CheckX += player.dir switch
+                                {
+                                    1 => -1,
+                                    3 => 1,
+                                    _ => 0
+                                };
+                                player.ProgData.CheckY += player.dir switch
+                                {
+                                    0 => 1,
+                                    2 => -1,
+                                    _ => 0
+                                };
+                                break;
+                            case ActionType.Flip:
+                                player.ProgData.CheckX *= -1;
+                                player.ProgData.CheckY *= -1;
                                 break;
                             case ActionType.RunIfFalse:
                                 labelCoords = player.ProgData.IndexOf(action.Label);
@@ -165,6 +326,7 @@ namespace StrangeServerCSharp
                                     player.ProgData.Y = labelCoords.Y;
                                     continue;
                                 }
+
                                 break;
                             case ActionType.RunIfTrue:
                                 labelCoords = player.ProgData.IndexOf(action.Label);
@@ -174,6 +336,7 @@ namespace StrangeServerCSharp
                                     player.ProgData.Y = labelCoords.Y;
                                     continue;
                                 }
+
                                 break;
                             case ActionType.GoTo:
                                 labelCoords = player.ProgData.IndexOf(action.Label);
@@ -195,6 +358,16 @@ namespace StrangeServerCSharp
                                 player.ProgData.X = 0;
                                 player.ProgData.Y++;
                                 continue;
+                            case ActionType.Start:
+                                player.ProgData.StartX = player.ProgData.X;
+                                player.ProgData.StartY = player.ProgData.Y;
+                                continue;
+                            case ActionType.Stop:
+                                player.SwitchProg();
+                                break;
+                            case ActionType.Beep:
+                                player.Beep();
+                                break;
                         }
                     }
 
@@ -211,6 +384,8 @@ namespace StrangeServerCSharp
         public ProgAction[,] ActionMatrix { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+        public int StartX { get; set; }
+        public int StartY { get; set; }
         public bool IsActive { get; set; }
         public DateTime NextRun { get; set; }
         public int ReturnX { get; set; }
@@ -219,6 +394,24 @@ namespace StrangeServerCSharp
         public int CheckX { get; set; }
         public int CheckY { get; set; }
         public ActionType? ConditionMode { get; set; }
+
+        public void SetCondition(bool condition)
+        {
+            Condition = ConditionMode switch
+            {
+                null => condition,
+                ActionType.Or => Condition || condition,
+                ActionType.And => Condition && condition,
+                _ => Condition
+            };
+
+            ConditionMode = null;
+        }
+
+        public void SetCheckCondition(Player player, Func<int, int, bool> checkFunc)
+        {
+            SetCondition(checkFunc((int)player.x + CheckX, (int)player.y + CheckY));
+        }
 
 
         public void AddDelay(int ms)
@@ -301,7 +494,7 @@ namespace StrangeServerCSharp
                         data.ActionMatrix[y, x] = new ProgAction(ActionType.NextRow);
                         break;
                     case '?':
-                        next = text[(i + 1)..].IndexOf('>');
+                        next = text[(i + 1)..].IndexOf('<');
                         if (next != -1)
                         {
                             next++;
@@ -315,7 +508,7 @@ namespace StrangeServerCSharp
                         i++;
                         if (text[i] == '?')
                         {
-                            next = text[(i + 1)..].IndexOf('>');
+                            next = text[(i + 1)..].IndexOf('<');
                             if (next != -1)
                             {
                                 next++;
@@ -330,6 +523,7 @@ namespace StrangeServerCSharp
                         i++;
                         next = text[i..].IndexOf(']');
                         var option = text[i..][..next];
+                        i += next;
                         switch (option)
                         {
                             case "W":
@@ -484,7 +678,7 @@ namespace StrangeServerCSharp
                                 data.ActionMatrix[y, x] = new ProgAction(ActionType.IsUnbreakable);
                                 break;
                             case 'A':
-                                data.ActionMatrix[y, x] = new ProgAction(ActionType.IsSlime);
+                                data.ActionMatrix[y, x] = new ProgAction(ActionType.IsAcid);
                                 break;
                             case 'B':
                                 data.ActionMatrix[y, x] = new ProgAction(ActionType.IsRedRock);
@@ -632,6 +826,11 @@ namespace StrangeServerCSharp
                             i += 4;
                             data.ActionMatrix[y, x] = new ProgAction(ActionType.Flip);
                         }
+                        else if (currentText.StartsWith("BEEP;"))
+                        {
+                            i += 4;
+                            data.ActionMatrix[y, x] = new ProgAction(ActionType.Beep);
+                        }
                         else if (currentText.StartsWith("OR"))
                         {
                             i += 4;
@@ -735,6 +934,7 @@ namespace StrangeServerCSharp
         ReturnState,
         Start,
         Stop,
+        Beep,
         CheckUp,
         CheckLeft,
         CheckDown,
@@ -773,7 +973,7 @@ namespace StrangeServerCSharp
         IsSand,
         IsBreakableRock,
         IsUnbreakable,
-        IsSlime,
+        IsAcid,
         IsRedRock,
         IsBlackRock,
         IsGreenBlock,

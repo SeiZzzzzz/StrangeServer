@@ -57,17 +57,6 @@ namespace StrangeServerCSharp
             106,
         };
 
-        public static void InitCell(string name)
-        {
-            if (cellspool[name] == null)
-            {
-                return;
-            }
-
-            var serializer = new JsonSerializer();
-            cellps[int.Parse(name)] = (Cell)serializer.Deserialize(new JTokenReader(cellspool[name]), typeof(Cell));
-        }
-
         public class Cell
         {
             public Cell CloneCell()
@@ -109,10 +98,13 @@ namespace StrangeServerCSharp
                 {
                     return cells[x + y * height].HP > -2;
                 }
+
                 return true;
             }
+
             return false;
         }
+
         public bool ValidForB(uint x, uint y)
         {
             if ((x >= 0 && y >= 0) && (x < width && y < height))
@@ -217,40 +209,43 @@ namespace StrangeServerCSharp
             SendPack('B', x, y, 0, 0);
             canboom[x + y * height] = true;
             AsyncAction(7, () =>
-             {
-                 for (int _x = -4; _x < 4; _x++)
-                 {
-                     for (int _y = -4; _y < 4; _y++)
-                     {
-                         if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2((x + _x), (y + _y))) <= 3.5f)
-                         {
-                             foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
-                             {
-                                 XServer.players[id].Hurt(40);
-                             }
-                             if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_percent))
-                             {
-                                 if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
-                                 {
-                                     SetCell((uint)(x + _x), (uint)(y + _y), 118);
-                                 }
-                                 else if (GetCell((uint)(x + _x), (uint)(y + _y)) == 118)
-                                 {
-                                     SetCell((uint)(x + _x), (uint)(y + _y), 103);
-                                 }
-                                 else
-                                 {
-                                     DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
-                                 }
+            {
+                for (int _x = -4; _x < 4; _x++)
+                {
+                    for (int _y = -4; _y < 4; _y++)
+                    {
+                        if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
+                                new System.Numerics.Vector2((x + _x), (y + _y))) <= 3.5f)
+                        {
+                            foreach (var id in ContPlayers((uint)(x + _x), (uint)(y + _y)))
+                            {
+                                XServer.players[id].Hurt(40);
+                            }
 
-                             }
-                         }
-                     }
-                 }
-                 SendDFToBotsGlobal(1, x, y, 3, 0, 0);
-                 ClearPack(x, y);
-                 canboom[x + y * height] = false;
-             });
+                            if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) <
+                                    GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_percent))
+                            {
+                                if (GetCell((uint)(x + _x), (uint)(y + _y)) == 117)
+                                {
+                                    SetCell((uint)(x + _x), (uint)(y + _y), 118);
+                                }
+                                else if (GetCell((uint)(x + _x), (uint)(y + _y)) == 118)
+                                {
+                                    SetCell((uint)(x + _x), (uint)(y + _y), 103);
+                                }
+                                else
+                                {
+                                    DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                SendDFToBotsGlobal(1, x, y, 3, 0, 0);
+                ClearPack(x, y);
+                canboom[x + y * height] = false;
+            });
         }
 
         public void OnGunBuild(uint x, uint y, int cid)
@@ -297,7 +292,7 @@ namespace StrangeServerCSharp
 
                             if (ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Contains(cid))
                             {
-                               ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Remove(cid);
+                                ongun[(uint)(x + _x) + (uint)(y + _y) * World.height].Remove(cid);
                             }
                         }
                     }
@@ -311,7 +306,10 @@ namespace StrangeServerCSharp
             {
                 return;
             }
-            else { g.off = 1; }
+            else
+            {
+                g.off = 1;
+            }
 
             World.THIS.OnGunBuild(x, y, cid);
             for (var _x = -21; _x < 21; _x++)
@@ -353,7 +351,8 @@ namespace StrangeServerCSharp
                         if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
                                 new System.Numerics.Vector2((x + _x), (y + _y))) <= 9.5f)
                         {
-                            if (packmap[(x + _x) + (y + _y) * height] != null && packmap[(x + _x) + (y + _y) * height].type == 'G')
+                            if (packmap[(x + _x) + (y + _y) * height] != null &&
+                                packmap[(x + _x) + (y + _y) * height].type == 'G')
                             {
                                 (packmap[(x + _x) + (y + _y) * height] as Gun).OnShot(100);
                             }
@@ -390,7 +389,8 @@ namespace StrangeServerCSharp
                         if (System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y),
                                 new System.Numerics.Vector2((x + _x), (y + _y))) <= 2f)
                         {
-                            if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) < GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_proton_percent))
+                            if (ValidCoordForPlace((uint)(x + _x), (uint)(y + _y)) && (Random.Next(0, 100) <
+                                    GetCellConst((uint)(x + _x), (uint)(y + _y)).boom_proton_percent))
                             {
                                 DestroyWithRoadCell((uint)(x + _x), (uint)(y + _y));
                             }
@@ -415,10 +415,10 @@ namespace StrangeServerCSharp
 
         public World(int width, int height, byte[] map, byte[] roadmap)
         {
-            cellspool = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText("MapBlocks.json"));
-            for (var i = 0; i < 255; i++)
+            var cellspool = JsonConvert.DeserializeObject<List<Cell>>(File.ReadAllText("MapBlocks.json"));
+            foreach (var cell in cellspool)
             {
-                InitCell(i.ToString());
+                cellps[cell.id] = cell;
             }
 
             World.map = map;
@@ -460,9 +460,9 @@ namespace StrangeServerCSharp
         public static async void GunUPD()
         {
             bool tick = false;
-                gunupdtimer = new PeriodicTimer(TimeSpan.FromMilliseconds(500));
-                while (await gunupdtimer.WaitForNextTickAsync())
-                {
+            gunupdtimer = new PeriodicTimer(TimeSpan.FromMilliseconds(500));
+            while (await gunupdtimer.WaitForNextTickAsync())
+            {
                 if (!tick)
                 {
                     tick = true;
@@ -484,15 +484,17 @@ namespace StrangeServerCSharp
                                 }
                             }
                         }
+
                         new BDClass().SaveChanges();
                     }
                     catch (Exception ex)
                     {
                         tick = false;
                     }
+
                     tick = false;
                 }
-                }
+            }
         }
 
         public static async void c117UPD() //кс
@@ -712,6 +714,118 @@ namespace StrangeServerCSharp
                     }
                 }
             }
+        }
+
+        //checks
+
+        public bool CheckCell(int x, int y, params CellType[] types)
+        {
+            var cell = GetCell((uint)x, (uint)y);
+            return types.Contains((CellType)cell);
+        }
+
+        public bool IsGreenBlock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.GreenBlock);
+        }
+
+        public bool IsYellowBlock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.YellowBlock);
+        }
+
+        public bool IsRedBlock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.RedBlock);
+        }
+
+        public bool IsSupport(int x, int y)
+        {
+            return CheckCell(x, y, CellType.Support);
+        }
+
+        public bool IsQuadBlock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.QuadBlock);
+        }
+
+        public bool IsRoad(int x, int y)
+        {
+            return CheckCell(x, y, CellType.Road, CellType.GoldenRoad, CellType.PolymerRoad);
+        }
+
+        public bool IsBox(int x, int y)
+        {
+            return CheckCell(x, y, CellType.Box);
+        }
+
+        public bool IsEmpty(int x, int y)
+        {
+            return GetCellConst((uint)x, (uint)y).is_empty;
+        }
+
+        public bool IsNotEmpty(int x, int y)
+        {
+            return !IsEmpty(x, y);
+        }
+
+        public bool IsFalling(int x, int y)
+        {
+            return GetCellConst((uint)x, (uint)y).is_falling;
+        }
+
+        public bool IsCrystal(int x, int y)
+        {
+            return CheckCell(x, y, CellType.GreenCrystal, CellType.GreenCrystalX, CellType.RedCrystal,
+                CellType.RedCrystalX, CellType.LivingRedCrystal, CellType.BlueCrystal, CellType.BlueCrystalX,
+                CellType.LivingBlueCrystal, CellType.WhiteCrystal, CellType.LivingWhiteCrystal, CellType.PurpleCrystal,
+                CellType.PurpleCrystalX, CellType.LivingPurpleCrystal, CellType.AquaCrystal, CellType.AquaCrystalX);
+        }
+
+        public bool IsLivingCrystal(int x, int y)
+        {
+            return GetCellConst((uint)x, (uint)y).is_alive;
+        }
+
+        public bool IsBoulder(int x, int y)
+        {
+            return CheckCell(x, y, CellType.Boulder1, CellType.Boulder2, CellType.Boulder3, CellType.BlackBoulder1,
+                CellType.BlackBoulder2, CellType.BlackBoulder3, CellType.MetalBoulder1, CellType.MetalBoulder2,
+                CellType.MetalBoulder3);
+        }
+
+        public bool IsSand(int x, int y)
+        {
+            return CheckCell(x, y, CellType.YellowSand, CellType.DarkYellowSand, CellType.BlueSand,
+                CellType.DarkBlueSand, CellType.RustySand, CellType.DarkRustySand, CellType.WhiteSand,
+                CellType.DarkWhiteSand, CellType.BlackSand, CellType.DarkBlackSand);
+        }
+
+        public bool IsBreakableRock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.Rock, CellType.AcidRock, CellType.DeepRock, CellType.GRock,
+                CellType.GoldenRock, CellType.HeavyRock);
+        }
+
+        public bool IsUnbreakable(int x, int y)
+        {
+            return !GetCellConst((uint)x, (uint)y).is_destructible;
+        }
+
+        public bool IsAcid(int x, int y)
+        {
+            return CheckCell(x, y, CellType.CorrosiveActiveAcid, CellType.GrayAcid, CellType.LivingActiveAcid,
+                CellType.PassiveAcid, CellType.PurpleAcid);
+        }
+
+        public bool IsRedRock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.RedRock);
+        }
+
+        public bool IsBlackRock(int x, int y)
+        {
+            return CheckCell(x, y, CellType.BlackRock);
         }
     }
 }
